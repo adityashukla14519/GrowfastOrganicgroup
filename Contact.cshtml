@@ -1,0 +1,55 @@
+﻿@{
+    ViewBag.Title = "Contact";
+}
+<h2>@ViewBag.Title.</h2>
+<h3>@ViewBag.Message</h3>
+
+<address>
+    One Microsoft Way<br />
+    Redmond, WA 98052-6399<br />
+    <abbr title="Phone">P:</abbr>
+    425.555.0100
+</address>
+
+<address>
+    <strong>Support:</strong>   <a href="mailto:Support@example.com">Support@example.com</a><br />
+    <strong>Marketing:</strong> <a href="mailto:Marketing@example.com">Marketing@example.com</a>
+</address>
+
+
+
+
+if(dt.Rows[i]["Managercode"] + "" == Session["empcode"].ToString())
+                        {
+                            if (dt.Rows[i]["Status"] + "" == "Pending")
+                            {
+                                res += "<div class='col mb-2 dv'><div class='card dashcard success border rounded-3 border-success-subtle bg-dark-subtle'><div class='card-body  m-1 p-1'><div class='row'><div class='col-8'>Leave type  <br /><span class=' text-info-emphasis'>" + dt.Rows[i]["Leave_type"] + "</span><br /><label>Name</label>  <span class=' text-info-emphasis'>" + dt.Rows[i]["Name"] + "</span><br /></div><div class='col-4'>Request Date <br /><span class=' text-info-emphasis'>" + DateTime.Parse(dt.Rows[i]["Date"] + "").ToString("dd/MM/yyyy") + "</span><br /></div></div><div class='row'><div class='col-8'><div class='row row-cols-2 row-cols-sm-2'><div class='col'>Total Day <br />  <span class=' text-info-emphasis'>" + dt.Rows[i]["Total_day"] + "</span></div><div class='col'></div><div class='col dotted'>From time <br />  <span class=' text-info-emphasis'>" + DateTime.Parse(dt.Rows[i]["From_date"] + "").ToString("dd/MM/yyyy") + "</span></div><div class='col'>To time <br />  <span class=' text-info-emphasis'>" + DateTime.Parse(dt.Rows[i]["To_date"] + "").ToString("dd/MM/yyyy") + "</span></div></div></div><div class='col-4'></div></div><div class='row'><div class='col-8'>Reason <br /> <span class=' text-info-emphasis'>" + dt.Rows[i]["Reason"] + "</span><br /></div><div class='col-4 justify-content-end d-flex'> <i class='fa fa-ellipsis-h fs-5' onclick='Getaid(\"" + dt.Rows[i]["Leave_id"].ToString() + "\")'></i></div></div><div class='row'><div class='col-6'></div><div class='col-6 '><button disabled class='btn btn-info text-light'>" + dt.Rows[i]["Status"] + "</button></div></div><div class='row'><div class='col-12'></div></div></div></div></div>";
+                            }
+                            else if (dt.Rows[i]["Status"] + "" == "inactive")
+                            {
+
+                            }
+                            else if(dt.Rows[i]["Status"] + "" == "Forwarded")
+                            {
+                                res = "<div class='col mb-2 dv'><div class='card dashcard success border rounded-3 border-success-subtle bg-dark-subtle'><div class='card-body  m-1 p-1'><div class='row'><div class='col-8'>Leave type  <span class=' text-info-emphasis'>" + dt.Rows[i]["Leave_type"] + "</span><br /><label>Name</label>  <span class=' text-info-emphasis'>" + dt.Rows[i]["Name"] + "</span><br /></div><div class='col-4'>Request Date <br /><span class=' text-info-emphasis'>" + DateTime.Parse(dt.Rows[i]["Date"] + "").ToString("dd/MM/yyyy") + "</span><br /></div></div><div class='row'><div class='col-8'><div class='row row-cols-2 row-cols-sm-2'><div class='col'>Total Day <br />  <span class=' text-info-emphasis'>" + dt.Rows[i]["Total_day"] + "</span></div><div class='col'></div><div class='col dotted'>From time <br />  <span class=' text-info-emphasis'>" + DateTime.Parse(dt.Rows[i]["From_date"] + "").ToString("dd/MM/yyyy") + "</span></div><div class='col'>To time <br />  <span class=' text-info-emphasis'>" + DateTime.Parse(dt.Rows[i]["To_date"] + "").ToString("dd/MM/yyyy") + "</span></div></div></div><div class='col-4'></div></div><div class='row'><div class='col-8'>Reason <br /> <span class=' text-info-emphasis'>" + dt.Rows[i]["Reason"] + "</span><br /></div><div class='col-4 justify-content-end d-flex'> <a href='/Employee/AssignLeave?id=" + dt.Rows[i]["Leave_id"] + "'><i class='fa fa-ellipsis-h fs-5'></i></a></div></div><div class='row'><div class='col-6'>Approval/Rejection Date <br /><span class=' text-info-emphasis'>" + DateTime.Parse(dt.Rows[i]["Approvaldate"] + "").ToString("dd/MM/yyyy") + "</span></div><div class='col-6 '><button disabled class='btn btn-info text-light'>" + dt.Rows[i]["Status"] + "</button></div></div><div class='row'><div class='col-12'>Remark <br /><span class=' text-info-emphasis'>" + dt.Rows[i]["Remark"] + "</span></div></div></div></div></div>";
+                            }
+                            else
+                            {
+                                res += "<div class='col mb-2 dv'><div class='card dashcard success border rounded-3 border-success-subtle bg-dark-subtle'><div class='card-body  m-1 p-1'><div class='row'><div class='col-8'>Leave type  <br /><span class=' text-info-emphasis'>" + dt.Rows[i]["Leave_type"] + "</span><br /><label>Name</label>  <span class=' text-info-emphasis'>" + dt.Rows[i]["Name"] + "</span><br /></div><div class='col-4'>Request Date <br /><span class=' text-info-emphasis'>" + DateTime.Parse(dt.Rows[i]["Date"] + "").ToString("dd/MM/yyyy") + "</span><br /></div></div><div class='row'><div class='col-8'><div class='row row-cols-2 row-cols-sm-2'><div class='col'>Total Day <br />  <span class=' text-info-emphasis'>" + dt.Rows[i]["Total_day"] + "</span></div><div class='col'></div><div class='col dotted'>From time <br />  <span class=' text-info-emphasis'>" + DateTime.Parse(dt.Rows[i]["From_date"] + "").ToString("dd/MM/yyyy") + "</span></div><div class='col'>To time <br />  <span class=' text-info-emphasis'>" + DateTime.Parse(dt.Rows[i]["To_date"] + "").ToString("dd/MM/yyyy") + "</span></div></div></div><div class='col-4'></div></div><div class='row'><div class='col-8'>Reason <br /> <span class=' text-info-emphasis'>" + dt.Rows[i]["Reason"] + "</span><br /></div><div class='col-4 justify-content-end d-flex'> <i class='fa fa-ellipsis-h fs-5' onclick='Getaid(\"" + dt.Rows[i]["Leave_id"].ToString() + "\")'></i></div></div><div class='row'><div class='col-6'>Approval/Rejection Date <br /><span class=' text-info-emphasis'>" + DateTime.Parse(dt.Rows[i]["Approvaldate"] + "").ToString("dd/MM/yyyy") + "</span></div><div class='col-6 '><button disabled class='btn btn-info text-light'>" + dt.Rows[i]["Status"] + "</button></div></div><div class='row'><div class='col-12'>Remark <br /><span class=' text-info-emphasis'>" + dt.Rows[i]["Remark"] + "</span></div></div></div></div></div>";
+                            }
+                        }
+                        else
+                        {
+                            if(dt.Rows[i]["Status"] + "" == "Pending")
+                            {
+                                res += "<div class='col mb-2 dv'><div class='card dashcard success border rounded-3 border-success-subtle bg-dark-subtle'><div class='card-body  m-1 p-1'><div class='row'><div class='col-8'>Leave type  <br /><span class=' text-info-emphasis'>" + dt.Rows[i]["Leave_type"] + "</span><br /></div><div class='col-4'>Request Date <br /><span class=' text-info-emphasis'>" + DateTime.Parse(dt.Rows[i]["Date"] + "").ToString("dd/MM/yyyy") + "</span><br /></div></div><div class='row'><div class='col-8'><div class='row row-cols-2 row-cols-sm-2'><div class='col'>Total Day <br />  <span class=' text-info-emphasis'>" + dt.Rows[i]["Total_day"] + "</span></div><div class='col'></div><div class='col dotted'>From time <br />  <span class=' text-info-emphasis'>" + DateTime.Parse(dt.Rows[i]["From_date"] + "").ToString("dd/MM/yyyy") + "</span></div><div class='col'>To time <br />  <span class=' text-info-emphasis'>" + DateTime.Parse(dt.Rows[i]["To_date"] + "").ToString("dd/MM/yyyy") + "</span></div></div></div><div class='col-4'></div></div><div class='row'><div class='col-8'>Reason <br /> <span class=' text-info-emphasis'>" + dt.Rows[i]["Reason"] + "</span><br /></div><div class='col-4 justify-content-end d-flex'> <i class='fa fa-ellipsis-h fs-5' onclick='Getrid(\"" + dt.Rows[i]["Leave_id"].ToString() + "\")'></i></div></div><div class='row'><div class='col-6'></div><div class='col-6 '><button disabled class='btn btn-info text-light'>" + dt.Rows[i]["Status"] + "</button></div></div><div class='row'><div class='col-12'></div></div></div></div></div>";
+                            }
+                            if (dt.Rows[i]["Status"] + "" == "inactive")
+                            {
+
+                            }
+                            else
+                            {
+                                res += "<div class='col mb-2 dv'><div class='card dashcard success border rounded-3 border-success-subtle bg-dark-subtle'><div class='card-body  m-1 p-1'><div class='row'><div class='col-8'>Leave type  <br /><span class=' text-info-emphasis'>" + dt.Rows[i]["Leave_type"] + "</span><br /></div><div class='col-4'>Request Date <br /><span class=' text-info-emphasis'>" + DateTime.Parse(dt.Rows[i]["Date"] + "").ToString("dd/MM/yyyy") + "</span><br /></div></div><div class='row'><div class='col-8'><div class='row row-cols-2 row-cols-sm-2'><div class='col'>Total Day <br />  <span class=' text-info-emphasis'>" + dt.Rows[i]["Total_day"] + "</span></div><div class='col'></div><div class='col dotted'>From time <br />  <span class=' text-info-emphasis'>" + DateTime.Parse(dt.Rows[i]["From_date"] + "").ToString("dd/MM/yyyy") + "</span></div><div class='col'>To time <br />  <span class=' text-info-emphasis'>" + DateTime.Parse(dt.Rows[i]["To_date"] + "").ToString("dd/MM/yyyy") + "</span></div></div></div><div class='col-4'></div></div><div class='row'><div class='col-8'>Reason <br /> <span class=' text-info-emphasis'>" + dt.Rows[i]["Reason"] + "</span><br /></div><div class='col-4 justify-content-end d-flex'> <i class='fa fa-ellipsis-h fs-5' onclick='Getaid(\"" + dt.Rows[i]["Leave_id"].ToString() + "\")'></i></div></div><div class='row'><div class='col-6'>Approval/Rejection Date <br /><span class=' text-info-emphasis'>" + DateTime.Parse(dt.Rows[i]["Approvaldate"] + "").ToString("dd/MM/yyyy") + "</span></div><div class='col-6 '><button disabled class='btn btn-info text-light'>" + dt.Rows[i]["Status"] + "</button></div></div><div class='row'><div class='col-12'>Remark <br /><span class=' text-info-emphasis'>" + dt.Rows[i]["Remark"] + "</span></div></div></div></div></div>";
+                            }
+                        }

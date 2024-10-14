@@ -1,0 +1,828 @@
+﻿
+@{
+    ViewBag.Title = "Leave";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+<script>
+    $(function () {
+        $('input[name="daterange"]').daterangepicker({
+            opens: 'left',
+            locale: {
+                format: 'DD/MM/YYYY'
+            }
+        }, function (start, end, label) {
+            console.log("A new date selection was made: " + start.format('DD/MM/YYYY') + ' to ' + end.format('DD/MM/YYYY'));
+        });
+    });
+</script>
+<script>
+    function validatefile(textbox) {
+        var allowedExtensions = /(\.jpg|\.jpeg|\.pdf)$/i; // Regular expression pattern to allow only JPG, JPEG, and PNG file extensions
+
+        if (!allowedExtensions.exec(textbox.value)) {
+            textbox.setCustomValidity("Please upload a file with a JPG, JPEG, or PNG extension"); // Set custom error message if input is not valid
+        } else {
+            textbox.setCustomValidity(""); // Clear error message if input is valid
+        }
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $("#depart").change(function () {
+            var depart = $("#depart").val();
+            //alert(depart);
+            $.ajax({
+                url: "/Admin/GetDesignation",
+                type: "GET",
+                dataType: "JSON",
+                data: { Depart: depart },
+                success: function (data) {
+                    //alert(data);
+                    $("#designation").empty();
+                    $("#designation").append(data);
+
+                }
+            })
+
+        })
+
+    })
+</script>
+<script>
+    $(document).ready(function () {
+        $("#emp").change(function () {
+            var empid = $("#emp").val();
+            //alert(empid);
+            $.ajax({
+                url: '/Admin/GetEmpDetails',
+                type: "GET",
+                dataType: "JSON",
+                data: { Empid: empid },
+                success: function (data) {
+                    //alert(data);
+                    $("#emprid").val(data[0]);
+                    $("#empid").val(data[1]);
+                    $("#empname").val(data[3]);
+                    $("#department").val(data[6]);
+                    $("#desig").val(data[7]);
+                    $("#manegername").val(data[8]);
+                    $("#manegerid").val(data[9]);
+                    $("#doj").val(data[10]);
+                    //alert(data[10]);
+                    const dateParts = data[10].split("/");
+                    const dateObject = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
+                    const formattedDate = dateObject.toLocaleDateString();
+                    const currentDate = new Date();
+                    const duration = (currentDate.getTime() - dateObject.getTime()) / (1000 * 60 * 60 * 24);
+                    //alert(duration);
+                    if (duration <= 180) {
+                        $("#leavetype").empty();
+                        $("#leavetype").append('<option>LWP</option>');
+                        //$("#leavetype").hide();
+                    }
+                    else {
+                        $.ajax({
+                            url: '/Admin/GetLeaveType',
+                            type: "GET",
+                            dataType: "JSON",
+                            data: { Empid: empid },
+                            success: function (data) {
+                                //alert(data);
+                                $("#leavetype").empty();
+                                $("#leavetype").append(data);
+                            }
+                        })
+                    }
+                }
+            })
+        })
+    })
+</script>
+<script>
+    $(document).ready(function () {
+        $("#tdt").hide();
+        $("#mdur").click(function () {
+            $('#todate').attr('required', true);
+            $("#tdt").show();
+        })
+        $("#sdur").click(function () {
+            $("#tdt").hide();
+            $('#todate').removeAttr('required');
+        })
+        $("#fhdur").click(function () {
+            $("#tdt").hide();
+            $('#todate').removeAttr('required');
+        })
+        $("#shdur").click(function () {
+            $("#tdt").hide();
+            $('#todate').removeAttr('required');
+        })
+    })
+</script>
+<script>
+    $(document).ready(function () {
+        $('#tblleave').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom'
+                }
+            ]
+        });
+
+
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        var table = $('#tblleave').DataTable();
+        var daterange = $("#daterange").val();
+        var dates = daterange.split(" - ");
+        var startDateStr = dates[0];
+        var endDateStr = dates[1];
+        var status = $("#status").val();
+        var depart = $("#depart").val();
+        var designation = $("#designation").val();
+        var empnm = $("#empnm").val();
+        var premise = $("#Premise").val();
+        $.ajax({
+            url: "/Admin/GetLeave",
+            type: "Get",
+            data: { Start_date: startDateStr, End_date: endDateStr, Department: depart, Status: status, Designation: designation, Empnm: empnm, Premise:premise },
+            success: function (response) {
+                var jsonArray = JSON.parse(response);
+                //alert(response);
+                table.clear().draw();
+                $.each(jsonArray, function (index, item) {
+                    if (item.Status == "Inactive") {
+
+                    }
+                    else {
+                        var fromdateStr = item.From_date;
+                        var todateStr = item.To_date;
+                        var applydateStr = item.Date;
+                        var fromdateObj = new Date(fromdateStr);
+                        var todateObj = new Date(todateStr);
+                        var applydateObj = new Date(applydateStr);
+                        var fromDate = fromdateObj.toLocaleDateString('en-GB');
+                        var toDate = todateObj.toLocaleDateString('en-GB');
+                        var applyDate = applydateObj.toLocaleDateString('en-GB');
+                        if (item.Approvaldate != null) {
+                            var adateStr = item.Approvaldate;
+                            var adateObj = new Date(adateStr);
+                            var aformattedDate = adateObj.toLocaleDateString('en-GB');
+                        }
+                        else {
+                            var aformattedDate = "";
+                        }
+                        var btn = "";
+                        if (item.Status == "Forwarded") {
+                            btn = "<a class='btn btn-default' href='/Admin/AssignLeave?Empid=" + item.Emprowid+"&id=" + item.Leave_id + "'><i class='fa fa-edit text-info'></i></a>"
+
+                        }
+                        else {
+                            btn = "<i class='fa fa-edit text-danger'></i>"
+                        }
+
+                        if (item.Status == "Forwarded") {
+                            stat = "<i class='fa fa-spinner text-warning'></i>"
+                        }
+                        else if (item.Status == "Pending") {
+                            stat = "<i class='fa fa-clock text-warning'></i>"
+                        }
+                        else if (item.Status == "Rejected") {
+                            stat = "<i class='fa fa-times text-danger'></i>"
+                        }
+                        else if (item.Status == "Approved") {
+                            stat = "<i class='fa fa-check text-success'></i>"
+                        }
+                        else {
+                            stat = "<i class='fa fa-ban text-danger'></i>"
+                        }
+                        table.row.add([
+                            index + 1,
+                            //item.Leave_id,
+                            //item.Employeeid,
+                            item.Name,
+                            item.Department,
+                            item.Designation,
+                            item.Leave_type+" - "+item.Leaveduration,
+                            fromDate,
+                            toDate,
+                            item.Total_day,
+                            //item.LogId,
+                            //item.Logname,
+                            item.Reason,
+                            applyDate,
+                            item.Remark,
+                            aformattedDate,
+                            stat,
+                            "<a href='@URL.ApiURL()" + item.Attachment + "' target='_blank'><img src='@URL.ApiURL()" + item.Attachment + "' id='img' class='bg-danger img-circle img-responsive img-circle w-25'></a>",
+                            btn
+                        ]).draw(false);
+                    }
+                });
+            }
+        })
+        $("#search").click(function () {
+            var table = $('#tblleave').DataTable();
+            var daterange = $("#daterange").val();
+            var dates = daterange.split(" - ");
+            var startDateStr = dates[0];
+            var endDateStr = dates[1];
+            var status = $("#status").val();
+            var depart = $("#depart").val();
+            var designation = $("#designation").val();
+            var empnm = $("#empnm").val();
+            var premise = $("#Premise").val();
+            $.ajax({
+                url: "/Admin/GetLeave",
+                type: "Get",
+                data: { Start_date: startDateStr, End_date: endDateStr, Department: depart, Status: status, Designation: designation, Empnm: empnm, Premise:premise },
+                success: function (response) {
+                    var jsonArray = JSON.parse(response);
+                    //alert(response);
+                    table.clear().draw();
+                    $.each(jsonArray, function (index, item) {
+                        if (item.Status == "Inactive") {
+
+                        }
+                        else {
+                            var fromdateStr = item.From_date;
+                            var todateStr = item.To_date;
+                            var applydateStr = item.Date;
+                            var fromdateObj = new Date(fromdateStr);
+                            var todateObj = new Date(todateStr);
+                            var applydateObj = new Date(applydateStr);
+                            var fromDate = fromdateObj.toLocaleDateString('en-GB');
+                            var toDate = todateObj.toLocaleDateString('en-GB');
+                            var applyDate = applydateObj.toLocaleDateString('en-GB');
+                            if (item.Approvaldate != null) {
+                                var adateStr = item.Approvaldate;
+                                var adateObj = new Date(adateStr);
+                                var aformattedDate = adateObj.toLocaleDateString('en-GB');
+                            }
+                            else {
+                                var aformattedDate = "";
+                            }
+                            var btn = "";
+                            if (item.Status == "Forwarded" && item.Premise!="Field Work") {
+                                btn = "<a class='btn btn-default' href='/Admin/AssignLeave?id=" + item.Leave_id + "'><i class='fa fa-edit text-info'></i></a>"
+
+                            }
+                            else {
+                                btn = "<i class='fa fa-edit text-danger'></i>"
+                            }
+
+                            if (item.Status == "Forwarded") {
+                                stat = "<i class='fa fa-spinner text-warning'></i>"
+                            }
+                            else if (item.Status == "Pending") {
+                                stat = "<i class='fa fa-clock text-warning'></i>"
+                            }
+                            else if (item.Status == "Rejected") {
+                                stat = "<i class='fa fa-times text-danger'></i>"
+                            }
+                            else if (item.Status == "Approved") {
+                                stat = "<i class='fa fa-check text-success'></i>"
+                            }
+                            else {
+                                stat = "<i class='fa fa-ban text-danger'></i>"
+                            }
+                            table.row.add([
+                                index + 1,
+                                //item.Leave_id,
+                                //item.Employeeid,
+                                item.Name,
+                                item.Department,
+                                item.Designation,
+                                item.Leave_type+" - "+item.Leaveduration,
+                                fromDate,
+                                toDate,
+                                item.Total_day,
+                                //item.LogId,
+                                //item.Logname,
+                                item.Reason,
+                                applyDate,
+                                item.Remark,
+                                aformattedDate,
+                                stat,
+                                "<a href='@URL.ApiURL()" + item.Attachment + "' target='_blank'><img src='@URL.ApiURL()" + item.Attachment + "' id='img' class='bg-danger img-circle img-responsive img-circle w-25'></a>",
+                                btn
+                            ]).draw(false);
+                        }
+                    });
+
+                }
+            })
+
+        });
+    });
+</script>
+
+<script>
+$(document).ready(function() {
+     $("#leavedv").hide();
+    var msg = '@ViewBag.msg';
+
+    if (msg) {
+        var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+            msg +
+            '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+            '</div>';
+        $(alertElement).insertBefore('#alert-container');
+        setTimeout(function () {
+            $('#alert').alert('close');
+        }, 5000);
+        //$('.alert').on('closed.bs.alert', function () {
+        //    window.location.href = '/Admin/Department';
+        //});
+        //$('#btnclose').on('click', function () {
+        //    window.location.href = '/Admin/Department';
+        //});
+    }
+});
+</script>
+<script>
+    $(document).ready(function () {
+        $("#hisemp").change(function () {
+            var empid = $("#hisemp").val();
+            //alert(empid);
+            $.ajax({
+                url: '/Admin/GetEmpLeaveHistory',
+                type: "GET",
+                dataType: "JSON",
+                data: { Empid: empid },
+                success: function (data) {
+                    //alert(data);
+                    $("#historydv").empty();
+                    $("#historydv").append(data);
+
+                }
+            })
+
+            $.ajax({
+                url: '/Admin/GetEmpDetails',
+                type: "GET",
+                dataType: "JSON",
+                data: { Empid: empid },
+                success: function (data) {
+                    $("#name").text(data[3]);
+                }
+            })
+        })
+    })
+</script>
+
+
+<script>
+    $(document).ready(function () {
+        $("#emp").change(function () {
+            var empid = $("#emp").val();
+            //alert(empid);
+            $.ajax({
+                url: '/Admin/GetAllLeaveCount',
+                type: "GET",
+                dataType: "JSON",
+                data: { Empid: empid },
+                success: function (data) {
+                    var res = '<option selected disabled value="">Select One</option>';
+                    //alert(data[0]);
+                    //alert(res);
+                    if (data[0] == 0) {
+                        res += '<option value="Personal" disabled>Personal Leave(' + data[0] + ')</option>';
+                    }
+                    else {
+                        res += '<option value="Personal">Personal Leave(' + data[0] + ')</option>';
+                    }
+                    if (data[1] == 0) {
+                        res += '<option value="Casual" disabled>Casual Leave(' + data[1] + ')</option>';
+                    }
+                    else {
+                        res += '<option value="Casual">Casual Leave(' + data[1] + ')</option>';
+                    }
+                    if (data[2] == 0) {
+                        res += '<option value="Sick" disabled>Sick Leave(' + data[2] + ')</option>';
+                    }
+                    else {
+                        res += '<option value="Sick">Sick Leave(' + data[2] + ')</option>';
+                    }
+                    if (data[3] == 0) {
+                        res += '<option value="Other" disabled>Other Leave(' + data[3] + ')</option>';
+                    }
+                    else {
+                        res += '<option value="Other">Other Leave(' + data[3] + ')</option>';
+                    }
+                    if (data[4] == 0) {
+                        res += '<option value="LWP">LWP Leave</option>';
+                    }
+                    else {
+                        res += '<option value="LWP">LWP Leave</option>';
+                    }
+
+                    $("#leavetype").empty();
+                    $("#leavetype").append(res);
+                }
+            })
+        })
+    })
+</script>
+@using System.Data;
+@{ DbManager db = new DbManager();}
+
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i> Leave </label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+<div class="row mt-2 mb-3 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        @*<button type="button" class="btn btncolor btn-sm me-2" data-bs-toggle="modal" data-bs-target="#Leavehistory">
+                View Leave Balance
+            </button>*@
+        @*<button type="button" class="btn btncolor btn-sm" data-bs-toggle="modal" data-bs-target="#Leave">
+                Add  Leave <i class="fa fa-plus" aria-hidden="true"></i>
+            </button>*@
+    </div>
+</div>
+
+
+<div class="row mt-3 mb-3 row-cols-2 row-cols-sm-6">
+    <div class="col">
+        <label>Date Range</label>
+        <input type="text" name="daterange" id="daterange" class="form-control shadow-none mt-1" />
+    </div>
+    <div class="col" style="display:none">
+        <label>Employee Name</label>
+        <select class="form-select shadow-none mt-1" id="empnm" name="empnm">
+            <option selected value="">Select one</option>
+            @{
+                string query5 = "select * from tbl_registration";
+                DataTable dt5 = db.GetAllRecord(query5);
+                if (dt5.Rows.Count > 0)
+                {
+                    for (int i = 0; i < dt5.Rows.Count; i++)
+                    {
+                        if (@dt5.Rows[i]["Status"] + "" == "Approved")
+                        {
+                            <option value="@dt5.Rows[i]["Id"]">@dt5.Rows[i]["Name"] (@dt5.Rows[i]["Employee_id"])</option>
+                        }
+                    }
+
+                }
+            }
+        </select>
+    </div>
+    <div class="col">
+        <label>Status</label>
+        <select class="form-select shadow-none mt-1" id="status" name="status">
+            <option selected value="">All</option>
+            <option value="Approved">Approved</option>
+            <option value="Pending">Pending</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Forworded">Forworded</option>
+        </select>
+    </div>
+    <div class="col" style="display:none">
+        <label>Department</label>
+        <select class="form-select shadow-none mt-1" id="depart" name="depart">
+            <option selected value="">Select one</option>
+            @{
+                string query1 = "select * from tbl_department";
+                DataTable dt1 = db.GetAllRecord(query1);
+                if (dt1.Rows.Count > 0)
+                {
+                    for (int i = 0; i < dt1.Rows.Count; i++)
+                    {
+                        if (@dt1.Rows[i]["Status"] + "" == "Active")
+                        {
+                            <option>@dt1.Rows[i]["Departmant"]</option>
+                        }
+
+                    }
+                } }
+
+        </select>
+    </div>
+    <div class="col">
+        <label>Status</label>
+        <select class="form-select shadow-none mt-1" id="Premise" name="Premise">
+            <option selected value="">Premise</option>
+            <option value="Office Work">Office Work</option>
+            <option value="Field Work">Field Work</option>
+        </select>
+    </div>
+    @*<div class="col">
+            <label>Sub Department</label>
+            @{
+                string query2 = "select * from tbl_subdepartment";
+                DataTable dt2 = db.GetAllRecord(query2);
+                if (dt2.Rows.Count > 0)
+                {
+                    <select class="form-select shadow-none mt-1" id="subdepart" name="subdepart">
+                        <option selected value="">Select one</option>
+                        @for (int i = 0; i < dt2.Rows.Count; i++)
+                        {
+                            <option>@dt2.Rows[i]["Subdepartmant"]</option>
+                        }
+
+                    </select>
+                }
+            }
+        </div>*@
+    <div class="col" style="display:none">
+        <label>Designation</label>
+        <select class="form-select shadow-none mt-1" id="designation" name="designation">
+            <option selected value="">Select one</option>
+            @{
+                string query3 = "select * from tbl_designation";
+                DataTable dt3 = db.GetAllRecord(query3);
+                if (dt3.Rows.Count > 0)
+                {
+                    for (int i = 0; i < dt3.Rows.Count; i++)
+                    {
+                        if (@dt3.Rows[i]["Status"] + "" == "Active")
+                        {
+                            <option>@dt3.Rows[i]["Designation"]</option>
+                        }
+                    }
+
+                }
+            }
+        </select>
+        <div class="invalid-feedback">
+            Please select a valid User type
+        </div>
+    </div>
+
+    <div class="col mt-1">
+        <br />
+        <button class="btn btncolor mt-1" id="search">Search</button>
+    </div>
+</div>
+<div class="table table-responsive">
+    <table class="display nowrap table table-responsive" id="tblleave">
+        <thead class="theadb text-center">
+            <tr>
+                <th>ID</th>
+                @*<th>LEAVE ID</th>
+                    <th>EMPLOYEE CODE</th>*@
+                <th>EMPLOYEE NAME</th>
+                <th>DEPARTMENT</th>
+                <th>DESIGNATION</th>
+                <th>LEAVE TYPE</th>
+                <th>FROM DATE</th>
+                <th>TO DATE</th>
+                <th>TOTAL DAY</th>
+                @*<th>LOG ID</th>
+                    <th>LOG NAME</th>*@
+                <th>REASON</th>
+                <th>REQUEST DATE</th>
+                <th>REMARK</th>
+                <th>ACTION DATE</th>
+                <th>STATUS</th>
+                <th>ATTACHMENT</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody class="text-center" id="tbl">
+        </tbody>
+    </table>
+</div>
+
+
+<!-- Modal  Leave-->
+<div class="modal fade" id="Leave" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <form action="/Admin/Leave" method="post" class="needs-validation" novalidate enctype="multipart/form-data">
+                <div class="modal-header justify-content-center">
+                    <h5 class="modal-title" id="staticBackdropLabel"> Leave Info</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row row-cols-1 row-cols-sm-2">
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Choose Member</h6>
+                            <select class="form-select shadow-none" id="emp" name="emp" required>
+                                <option selected disabled value="">Select one</option>
+                                @{
+                                    string query6 = "select * from tbl_registration";
+                                    DataTable dt6 = db.GetAllRecord(query6);
+                                    if (dt6.Rows.Count > 0)
+                                    {
+                                        for (int i = 0; i < dt6.Rows.Count; i++)
+                                        {
+                                            if (dt6.Rows[i]["Status"] + "" == "Approved")
+                                            {
+                                                <option value="@dt6.Rows[i]["Employee_id"]">@dt6.Rows[i]["Name"] (@dt6.Rows[i]["Employee_id"])</option>
+                                            }
+
+
+                                        }
+
+                                    }
+                                }
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a valid option.
+                            </div>
+                            <input type="hidden" id="empid" name="empid" />
+                            <input type="hidden" id="empname" name="empname" />
+                            <input type="hidden" id="department" name="department" />
+                            <input type="hidden" id="desig" name="desig" />
+
+                            <input type="hidden" id="manegername" name="manegername" />
+                            <input type="hidden" id="manegerid" name="manegerid" />
+
+                            <input type="hidden" id="doj" name="doj" />
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Leave Type</h6>
+                            <select class="form-select shadow-none" id="leavetype" name="leavetype" required>
+                                <option selected disabled value="">Select One</option>
+                                <option value="Personal">Personal Leave</option>
+                                <option value="Casual">Casual Leave</option>
+                                <option value="Sick">Sick Leave</option>
+                                <option value="LWP">LWP</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a valid option.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row row-cols-1 row-cols-sm-4" id="leavedv">
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Leave Type</h6>
+                            <input type="text" class="form-control shadow-none" readonly id="typeleave" name="typeleave" />
+                            <div class="invalid-feedback">
+                                please choose valid date
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Total Leave</h6>
+                            <input type="text" class="form-control shadow-none" readonly id="total" name="total" />
+                            <div class="invalid-feedback">
+                                please choose valid date
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Approved Leave</h6>
+                            <input type="text" class="form-control shadow-none" readonly id="approved" name="approved" />
+
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Remaining Leave</h6>
+                            <input type="text" class="form-control shadow-none" readonly id="remaining" name="remaining" />
+
+                        </div>
+                    </div>
+                    <div class="row row-cols-1 row-cols-sm-1">
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Select Duration</h6>
+                            <input type="radio" name="dur" id="sdur" checked value="Single" /> Single
+                            <input class="ms-3" type="radio" id="mdur" name="dur" value="Multiple" /> Multiple
+                            <input class="ms-3" type="radio" id="fhdur" name="dur" value="First Half Day" /> First Half Day
+                            <input class="ms-3" type="radio" id="shdur" name="dur" value="Second Half Day" /> Second Half Day
+                        </div>
+                    </div>
+
+                    <div class="row row-cols-1 row-cols-sm-2">
+                        <div class="col mb-3">
+                            <h6 class="mt-2">From Date</h6>
+                            <input type="date" class="form-control shadow-none" required id="fromdate" name="fromdate" />
+                            <div class="invalid-feedback">
+                                please choose valid date
+                            </div>
+                        </div><div class="col mb-3" id="tdt">
+                            <h6 class="mt-2">To Date</h6>
+                            <input type="date" class="form-control shadow-none" id="todate" name="todate" />
+                            <div class="invalid-feedback">
+                                please choose valid date
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Reason for Absense</h6>
+                            <input type="text" class="form-control shadow-none" id="reason" name="reason" required placeholder="Enter Reason" onkeyup="validateTextbox(this)" pattern="^[a-zA-Z,./ ]*$" title="Please enter only letters, and spaces" />
+                            <div class="invalid-feedback">
+                                Please enter only letters , . / and spaces
+                            </div>
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Attachment</h6>
+                            <input type="file" class="form-control shadow-none" id="attatch" name="attatch" onchange="validatefile(this)" />
+
+                            <div class="invalid-feedback">
+                                Please upload a file with a JPG, JPEG, or PNG extension
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+                    <button type="submit" class="btn btn-outline-info"><i class="fa fa-check"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal  History-->
+<div class="modal fade" id="Leavehistory" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header justify-content-center">
+                <h5 class="modal-title" id="staticBackdropLabel"> Leave Balance</h5>
+            </div>
+
+            <div class="modal-body">
+                <div class="row row-cols-1 row-cols-sm-2">
+                    <div class="col"><h6 id="hisempdet"></h6></div>
+                    <div class="col"><h6 id="hismandet"></h6></div>
+                    <div class="col mb-2">
+
+                        <h6 class="mt-2">Choose Member</h6>
+                        <select class="form-select shadow-none" id="hisemp" name="hisemp" required>
+                            <option selected disabled value="">All</option>
+                            @{
+
+                                if (dt6.Rows.Count > 0)
+                                {
+                                    for (int i = 0; i < dt6.Rows.Count; i++)
+                                    {
+                                        if (dt6.Rows[i]["Status"] + "" == "Approved")
+                                        {
+                                            if (dt6.Rows[i]["Employee_id"] + "" == Session["empcode"] + "")
+                                            {
+                                                <option value="@dt6.Rows[i]["Employee_id"]"> Self </option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@dt6.Rows[i]["Employee_id"]">@dt6.Rows[i]["Name"] (@dt6.Rows[i]["Employee_id"])</option>
+                                            }
+                                        }
+
+
+                                    }
+
+                                }
+                            }
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select a valid option.
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="row mt-3 mb-3">
+                    <div class="col bg-light text-dark">
+                        <h5 class="p-3 bg-dark-subtle" id="name"></h5>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-sm-12" id="historydv">
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><i class="fa fa-times"></i></button>
+
+            </div>
+        </div>
+    </div>
+</div>
+

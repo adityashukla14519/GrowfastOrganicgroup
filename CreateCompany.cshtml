@@ -1,0 +1,437 @@
+﻿
+@{
+    ViewBag.Title = "CreateCompany";
+    Layout = "~/Views/Shared/Adminmaster.cshtml";
+}
+
+@using System.Data;
+
+
+
+<script>
+    $(document).ready(function () {
+        $('#tblregistration').DataTable({
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn btn-outline-info p-1 m-0 rounded-1'
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn btn-outline-info p-1 m-0 rounded-1'
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn btn-outline-info p-1 m-0 rounded-1'
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn btn-outline-info p-1 m-0 rounded-1'
+                },
+                {
+                    extend: 'print',
+                    className: 'btn btn-outline-info p-1 m-0 rounded-1'
+                }
+            ]
+        });
+
+
+    });
+</script>
+<script>
+    function Getmailid(mailid) {
+        //alert(mailid);
+        $("#mailid").val(mailid);
+    }
+    $(document).ready(function () {
+        $("#cancel").click(function () {
+            $("input[type='text'],#hid,#companylogo").val("");
+        })
+    })
+    function remove() {
+        complogo.removeAttribute("required");
+    }
+    function add() {
+        complogo.setAttribute("required", "");
+    }
+
+    function Getid(id) {
+        var up = id;
+        //alert(up);
+        $.ajax({
+            url: '/Admin/UpdateCompanyDetails',
+            type: "GET",
+            dataType: "JSON",
+            data: { Up: up },
+            success: function (data) {
+                //alert(data);
+                $("#hid").val(data[0]);
+                $("#compname").val(data[2]);
+                $("#compcont").val(data[3]);
+                $("#compmail").val(data[4]);
+                $("#compweburl").val(data[5]);
+                $("#companylogo").val(data[6]);
+                $("#compadd").val(data[7]);
+
+            }
+        })
+    }
+
+    
+
+</script>
+<script>
+    $(document).ready(function () {
+        $("#sendmail").click(function () {
+            var mailid = $("#mailid").val();
+            var subject = $("#subject").val();
+            var body = $("#msg").val();
+            //alert(mailid);
+            $.ajax({
+                url: '/Admin/Sendmail',
+                type: "GET",
+                dataType: "JSON",
+                data: { Mailid: mailid, Subject: subject, Body: body },
+                success: function (data) {
+                    alert(data);
+                    //$('#mail').modal('hide');
+
+                }
+            })
+        })
+    })
+</script>
+
+@{ EncryptDecrypt ed = new EncryptDecrypt();}
+
+
+<div class="row mt-1 mb-2 bg-info-subtle">
+    <div class="col">
+        <h6 class="pt-2 text-uppercase text-truncate">Admin <i class="fa fa-angle-double-right"></i>  Company Details</h6>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <h6 class="pt-2 text-uppercase text-truncate" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</h6>
+    </div>
+</div>
+
+<div class="row mt-2 mb-2 text-right d-flex justify-content-end">
+    <div class="col-sm-5"></div>
+    <div class="col-sm-7 text-right d-flex justify-content-end">
+        <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#createcompany">
+            Create New Company <i class="fa fa-plus" aria-hidden="true"></i>
+        </button>
+    </div>
+</div>
+<script>
+    function validatefile(textbox) {
+        var allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i; // Regular expression pattern to allow only JPG, JPEG, and PNG file extensions
+
+        if (!allowedExtensions.exec(textbox.value)) {
+            textbox.setCustomValidity("Please upload a file with a JPG, JPEG, or PNG extension"); // Set custom error message if input is not valid
+        } else {
+            textbox.setCustomValidity(""); // Clear error message if input is valid
+        }
+    }
+</script>
+<script>
+    function mail() {
+        var ml = document.getElementById("compmail").value;
+        var mll = ml.substr(ml.lastIndexOf(".") + 1);
+        if (ml != null && ml != "") {
+            if (ml.indexOf(".") != -1) {
+                if (mll != null && mll != "") {
+                    spmail.innerText = "";
+                    return true;
+                }
+                else {
+                    spmail.innerText = "Please enter a valid email address ex:- john@gmail.com";
+                    spmail.style.color = "red";
+                    return false;
+                }
+
+            }
+            else {
+                spmail.innerText = "Please enter a valid email address ex:- john@gmail.com";
+                spmail.style.color = "red";
+                return false;
+            }
+        }
+        else {
+            spmail.innerText = "Please enter your email";
+            spmail.style.color = "red";
+            return false;
+        }
+    }
+</script>
+<script>
+$(document).ready(function() {
+    var msg = '@ViewBag.msg';
+    if (msg) {
+        var alertElement = '<div class="alert alert-info alert-dismissible fade show" role="alert">' +
+            msg +
+            '<button type="button" class="btn-close mt-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+            '</div>';
+        $(alertElement).insertBefore('#alert-container');
+        return false;
+    }
+});
+</script>
+
+<!-- Your HTML code goes here for alert Message -->
+<div class="row mt-2 mb-1 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col"></div>
+</div>
+
+
+@{
+    DbManager db = new DbManager();
+    Activitylog activitylog = new Activitylog();
+}
+
+
+@{
+    try
+    {
+        string query = "select * from tbl_company  where Createdbyid='" + Session["sacode"] + "'";
+        activitylog.Activitylogins("tbl_company", "", query, "Failed", "", Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        DataTable dt = db.GetAllRecord(query);
+        activitylog.Activitylogupd("Success", "");
+        db.connectionstate();
+        if (dt.Rows.Count > 0)
+        {
+            <div class="row table table-responsive">
+                <table class="table table-responsive table-bordered" id="tblregistration">
+                    <thead class="bg-dark text-white text-center">
+                        <tr>
+                            <th class="text-center">Id</th>
+                            <th class="text-center">Company Code</th>
+                            <th class="text-center">Company Name</th>
+                            <th class="text-center">Company Logo</th>
+                            <th class="text-center">Company Contact</th>
+                            <th class="text-center">Company Mail Id</th>
+                            <th class="text-center">Company Website</th>
+                            <th class="text-center">Company Address</th>
+                            <th class="text-center">Status</th>
+                            <th>Mail</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        @for (int i = 0; i < dt.Rows.Count; i++)
+                        {
+                            <tr>
+                                <td>@dt.Rows[i]["Id"]<input type="hidden" id="@dt.Rows[i]["Id"]" value="@dt.Rows[i]["Id"]" /></td>
+                                <td>@dt.Rows[i]["Companycode"]</td>
+                                <td>@dt.Rows[i]["Companyname"]</td>
+                                <td><img src="https://attendance.winaxis.in/@dt.Rows[i]["Companylogo"]" id="img" class="bg-danger img-circle img-responsive img-circle w-25" onerror="this.onerror=null;this.src='~/Content/Img/defaultimg.png';"></td>
+                                <td>@dt.Rows[i]["Companycontact"]</td>
+                                <td>@dt.Rows[i]["Companymail"]</td>
+                                <td>@dt.Rows[i]["CompanyURL"]</td>
+                                <td>@dt.Rows[i]["Companyaddress"]</td>
+                                @if (dt.Rows[i]["Status"] + "" == "active")
+                                {
+                                    <td><i class="fa fa-check text-success"></i></td>
+
+                                }
+                                else
+                                {
+                                    <td><i class="fa fa-ban text-danger"></i></td>
+                                }
+                                <td><button class="btn btn-outline-info" data-bs-toggle="modal" onclick='Getmailid("@dt.Rows[i]["Companymail"]")' data-bs-target="#mail"><i class="fa fa-envelope"></i></button></td>
+                                @*<td><button class="btn btn-outline-info" onclick="Getid($('#@dt.Rows[i]["id"]').val()), remove();" data-bs-toggle="modal" data-bs-target="#createcompany"><i class="fa fa-edit"></i></button></td>*@
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class='row justify-content-center d-flex m-5' id='datanotdound'>
+                <img src='~/Content/Img/nodata1.png' style="height:50%;width:50%" />
+            </div>
+        }
+    }
+    catch (Exception ex)
+    {
+        try
+        {
+            Error_15_16 error_15_16 = new Error_15_16();
+            string pageUrl = "", moduleName = "", errorLine = "", errorMessage = "", errorName = "", errorTrace = "";
+            // Get the page URL, if available
+            pageUrl = System.Web.HttpContext.Current.Request.Url.AbsoluteUri;
+            // Get the module name
+            moduleName = ex.TargetSite.Module.Name;
+            // Get the error line number, if available
+            var stackTrace = ex.StackTrace;
+            if (!string.IsNullOrEmpty(stackTrace))
+            {
+                var lineNumberIndex = stackTrace.LastIndexOf(":line ");
+                if (lineNumberIndex >= 0)
+                {
+                    var lineNumber = stackTrace.Substring(lineNumberIndex + 6);
+                    var newLineIndex = lineNumber.IndexOf(Environment.NewLine);
+                    if (newLineIndex >= 0)
+                    {
+                        errorLine = lineNumber.Substring(0, newLineIndex);
+                    }
+                    else
+                    {
+                        errorLine = lineNumber;
+                    }
+                }
+            }
+            // Get the error message and name
+            if (ex.Message.ToString().Length >= 1000)
+            {
+                errorMessage = ex.Message.Substring(1, 500);
+            }
+            else
+            {
+                errorMessage = ex.Message;
+            }
+            errorName = ex.GetType().FullName;
+            // Get the error trace
+            errorTrace = ex.StackTrace;
+            error_15_16.Error_15_16ins(pageUrl, moduleName, errorLine, errorMessage.Replace("'", "`"), errorName.Replace("'", "`"), errorTrace.Replace("'", "`"), Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        }
+
+        catch
+        {
+
+        }
+    }
+    finally
+    {
+        db.connectionstate();
+    }
+
+}
+
+<!-- Modal Create Company-->
+<div class="modal fade" id="createcompany" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <form action="/Admin/CreateCompany" method="post" class="needs-validation" novalidate enctype="multipart/form-data">
+                <div class="modal-header justify-content-center">
+                    <h5 class="modal-title" id="staticBackdropLabel">Company Details</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row row-cols-1 row-cols-sm-2">
+                        <div class="col mb-2">
+                            <input type="hidden" id="hid" name="hid" />
+                            <label>Company Name</label>
+                            <input type="text" class="form-control shadow-none" id="compname" name="compname" required onkeyup="validateTextbox(this)" pattern="^[a-zA-Z.() ]*$" title="Please enter only letters,( ) . and spaces" />
+                            <div class="invalid-feedback">
+                                Please enter only letters,( ) . and spaces
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <label>Contact Number</label>
+                            <input type="text" class="form-control shadow-none" id="compcont" name="compcont" required onkeyup="validateTextbox(this)" pattern="^[0-9]{10}$" title="Please enter a valid 10-digit mobile number" />
+                            <div class="invalid-feedback">
+                                Please enter a valid 10-digit mobile number
+                            </div>
+                        </div>
+
+                        <div class="col mb-2">
+                            <label>Website Url</label>
+                            <input type="text" class="form-control shadow-none" id="compweburl" name="compweburl" required onkeyup="validateTextbox(this)" pattern="^[a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*\.[a-zA-Z]{2,6}$" title="Please enter a valid domain name, e.g. example.com" />
+                            <div class="invalid-feedback">
+                                Please enter a valid domain name, e.g. example.com
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <label>mail Address</label>
+                            <input type="text" class="form-control shadow-none" id="compmail" name="compmail" required onkeyup="mail()" /><span id="spmail"></span>
+                            <div class="invalid-feedback">
+                                Please enter a valid email address ex:- john@gmail.com
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <label>Company Logo</label>
+                            <input type="file" class="form-control shadow-none" id="complogo" name="complogo" required onchange="validatefile(this)" />
+                            <input type="hidden" id="companylogo" name="companylogo" />
+                            <div class="invalid-feedback">
+                                Please upload a file with a JPG, JPEG, or PNG extension
+                            </div>
+                        </div>
+                        @*<div class="col mb-2">
+                                <label>Company Stamp</label>
+                                <input type="file" class="form-control shadow-none" id="compstamp" name="compstamp" onchange="validatefile(this)" />
+                                <div class="invalid-feedback">
+                                    Please upload a file with a JPG, JPEG, or PNG extension
+                                </div>
+                            </div>*@
+                    </div>
+                    <div class="row">
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Address</h6>
+                            <input type="text" class="form-control shadow-none" id="compadd" name="compadd" required onkeyup="validateTextbox(this)" pattern="^[-a-zA-Z0-9(),./ ]*$" title="Please enter only letters, ( ) , / . and spaces" />
+                            <div class="invalid-feedback">
+                                Please enter only letters, ( ) - , / and spaces
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" id="cancel" data-bs-dismiss="modal" onclick="add()"><i class="fa fa-times"></i></button>
+                    <button type="submit" class="btn btn-outline-info"><i class="fa fa-check"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="mail" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            
+                <div class="modal-header justify-content-center">
+                    <h5 class="modal-title" id="staticBackdropLabel">Send Mail</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row row-cols-1 row-cols-sm-1">
+                        <div class="col mb-2">
+                            <input type="hidden" id="mailid" name="mailid" />
+                            <label>Enter Subject</label>
+                            <input type="text" class="form-control shadow-none" id="subject" name="subject" required onkeyup="validateTextbox(this)" pattern="^[a-zA-Z.() ]*$" title="Please enter only letters,( ) . and spaces" />
+                            <div class="invalid-feedback">
+                                Please enter only letters,( ) . and spaces
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <label>Body of mail</label>
+                            <input type="text" class="form-control shadow-none" id="msg" name="msg" required onkeyup="validateTextbox(this)" pattern="^[-a-zA-Z0-9(),./ ]*$" title="Please enter only letters, ( ) , / . and spaces" />
+                            <div class="invalid-feedback">
+                                Please enter only letters, ( ) - , / and spaces
+                            </div>
+                        </div>
+
+
+                        @*<div class="col mb-2">
+                            <label>Attatchment</label>
+                            <input type="file" class="form-control shadow-none" id="Attachedfile" name="Attachedfile" onchange="validatefile(this)" />
+                            <input type="hidden" id="companylogo" name="companylogo" />
+                            <div class="invalid-feedback">
+                                Please upload a file with a JPG, JPEG, or PNG extension
+                            </div>
+                        </div>*@
+
+                    </div>
+                    
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" id="cancel" data-bs-dismiss="modal"><i class="fa fa-times"></i></button>
+                    <button type="button" class="btn btn-outline-info" id="sendmail" data-bs-dismiss="modal"><i class="fa fa-check"></i></button>
+                </div>
+           
+        </div>
+    </div>
+</div>

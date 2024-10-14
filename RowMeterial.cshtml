@@ -1,0 +1,334 @@
+﻿
+@{
+    ViewBag.Title = "Raw Material";
+    Layout = "~/Views/Shared/UserMaster.cshtml";
+}
+
+
+<!-- toogle button -->
+<link href="~/Content/tooglebutton/bootstrap5-toggle.min.css" rel="stylesheet" />
+<script src="~/Content/tooglebutton/bootstrap5-toggle.ecmas.min.js"></script>
+
+<script>
+    function statuschange(id, status, tdstatus) {
+        tdstatus = "#" + tdstatus;
+        $.ajax({
+            url: "/User/Statuschangetive",
+            type: "Post",
+            dataType: "JSON",
+            data: { id: id, status: status, tblnm: 'tbl_rowmeterial' },
+            success: function (data) {
+                if (data == "Active") {
+                    $(tdstatus).empty();
+                    $(tdstatus).append('<i class="fa fa-check text-success"></i><span style="display:none">' + data + '</span>');
+                }
+                else {
+                    $(tdstatus).empty();
+                    $(tdstatus).append('<i class="fa fa-ban text-danger"></i><span style="display:none">' + data + '</span>');
+                }
+            },
+        });
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        var table = $('#tblrowmeterial').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                }
+            ]
+        });
+    });
+
+</script>
+<script>
+    function Getid(id) {
+        var up = id;
+        //alert(up);
+        $.ajax({
+            url: '/User/UpdateRowMeterial',
+            type: "GET",
+            dataType: "JSON",
+            data: { Up: up },
+            success: function (data) {
+                //alert(data);
+                $("#hid").val(data[0]);
+                $("#row").val(data[1]);
+                $("#unittype").val(data[2]);
+                $("#status").val(data[3]);
+                $("#status").removeClass("readonly");
+                $("#status").prop("disabled", false);
+            }
+        })
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $("#status").val("Active");
+        $("#status").addClass("readonly");
+        $("#status").prop("disabled", true);
+
+        $("#cancel").click(function () {
+            $("input[type='text'],.form-select,#hid,#status").val("");
+            $("#status").val("Active");
+            $("#status").addClass("readonly");
+            $("#status").prop("disabled", true);
+        })
+
+        var msg = '@ViewBag.msg';
+
+
+        if (msg) {
+            var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+                msg +
+                '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                '</div>';
+            $(alertElement).insertBefore('#alert-container');
+            setTimeout(function () {
+                $('#alert').alert('close');
+            }, 5000);
+            //$('.alert').on('closed.bs.alert', function () {
+            //    window.location.href = '/User/ProductName';
+            //});
+            //$('#btnclose').on('click', function () {
+            //    window.location.href = '/User/ProductName';
+            //});
+        }
+    });
+</script>
+
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">User <i class="fa fa-angle-double-right"></i>  Raw Material</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+<div class="row mt-2 mb-3 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+
+        <button type="button" class="btn btncolor btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#RawMeterial">
+            <i class="fa fa-plus" aria-hidden="true"></i> New
+        </button>
+    </div>
+
+</div>
+@using System.Data;
+@{
+    DbManager db = new DbManager();
+    Activitylog activitylog = new Activitylog();
+}
+@{
+    try
+    {
+        string query = "select * from tbl_rowmeterial where BranchCode='" + Session["ubrcode"] + "'";
+        activitylog.Activitylogins("tbl_rowmeterial", "", query, "Failed", "", Session["userid"].ToString(), Session["username"].ToString(), Session["usermail"].ToString());
+        DataTable dt = db.GetAllRecord(query);
+        activitylog.Activitylogupd("Success", "");
+        int count = 1;
+        if (dt.Rows.Count > 0)
+        {
+            <div class="row table table-responsive">
+                <table class="table table-responsive table-bordered" id="tblrowmeterial">
+                    <thead class="text-center theadb text-light">
+                        <tr>
+                            <th class="text-center">Id</th>
+                            <th class="text-center">Raw Material</th>
+                            <th class="text-center">Unit Type</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Active/Inactive</th>
+                            <th class="text-center">Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        @for (int i = 0; i < dt.Rows.Count; i++)
+                        {
+                            <tr>
+                                <td>@(count + i)<input type="hidden" id="@dt.Rows[i]["id"]" value="@dt.Rows[i]["id"]" /></td>
+                                <td>@dt.Rows[i]["RowMeterial"]</td>
+                                <td>@dt.Rows[i]["UnitType"]</td>
+                                @*<td>@dt.Rows[i]["Date_time"]</td>*@
+                                @if (@dt.Rows[i]["Status"] + "" == "Active")
+                                {
+
+                                    <td id="tdi_@dt.Rows[i]["id"]"><i class="fa fa-check text-success"></i><span style="display:none">@dt.Rows[i]["Status"]</span></td>
+                                    <td>
+                                        <style>
+                                            .custom-toggle {
+                                                width: 500px; /* Set your desired width */
+                                                height: 400px; /* Set your desired height */
+                                            }
+                                        </style>
+
+                                        <input type="checkbox" checked data-toggle="toggle" data-on="Active" data-off="Inactive" onchange="statuschange('@dt.Rows[i]["id"]','Inactive','tdi_@dt.Rows[i]["id"]')" class="btn btncolorblue custom-toggle" style="width: 500px; height: 400px;">
+                                    </td>
+
+                                }
+                                else
+                                {
+
+                                    <td id="tda_@dt.Rows[i]["id"]"><i class="fa fa-ban text-danger"></i><span style="display:none">@dt.Rows[i]["Status"]</span></td>
+                                    <td>
+                                        <input type="checkbox" data-toggle="toggle" data-on="Active" data-off="Inactive" onchange="statuschange('@dt.Rows[i]["id"]','Active','tda_@dt.Rows[i]["id"]')" class="btn btncolorblue">
+                                    </td>
+                                }
+                                <td><button class="btn btncolorblue" onclick="Getid($('#@dt.Rows[i]["id"]').val())" data-bs-toggle="modal" data-bs-target="#RawMeterial"><i class="fa fa-edit"></i></button></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class='row justify-content-center d-flex m-5' id='datanotfdound'>
+                <img src='~/Content/Img/nodata1.png' style="height:50%;width:50%" />
+            </div>
+        }
+    }
+    catch (Exception ex)
+    {
+        try
+        {
+            Error_15_16 error_15_16 = new Error_15_16();
+            string pageUrl = "", moduleName = "", errorLine = "", errorMessage = "", errorName = "", errorTrace = "";
+            // Get the page URL, if available
+            pageUrl = System.Web.HttpContext.Current.Request.Url.AbsoluteUri;
+            // Get the module name
+            moduleName = ex.TargetSite.Module.Name;
+            // Get the error line number, if available
+            var stackTrace = ex.StackTrace;
+            if (!string.IsNullOrEmpty(stackTrace))
+            {
+                var lineNumberIndex = stackTrace.LastIndexOf(":line ");
+                if (lineNumberIndex >= 0)
+                {
+                    var lineNumber = stackTrace.Substring(lineNumberIndex + 6);
+                    var newLineIndex = lineNumber.IndexOf(Environment.NewLine);
+                    if (newLineIndex >= 0)
+                    {
+                        errorLine = lineNumber.Substring(0, newLineIndex);
+                    }
+                    else
+                    {
+                        errorLine = lineNumber;
+                    }
+                }
+            }
+            // Get the error message and name
+            if (ex.Message.ToString().Length >= 1000)
+            {
+                errorMessage = ex.Message.Substring(1, 500);
+            }
+            else
+            {
+                errorMessage = ex.Message;
+            }
+            errorName = ex.GetType().FullName;
+            // Get the error trace
+            errorTrace = ex.StackTrace;
+            error_15_16.Error_15_16ins(pageUrl, moduleName, errorLine, errorMessage.Replace("'", "`"), errorName.Replace("'", "`"), errorTrace.Replace("'", "`"), Session["userid"].ToString(), Session["username"].ToString(), Session["usermail"].ToString());
+        }
+        catch
+        {
+
+        }
+    }
+    finally
+    {
+        db.connectionstate();
+    }
+}
+
+<!-- Modal RowMeterial-->
+<div class="modal fade" id="RawMeterial" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <form action="/User/RowMeterial" method="post" class="needs-validation" novalidate>
+                <div class="modal-header justify-content-center nevigationstrip">
+                    <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Raw Material</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="col-sm-12">
+                        <div class="mb-4">
+                            <input type="hidden" id="hid" name="hid" />
+                            <h6 class="mt-2">Raw Meterial</h6>
+                            <input type="text" class="form-control shadow-none" name="row" id="row" required placeholder="Enter Raw Material Name" onkeyup="validateTextbox(this)" pattern="^[a-zA-Z0-9% ]*$" title="Please enter only letters, and spaces" />
+                            <div class="invalid-feedback">
+                                Please enter only letters, and spaces
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <h6 class="mt-2">Unit Type</h6>
+                            <select class="form-select shadow-none" id="unittype" name="unittype" required>
+                                <option selected disabled value="">Select One</option>
+                                <option>Piece</option>
+                                <option>Kg</option>
+                                <option>Leter</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a valid option.
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="mt-2">Status</h6>
+                            <select class="form-select shadow-none" id="status" name="status" required>
+                                @*<option selected disabled value="">Select one</option>*@
+                                <option>Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a valid Status.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+                    <button type="submit" class="btn btncolor"><i class="fa fa-check"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,153 @@
+﻿
+@{
+    ViewBag.Title = "ChangeEmpcode";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+<script>
+    $(document).ready(function () {
+        $("#oldPassword").click(function () {
+            var passwordField = $("#opass");
+            var passwordFieldType = passwordField.attr("type");
+
+            // Toggle the password field type
+            if (passwordFieldType === "password") {
+                passwordField.attr("type", "text");
+                $(this).html('<i class="fa fa-eye-slash"></i>');
+            } else {
+                passwordField.attr("type", "password");
+                $(this).html('<i class="fa fa-eye"></i>');
+            }
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $("#newPassword").click(function () {
+            var passwordField = $("#npass");
+            var passwordFieldType = passwordField.attr("type");
+
+            // Toggle the password field type
+            if (passwordFieldType === "password") {
+                passwordField.attr("type", "text");
+                $(this).html('<i class="fa fa-eye-slash"></i>');
+            } else {
+                passwordField.attr("type", "password");
+                $(this).html('<i class="fa fa-eye"></i>');
+            }
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $("#cnewPassword").click(function () {
+            var passwordField = $("#cnpass");
+            var passwordFieldType = passwordField.attr("type");
+
+            // Toggle the password field type
+            if (passwordFieldType === "password") {
+                passwordField.attr("type", "text");
+                $(this).html('<i class="fa fa-eye-slash"></i>');
+            } else {
+                passwordField.attr("type", "password");
+                $(this).html('<i class="fa fa-eye"></i>');
+            }
+        });
+    });
+</script>
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Home <i class="fa fa-angle-double-right"></i> Change Empcode</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+<div class="row mt-2 mb-2 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+
+    var msg = '@ViewBag.msg';
+
+        if (msg) {
+            var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+                msg +
+                '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                '</div>';
+            $(alertElement).insertBefore('#alert-container');
+            setTimeout(function () {
+                $('#alert').alert('close');
+            }, 5000);
+            //$('.alert').on('closed.bs.alert', function () {
+            //    window.location.href = '/Home/Department';
+            //});
+            //$('#btnclose').on('click', function () {
+            //    window.location.href = '/Home/Department';
+            //});
+        }
+});
+</script>
+
+<div class="row d-flex justify-content-center mt-5" id="changepass">
+
+    <div class="col-12 col-sm-8">
+        <div class="card card-body border-start-0 border-end-0 border-top-0 shadow-sm border">
+            <form action="/Home/ChangeEmpcode" method="post" class="needs-validation" novalidate enctype="multipart/form-data">
+
+
+                @*<h5 class="modal-title text-center mb-2" id="staticBackdropLabel"> Change Password </h5>*@
+
+                <div class="row row-cols-1 row-cols-sm-1">
+                    <div class="col mb-2">
+                        <label>Enter Old Empcode<span class="text-danger">*</span></label>
+                        <div class="input-group mt-2">
+                            <input type="text" class="form-control shadow-none" name="oldempcode" id="oldempcode" required placeholder="Enter Old Empcode">
+                            <span class="input-group-addon">
+                                <span class="btn btncolor border-1 rounded-0" type="button" id="oldPassword" style="width:50px">
+                                    <i class="fa fa-eye"></i>
+                                </span>
+                            </span>
+                            <div class="invalid-feedback">
+                                Please Enter your Old Empcode
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="col mb-2">
+                        <label>Enter New Empcode<span class="text-danger">*</span></label>
+                        <div class="input-group mt-2">
+                            <input type="text" class="form-control shadow-none" name="newempcode" id="newempcode" required placeholder="Enter New Empcode">
+                            <span class="input-group-addon">
+                                <span class="btn btncolor border-1 rounded-0" type="button" id="newPassword" style="width:50px">
+                                    <i class="fa fa-eye"></i>
+                                </span>
+                            </span>
+                            <div class="invalid-feedback">
+                                Please Enter your New Empcode
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row d-flex text-center mt-2">
+                    <div class="col">
+                        <button type="submit" class="btn btncolor" id="submit">Submit</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</div>
+

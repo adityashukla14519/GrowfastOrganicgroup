@@ -1,0 +1,1183 @@
+﻿﻿
+@{
+    ViewBag.Title = "Product Manufacturing";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+<script>
+    function validateNumericInput(inputElement, maxDigits, spid) {
+        // Get the current input value as a string
+        const errorMessage = document.getElementById(spid);
+        let inputValue = inputElement.value.toString();
+
+        // Remove any non-digit characters (e.g., commas, periods, except one dot)
+        inputValue = inputValue.replace(/[^0-9.]/g, '');
+
+        // If there is more than one dot, remove all but the first one
+        const dotIndex = inputValue.indexOf('.');
+        if (dotIndex !== -1) {
+            const beforeDot = inputValue.slice(0, dotIndex);
+            const afterDot = inputValue.slice(dotIndex + 1);
+            inputValue = beforeDot + '.' + afterDot.replace(/\./g, '');
+        }
+
+        // Truncate the value to the specified maximum number of digits
+        if (inputValue.length > maxDigits) {
+            inputValue = inputValue.slice(0, maxDigits);
+        }
+
+        // Update the input value with the sanitized and truncated value
+        inputElement.value = inputValue;
+
+        // Check if the sanitized value is different from the original input
+        if (inputValue.length > maxDigits) {
+            errorMessage.textContent = 'Please enter no more than ' + maxDigits + ' digits.';
+        } else {
+            errorMessage.textContent = '';
+        }
+    }
+
+</script>
+<script>
+    var selectedothValues = [];
+    $(document).ready(function () {
+        $("#product").change(function () {
+           /* $("#hid").val("");*/
+            var product = $("#product").val();
+            var stock = $("#addstock").val();
+            if (stock != null && stock != "") {
+                //alert(product)
+                $.ajax({
+                    url: '/Admin/GetProductStock',
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { Productid: product, addstock: stock },
+                    success: function (data) {
+                        //alert(data[6]);
+                        //alert(data[0])
+                        $("#hid").val(data[0]);
+                        $("#productid").val(data[0]);
+                        $("#productname").val(data[1]);
+                        $("#brandname").val(data[6]);
+                        /*  $("#totalbal").val(data[4]);*/
+                        var jsonArray = JSON.parse(data[7]);
+                        var table = $('#tblotherresource').DataTable();
+                        table.clear().draw();
+                        $.each(jsonArray, function (index, item) {
+                            table.row.add([
+                                index + 1,
+                                item.Rawmaterialname,
+                                item.Unittype,
+                                item.Quantity1p,
+                                item.Totalbalance,
+                                item.Usebalance,
+                                item.Balancestatus
+                            ]).draw(false);
+                        });
+                        //if (data[3] == "") {
+                        //    $("#hid").val("");
+                        //    $("#credit").val("0");
+                        //}
+                        //else {
+                        //    $("#credit").val(data[3]);
+                        //}
+                        if (data[5] == "") {
+                            $("#availbal").val("0");
+                        }
+                        else {
+                            $("#availbal").val(data[5]);
+                        }
+
+
+                        $("#protype").val(data[2]);
+
+                    }
+                })
+            }
+            else {
+                //alert("please Enter Quantity");
+            }
+
+
+        })
+
+
+        $("#addstock").keyup(function () {
+            /*$("#hid").val("");*/
+            var product = $("#product").val();
+            var stock = $("#addstock").val();
+            if (product != null && product != "") {
+                //alert(product)
+                $.ajax({
+                    url: '/Admin/GetProductStock',
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { Productid: product, addstock: stock },
+                    success: function (data) {
+                        //alert(data[6]);
+                        //alert(data[0])
+                        $("#hid").val(data[0]);
+                        $("#productid").val(data[0]);
+                        $("#productname").val(data[1]);
+                        $("#brandname").val(data[6]);
+                        /*  $("#totalbal").val(data[4]);*/
+                        var jsonArray = JSON.parse(data[7]);
+                        var table = $('#tblotherresource').DataTable();
+                        table.clear().draw();
+                        $.each(jsonArray, function (index, item) {
+                            table.row.add([
+                                index + 1,
+                                item.Rawmaterialname,
+                                item.Unittype,
+                                item.Quantity1p,
+                                item.Totalbalance,
+                                item.Usebalance,
+                                item.Balancestatus
+                            ]).draw(false);
+                        });
+                        //if (data[3] == "") {
+                        //    $("#hid").val("");
+                        //    $("#credit").val("0");
+                        //}
+                        //else {
+                        //    $("#credit").val(data[3]);
+                        //}
+                        if (data[5] == "") {
+                            $("#availbal").val("0");
+                        }
+                        else {
+                            $("#availbal").val(data[5]);
+                        }
+
+
+                        $("#protype").val(data[2]);
+
+                    }
+                })
+            }
+            else {
+                //alert("please Enter Select Product");
+            }
+
+
+        })
+
+        //$("#godown").change(function () {
+        //    $("#product,#availbal,#addstock").val("");
+        //    $("#hid").val("");
+        //    $("#spotherresource").text("");
+        //    var godown = $("#godown").val();
+        //    $.ajax({
+        //        url: '/Admin/UpdateGodownName',
+        //        type: "GET",
+        //        dataType: "JSON",
+        //        data: { Up: godown },
+        //        success: function (data) {
+        //            //alert(data);
+        //            $("#godownid").val(data[0]);
+        //            $("#godownname").val(data[1]);
+
+        //        }
+        //    })
+
+        //})
+    })
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('#tblproductstock').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom'
+                }
+            ]
+        });
+
+
+    });
+</script>
+<script>
+    function Getid(id) {
+        //alert(id)
+        $.ajax({
+            url: '/Admin/GetAllProductStock',
+            type: "GET",
+            dataType: "JSON",
+            data: { Up: id },
+            success: function (data) {
+                //alert(data);
+                $("#hid").val(data[0]);
+                $("#product").val(data[1]);
+                $("#productid").val(data[1]);
+                $("#productname").val(data[2]);
+                $("#credit").val(data[3]);
+                /*  $("#totalbal").val(data[4]);*/
+                $("#availbal").val(data[5]);
+                $("#protype").val(data[6]);
+
+                var product = $("#product").val();
+                var stock = $("#addstock").val();
+                $.ajax({
+                    url: '/Admin/GetProductStock',
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { Productid: product, addstock: stock },
+                    success: function (data) {
+                        //alert(data[6]);
+                        //alert(data[0])
+                        $("#hid").val(data[0]);
+                        $("#productid").val(data[0]);
+                        $("#productname").val(data[1]);
+                        $("#brandname").val(data[6]);
+                        /*  $("#totalbal").val(data[4]);*/
+                        var jsonArray = JSON.parse(data[7]);
+                        var table = $('#tblotherresource').DataTable();
+                        table.clear().draw();
+                        $.each(jsonArray, function (index, item) {
+                            table.row.add([
+                                index + 1,
+                                item.Rawmaterialname,
+                                item.Unittype,
+                                item.Quantity1p,
+                                item.Totalbalance,
+                                item.Usebalance,
+                                item.Balancestatus
+                            ]).draw(false);
+                        });
+                        //if (data[3] == "") {
+                        //    $("#hid").val("");
+                        //    $("#credit").val("0");
+                        //}
+                        //else {
+                        //    $("#credit").val(data[3]);
+                        //}
+                        if (data[5] == "") {
+                            $("#availbal").val("0");
+                        }
+                        else {
+                            $("#availbal").val(data[5]);
+                        }
+
+
+                        $("#protype").val(data[2]);
+
+                    }
+                })
+
+            }
+        })
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $("#spronm").show();
+        $("#dvpronm").hide();
+        $("#selproductnm").change(function () {
+            var name = $("#selproductnm").val();
+            //alert(name);
+            if (name != "Other") {
+                $("#spronm").show();
+                $("#dvpronm").hide();
+                $("#productnm").val(name);
+            }
+            else {
+                $("#spronm").hide();
+                $("#dvpronm").show();
+                $("#productnm").val("");
+            }
+        })
+    })
+
+
+</script>
+<script>
+        $(document).ready(function () {
+            $("#cancel").click(function () {
+                $("input[type='text'],.form-select,#hid,#status").val("");
+                $("input[type='file']").val("");
+                $("#spronm").show();
+                $("#dvpronm").hide();
+                $("#productprimg").attr("Required", true);
+            })
+            $("#cancel1").click(function () {
+                $("#pspotherresource").text("");
+            })
+        var msg = '@ViewBag.msg';
+
+
+        if (msg) {
+            var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+                msg +
+                '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                '</div>';
+            $(alertElement).insertBefore('#alert-container');
+            setTimeout(function () {
+                $('#alert').alert('close');
+            }, 5000);
+            //$('.alert').on('closed.bs.alert', function () {
+            //    window.location.href = '/Admin/ProductStock';
+            //});
+            //$('#btnclose').on('click', function () {
+            //    window.location.href = '/Admin/ProductStock';
+            //});
+        }
+    });
+</script>
+
+
+<div class="row mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i>  Product Manufacturing</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+<div class="row mt-2 mb-3 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        @if (Session["logmails"] != null && Session["logmails"].ToString() == "growfast.dileep@gmail.com") { 
+            <button type="button" class="btn btncolor btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#ProductStock">
+                <i class="fa fa-cart-plus" aria-hidden="true"></i> New
+            </button>
+            }
+        <button type="button" class="btn btncolor btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#ProductStockpack">
+            <i class="fa fa-cart-arrow-down" aria-hidden="true"></i> Packaging
+        </button>
+        <button type="button" class="btn btncolor btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#ProductStockpackBalance">
+            <i class="fa fa-eye" aria-hidden="true"></i> Stock Balance
+        </button>
+    </div>
+</div>
+@using System.Data;
+@{
+
+    DbManager db = new DbManager();
+    Activitylog activitylog = new Activitylog();
+}
+@{
+    try
+    {
+        string query = "select * from tbl_Product_name where Mfgstatus!='Pending'";
+        activitylog.Activitylogins("tbl_Product_name", "", query, "Failed", "", Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        DataTable dt = db.GetAllRecord(query);
+        activitylog.Activitylogupd("Success", "");
+        int count = 1;
+        if (dt.Rows.Count > 0)
+        {
+            <div class="row table table-responsive">
+                <table class="table table-responsive table-bordered" id="tblproductstock">
+                    <thead class="text-center theadb text-light">
+                        <tr>
+                            <th class="text-center">Id</th>
+                            <th class="text-center">Brand Name</th>
+                            <th class="text-center">Product Name</th>
+                            <th class="text-center">Unit</th>
+                            <th class="text-center">Added Stock</th>
+                            <th class="text-center">Used Stock</th>
+                            <th class="text-center">Available Stock</th>
+                            @if (Session["logmails"] != null && Session["logmails"].ToString() == "growfast.dileep@gmail.com")
+                            {
+                                <th class="text-center">Add Stock</th>
+                            }
+                                <th class="text-center">Packaging</th>
+                                <th class="text-center">Stock Balance</th>
+                            </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        @for (int i = 0; i < dt.Rows.Count; i++)
+                        {
+                            
+                        <tr>
+                            <td>@(count + i)</td>
+                            <td>@dt.Rows[i]["Brandname"]</td>
+                            <td>@dt.Rows[i]["Productname"]</td>
+                            <td>@dt.Rows[0]["UnitType"]</td>
+                            <td>@dt.Rows[i]["Credit"]</td>
+                            <td>@dt.Rows[i]["Debit"]</td>
+                            <td>@dt.Rows[i]["Balance"]</td>
+                            @if (Session["logmails"] != null && Session["logmails"].ToString() == "growfast.dileep@gmail.com")
+                            {
+                                <td><button class="btn btncolorblue" onclick="Getid('@dt.Rows[i]["id"]')" data-bs-toggle="modal" data-bs-target="#ProductStock"><i class="fa fa-cart-plus"></i></button></td>
+                            }
+                                <td><button class="btn btncolorblue" @*onclick="Getpackid('@dt.Rows[i]["id"]')"*@ data-bs-toggle="modal" data-bs-target="#ProductStockpack"><i class="fa fa-cart-arrow-down"></i></button></td>
+                                <td><button class="btn btncolorblue" onclick="Getbalanceid('@dt.Rows[i]["id"]')" data-bs-toggle="modal" data-bs-target="#ProductStockpackBalance"><i class="fa fa-eye"></i></button></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class='row justify-content-center d-flex m-5' id='datanotfdound'>
+                <img src='~/Content/Img/nodata1.png' style="height:50%;width:50%" />
+            </div>
+        }
+    }
+
+
+    catch (Exception ex)
+    {
+        try
+        {
+            Error_15_16 error_15_16 = new Error_15_16();
+            string pageUrl = "", moduleName = "", errorLine = "", errorMessage = "", errorName = "", errorTrace = "";
+            // Get the page URL, if available
+            pageUrl = System.Web.HttpContext.Current.Request.Url.AbsoluteUri;
+            // Get the module name
+            moduleName = ex.TargetSite.Module.Name;
+            // Get the error line number, if available
+            var stackTrace = ex.StackTrace;
+            if (!string.IsNullOrEmpty(stackTrace))
+            {
+                var lineNumberIndex = stackTrace.LastIndexOf(":line ");
+                if (lineNumberIndex >= 0)
+                {
+                    var lineNumber = stackTrace.Substring(lineNumberIndex + 6);
+                    var newLineIndex = lineNumber.IndexOf(Environment.NewLine);
+                    if (newLineIndex >= 0)
+                    {
+                        errorLine = lineNumber.Substring(0, newLineIndex);
+                    }
+                    else
+                    {
+                        errorLine = lineNumber;
+                    }
+                }
+            }
+            // Get the error message and name
+            if (ex.Message.ToString().Length >= 1000)
+            {
+                errorMessage = ex.Message.Substring(1, 500);
+            }
+            else
+            {
+                errorMessage = ex.Message;
+            }
+            errorName = ex.GetType().FullName;
+            // Get the error trace
+            errorTrace = ex.StackTrace;
+            error_15_16.Error_15_16ins(pageUrl, moduleName, errorLine, errorMessage.Replace("'", "`"), errorName.Replace("'", "`"), errorTrace.Replace("'", "`"), Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        }
+
+        catch
+        {
+        }
+    }
+    finally
+    {
+        db.connectionstate();
+    }
+}
+
+<!-- Modal ProductStock-->
+<div class="modal fade" id="ProductStock" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <form action="/Admin/ProductStock" method="post" class="needs-validation" novalidate enctype="multipart/form-data">
+                <div class="modal-header justify-content-center nevigationstrip">
+                    <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Product Manufacturing Details</h5>
+                </div>
+                <div class="modal-body">
+                    <span id="spotherresource" class="text-danger"></span>
+                    <div class="row row-cols-1 row-cols-sm-3">
+                        @*<div class="col mb-2" id="spronm">
+                                <h6 class="mt-2">Godown Name</h6>
+                                <select class="form-select shadow-none" id="godown" name="godown" required>
+                                    <option selected disabled value="">Select</option>
+                                    @{
+                                        string query1 = "select * from tbl_godown where BranchCode='" + Session["ubrcode"] + "'";
+                                        DataTable dt1 = db.GetAllRecord(query1);
+                                        if (dt1.Rows.Count > 0)
+                                        {
+                                            for (int i = 0; i < dt1.Rows.Count; i++)
+                                            {
+                                                <option value="@dt1.Rows[i]["id"]">@dt1.Rows[i]["GodownName"]</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                                <div class="invalid-feedback">
+                                    Please select a valid option.
+                                </div>
+                            </div>*@
+                        <div class="col mb-2" id="spronm">
+                            <input type="hidden" id="hid" name="hid" value="000" />
+                            <h6 class="mt-2">Select Product</h6>
+                            <select class="form-select shadow-none" id="product" name="product" required>
+                                <option selected disabled value="">Select</option>
+                                @{
+                                    string query11 = "select * from tbl_Product_name where Mfgstatus!='Pending'";
+                                    DataTable dt11 = db.GetAllRecord(query11);
+                                    if (dt11.Rows.Count > 0)
+                                    {
+                                        for (int i = 0; i < dt11.Rows.Count; i++)
+                                        {
+                                            <option value="@dt11.Rows[i]["Id"]">@dt11.Rows[i]["Brandname"]</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                            @*<input type="hidden" name="protype" id="protype" />*@
+                            <input type="hidden" name="productid" id="productid" />
+                            <input type="hidden" name="productname" id="productname" />
+                            <input type="hidden" name="brandname" id="brandname" />
+                            <input type="hidden" name="credit" id="credit" />
+
+
+                            <div class="invalid-feedback">
+                                Please select a valid option.
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Packing Quantity</h6>
+                            <input type="text" class="form-control shadow-none" id="addstock" name="addstock" required placeholder="Enter Quantity" oninput="validateNumericInput(this,20,'spnum')" />
+                            <div class="invalid-feedback" id="spnum">
+                                Please enter only numbers
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2"> Available Balance</h6>
+                            <input type="text" class="form-control shadow-none readonly" id="availbal" name="availbal" required onkeyup="validateTextbox(this)" pattern="^[0-9,./ ]*$" title="Please enter only letters, and spaces" readonly />
+                        </div>
+                        <div class="col-12 col-sm-12">
+                            <div class="row row-cols-1 row-cols-sm-1">
+                                <div class="col">
+                                    <div class="col-sm-12">
+                                        <table class="table table-responsive" id="tblotherresource">
+                                            <thead class="thead">
+                                                <tr>
+
+                                                    <th>Id</th>
+                                                    <th>Row Material</th>
+                                                    <th>Unit Type</th>
+                                                    <th>Quantity per Unit</th>
+                                                    <th>Total Balance</th>
+                                                    <th>Use Ualance</th>
+                                                    <th>Balance Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="table-other-body">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+                    <button type="submit" class="btn btncolor" id="btnsub"><i class="fa fa-check"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Modal ProductStockpack-->
+<div class="modal fade" id="ProductStockpack" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            @*<form action="/Admin/ProductStock" method="post" class="needs-validation" novalidate enctype="multipart/form-data">*@
+            <div class="modal-header justify-content-center nevigationstrip">
+                <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Product Manufacturing Details</h5>
+            </div>
+            <div class="modal-body">
+                <span id="pspotherresource" class="text-danger"></span>
+                <div class="row row-cols-1 row-cols-sm-3">
+                    <div class="col mb-2" id="spronm">
+                        <input type="hidden" id="phid" name="phid" />
+                        <h6 class="mt-2">Select Product</h6>
+                        <select class="form-select shadow-none" id="pproduct" name="pproduct" required>
+                            <option selected disabled value="">Select</option>
+                            @{
+                                string query111 = "select * from tbl_Product_name where Mfgstatus!='Pending'";
+                                DataTable dt111 = db.GetAllRecord(query11);
+                                if (dt11.Rows.Count > 0)
+                                {
+                                    for (int i = 0; i < dt11.Rows.Count; i++)
+                                    {
+                                        <option value="@dt11.Rows[i]["Id"]">@dt11.Rows[i]["Brandname"]</option>
+                                    }
+                                }
+                            }
+                        </select>
+                        @*<input type="hidden" name="protype" id="protype" />*@
+                        <input type="hidden" name="pproductid" id="pproductid" />
+                        <input type="hidden" name="pproductname" id="pproductname" />
+                        <input type="hidden" name="pbrandname" id="pbrandname" />
+                        <input type="hidden" name="pproductcategory" id="pproductcategory" />
+                        <input type="hidden" name="pproductunittype" id="pproductunittype" />
+                        @*<input type="hidden" name="credit" id="credit" />*@
+
+
+                        <div class="invalid-feedback">
+                            Please select a valid option.
+                        </div>
+                    </div>
+                    <div class="col mb-2">
+                        <h6 class="mt-2">Quantity</h6>
+                        <input type="text" class="form-control shadow-none" id="paddstock" name="paddstock" required placeholder="Enter Quantity" oninput="validateNumericInput(this, 20, 'pspnum'), calculateproductquantity();" />
+                        <div class="invalid-feedback" id="pspnum">
+                            Please enter only numbers
+                        </div>
+                    </div>
+                    <div class="col mb-2">
+                        <h6 class="mt-2"> Available Balance</h6>
+                        <input type="text" class="form-control shadow-none readonly" id="pavailbal" name="pavailbal" required onkeyup="validateTextbox(this)" pattern="^[0-9,./ ]*$" title="Please enter only letters, and spaces" readonly />
+                    </div>
+
+
+                </div>
+
+                <div class="row row-cols-1 row-cols-sm-3">
+                    <div class="col mb-4">
+                        <h6 class="mt-2">Packing Material</h6>
+                        <select class="form-select shadow-none" id="row" name="row" required>
+                            <option selected disabled value="">Select</option>
+                            @{
+                                string query1 = "select * from tbl_rowmeterialstock where Materialcategory!='Raw Material'";
+                                DataTable dt1 = db.GetAllRecord(query1);
+                                if (dt1.Rows.Count > 0)
+                                {
+                                    for (int i = 0; i < dt1.Rows.Count; i++)
+                                    {
+                                        <option value="@dt1.Rows[i]["Id"]">@dt1.Rows[i]["RowMeterial"]</option>
+                                    }
+                                }
+                            }
+                        </select>
+                        <input type="hidden" name="rowmeterial" id="rowmeterial" />
+                        <input type="hidden" name="rowmeterialid" id="rowmeterialid" />
+                    </div>
+                    <div class="col mb-2">
+                        <h6 class="mt-2">Unit Type</h6>
+                        <input type="text" class="form-control shadow-none readonly" id="unittyperaw" name="unittyperaw" required onkeyup="validateTextbox(this)" pattern="^[0-9,./ ]*$" title="Please enter only letters, and spaces" readonly />
+                    </div>
+                    <div class="col mb-4">
+                        <h6 class="mt-2">Quantity of Bags/Unit/Bottles</h6>
+                        <input type="text" class="form-control shadow-none" id="cr" name="cr" required oninput="validateNumericInput(this, 20, 'spnum'), calculateproductquantity();" />
+                    </div>
+                </div>
+
+                <div class="row row-cols-1 row-cols-sm-3">
+                    <div class="col mb-2">
+                        <h6 class="mt-2"> Total Product Balance</h6>
+                        <input type="text" class="form-control shadow-none readonly" id="ptotalbal" name="ptotalbal" required onkeyup="validateTextbox(this)" pattern="^[0-9,./ ]*$" title="Please enter only letters, and spaces" readonly />
+                    </div>
+
+
+                    <div class="col mb-4">
+                        <h6 class="mt-2">Used Quantity</h6>
+                        <input type="text" class="form-control shadow-none readonly" id="usedbalance" name="usedbalance" required readonlyoninput="validateNumericInput(this, 20, 'spnum'), calculateproductquantity();" readonly/>
+                    </div>
+                    <div class="col mb-4">
+                        <h6 class="mt-2">Left Product Balance</h6>
+                        <input type="text" class="form-control shadow-none readonly" id="leftbalance" name="leftbalance" required readonlyoninput="validateNumericInput(this, 20, 'spnum'), calculateproductquantity();" readonly />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel1"><i class="fa fa-times"></i></button>
+                <button type="button" class="btn btncolor" id="btnsub_manufacture"><i class="fa fa-check"></i></button>
+            </div>
+            @*</form>*@
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        $("#btnsub_manufacture").click(function () {
+            var phid = $("#phid").val();
+            var pproduct = $("#pproduct").val();
+            var pproductid = $("#pproductid").val();
+            var pproductname = $("#pproductname").val();
+            var pbrandname = $("#pbrandname").val();
+            var pproductcategory = $("#pproductcategory").val();
+            var pproductunittype = $("#pproductunittype").val();
+            var paddstock = $("#paddstock").val();
+            var pavailbal = $("#pavailbal").val();
+            var rowmeterial = $("#rowmeterial").val();
+            var rowmeterialid = $("#rowmeterialid").val();
+            var unittyperaw = $("#unittyperaw").val();
+            var materialpackquantity = $("#cr").val();
+            var ptotalbal = $("#ptotalbal").val();
+            var usedbalance = $("#usedbalance").val();
+            var leftbalance = $("#leftbalance").val();
+            //alert(pproduct)
+            if (pproduct == "" || pproduct == null) {
+                $("#pspotherresource").text("Please Select Product.");
+                //alert("ok");
+            } else if (paddstock == "") {
+                $("#pspotherresource").text("Please Enter Product Quantity.");
+                //alert("okstock");
+            }
+            else if (rowmeterialid == "") {
+                $("#pspotherresource").text("Please Select Packaging Material.");
+                //alert("okrow");
+            }
+            else if (materialpackquantity == "") {
+                $("#pspotherresource").text("Please Enter No of Bag,Unit,Bottle etc.");
+                //alert("okcr");
+            }
+            else if (usedbalance == "") {
+                $("#pspotherresource").text("Please Enter No of Bag,Unit,Bottle etc. in a aqqurate quantity.");
+                //alert("okuse");
+            }
+            else if (leftbalance == "") {
+                $("#pspotherresource").text("Please Enter No of Bag,Unit,Bottle etc. in a aqqurate quantity.");
+                //alert("okleft");
+            }
+            else {
+                //alert("okelse");
+                var formData = new FormData();
+                formData.append("phid", phid);
+                formData.append("pproduct", pproduct);
+                formData.append("pproductid", pproductid);
+                formData.append("pproductname", pproductname);
+                formData.append("pbrandname", pbrandname);
+                formData.append("pproductcategory", pproductcategory);
+                formData.append("pproductunittype", pproductunittype);
+                formData.append("paddstock", paddstock);
+                formData.append("pavailbal", pavailbal);
+                formData.append("rowmeterial", rowmeterial);
+                formData.append("rowmeterialid", rowmeterialid);
+                formData.append("unittyperaw", unittyperaw);
+                formData.append("materialpackquantity", materialpackquantity);
+                formData.append("ptotalbal", ptotalbal);
+                formData.append("usedbalance", usedbalance);
+                formData.append("leftbalance", leftbalance);
+                //alert(pproductunittype)
+                $.ajax({
+                    url: '/Admin/AddProductFinishStock',
+                    type: "Post",
+                    data: formData,
+                    contentType: false, // Set contentType to false for FormData
+                    processData: false, // Set processData to false for FormData
+                    success: function (data) {
+                        //alert(data)
+                        
+
+                        if (data == "Data Updated") {
+                            $("#ProductStockpack").modal("hide");
+                            Swal.fire({
+                                icon: "success",
+                                title: "Finish stock added successfully",
+                                showConfirmButton: false,
+                                timer: 3000,
+                                position: 'center',
+                                customClass: {
+                                    popup: 'custom-swal-popup-class',
+                                },
+                                didClose: function () {
+                                    location.reload();
+                                }
+                            });
+                           
+                        }
+                        else {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Finish stock not added",
+                                showConfirmButton: false,
+                                timer: 3000,
+                                position: 'center',
+                                customClass: {
+                                    popup: 'custom-swal-popup-class',
+                                }
+                            });
+                        }
+
+                    }
+                })
+            }
+        })
+    })
+</script>
+<script>
+    function calculateproductquantity() {
+        $("#pspotherresource").text("");
+        var cr = $("#cr").val();
+        var paddstock = $("#paddstock").val();
+        var ptotalbal = $("#ptotalbal").val();
+        if (cr == "") {
+            cr = 0;
+        }
+        if (paddstock == "") {
+            paddstock = 0;
+        }
+        if (ptotalbal == "") {
+            ptotalbal = 0;
+        }
+        var totaluse = parseFloat(cr) * parseFloat(paddstock);
+        var avail = parseFloat(ptotalbal) - parseFloat(totaluse)
+        //alert(avail); alert(totaluse)
+        $("#usedbalance").val(totaluse);
+        $("#leftbalance").val(avail);
+        if (avail < 0) {
+            $("#pspotherresource").text("Not Sufficient balance to make product");
+            $("#usedbalance").val("");
+            $("#leftbalance").val("");
+        }
+
+
+    }
+
+    $(document).ready(function () {
+        $("#pproduct").change(function () {
+            $("#phid").val("");
+            var product = $("#pproduct").val();
+            var stock = $("#paddstock").val();
+            if (stock != null && stock != "") {
+                //alert(product)
+                $.ajax({
+                    url: '/Admin/GetProductDetailsforstock',
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { Productid: product, addstock: stock },
+                    success: function (data) {
+                        //alert(data)
+                        $("#phid").val(data[18]);
+                        $("#pproductid").val(data[18]);
+                        $("#pproductname").val(data[3]);
+                        $("#pbrandname").val(data[2]);
+
+                        $("#pproductcategory").val(data[7]);
+                        $("#pproductunittype").val(data[5]);
+
+                        //alert(data[5])
+                        if (data[24] != "") {
+                            $("#pavailbal").val(data[24]);
+                        }
+                        else {
+                            $("#pavailbal").val("0");
+                            $("#phid").val("");
+                        }
+                        //alert(data[24])
+
+
+                        $("#pprotype").val(data[2]);
+
+                    }
+                })
+            }
+            else {
+                //alert("please Enter Quantity");
+            }
+
+            $.ajax({
+                url: '/Admin/GetProductStock',
+                type: "GET",
+                dataType: "JSON",
+                data: { Productid: product, addstock: stock },
+                success: function (data) {
+                    $("#ptotalbal").val(data[5]);
+
+                }
+            })
+
+        })
+
+
+        $("#paddstock").keyup(function () {
+            $("#phid").val("");
+            var product = $("#pproduct").val();
+            var stock = $("#paddstock").val();
+            if (product != null && product != "") {
+                //alert(stock)
+                $.ajax({
+                    url: '/Admin/GetProductDetailsforstock',
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { Productid: product, addstock: stock },
+                    success: function (data) {
+                        // alert(data)
+                        $("#phid").val(data[18]);
+                        $("#pproductid").val(data[18]);
+                        $("#pproductname").val(data[3]);
+                        $("#pbrandname").val(data[2]);
+
+                        $("#pproductcategory").val(data[7]);
+                        $("#pproductunittype").val(data[5]);
+                        //alert(data[24])
+                        //alert(data[5])
+                        if (data[24] != "") {
+                            $("#pavailbal").val(data[24]);
+                        }
+                        else {
+                            $("#pavailbal").val("0");
+                            $("#phid").val("");
+                        }
+
+
+                    }
+                })
+            }
+            else {
+                //alert("please Enter Select Product");
+            }
+
+            $.ajax({
+                url: '/Admin/GetProductStock',
+                type: "GET",
+                dataType: "JSON",
+                data: { Productid: product, addstock: stock },
+                success: function (data) {
+                    $("#ptotalbal").val(data[5]);
+                }
+            })
+
+        })
+
+
+    })
+</script>
+
+<script>
+    $(document).ready(function () {
+        $("#row").change(function () {
+            var up = $("#row").val();
+            $.ajax({
+                url: '/Admin/UpdateRowMeterialStock',
+                type: "GET",
+                dataType: "JSON",
+                data: { Up: up },
+                success: function (data) {
+                    $("#rowmeterial").val(data[2]);
+                    $("#rowmeterialid").val(data[1]);
+                    $("#unittyperaw").val(data[6]);
+                    $("#cr").val("");
+                }
+            })
+        })
+    })
+</script>
+<script>
+    $(document).ready(function () {
+        $("#tblotherresourcep").hide();
+        $("#add-other-res").click(function () {
+            // alert("ok");
+            var totalothersalary = $("#tblotherresourcep").val();
+            var rowmeterialid = $("#rowmeterialid").val();
+            var rowmeterial = $("#rowmeterial").val();
+            var unittyperaw = $("#unittyperaw").val();
+            var cr = $("#cr").val();
+
+            if (rowmeterial == null || rowmeterial == "") {
+                spotherresourcetable.innerHTML = "Warning : Please Select Row Material Name";
+                spotherresourcetable.style.color = "Red";
+            }
+            else if (unittyperaw == null || unittyperaw == "") {
+                spotherresourcetable.innerHTML = "Warning : Please Enter UnitType Amount";
+                spotherresourcetable.style.color = "Red";
+            }
+            else if (cr == null || cr == "") {
+                spotherresourcetable.innerHTML = "Warning : Please Enter Quantity Amount";
+                spotherresourcetable.style.color = "Red";
+            }
+            else {
+                if (selectedothValues.includes(rowmeterial)) {
+                    // Reset the dropdown value
+                    spotherresourcetable.innerHTML = "Warning : This option has already been selected. Please choose a different option.";
+                    spotherresourcetable.style.color = "Red";
+                }
+                else {
+                    // Add the selected option to the array of selected values
+                    selectedothValues.push(rowmeterial);
+                    spotherresourcetable.innerHTML = "";
+                    $("#tblotherresourcep").show();
+                    var newRow = "<tr>" +
+                        "<td>" +
+                        "" + rowmeterial +
+                        "</td>" +
+                        "<td>" +
+                        "" + rowmeterialid +
+                        "</td>" +
+                        "<td>" +
+                        "" + unittyperaw +
+                        "</td>" +
+                        "<td>" +
+                        "" + cr +
+                        "</td>" +
+                        "<td><i class='fa fa-trash' style='color:red;cursor:pointer' onclick='removeRowexpense(this)'></i></td> ";
+                    $("#table-other-bodyp").append(newRow);
+
+                }
+            }
+        })
+    })
+</script>
+
+<script>
+
+    function removeRowexpense(element) {
+        //alert("removeRowexpense")
+
+        var row = element.parentNode.parentNode; // Get the row element
+        //alert(element);
+        //var salaryValue = row.querySelector('input[name="salary"]').value; // Get the salary value
+        //alert(salaryValue);
+
+        var selectedOption = row.querySelector('td:nth-child(1)').innerText;
+        //alert(selectedOption);
+        //alert(selectedothValues)
+        var index = selectedothValues.indexOf(selectedOption);
+        //alert(index)
+        selectedothValues.splice(index, 1);
+        //alert(index+"after")
+        row.parentNode.removeChild(row); // Remove the row from the table
+        //alert(index + "after1")
+    }
+</script>
+
+<!-- Modal ProductStockpackBalance-->
+<div class="modal fade" id="ProductStockpackBalance" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            @*<form action="/Admin/ProductStock" method="post" class="needs-validation" novalidate enctype="multipart/form-data">*@
+            <div class="modal-header justify-content-center nevigationstrip">
+                <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Product Manufacturing Details</h5>
+            </div>
+            <div class="modal-body">
+                <span id="pbspotherresource" class="text-danger"></span>
+                <div class="row row-cols-1 row-cols-sm-3">
+                    <div class="col mb-2" id="spronm">
+                        <h6 class="mt-2">Select Product</h6>
+                        <select class="form-select shadow-none" id="pbproduct" name="pbproduct" required>
+                            <option selected disabled value="">Select</option>
+                            @{
+                                string query1111 = "select * from tbl_Product_name where Mfgstatus!='Pending'";
+                                DataTable dt1111 = db.GetAllRecord(query1111);
+                                if (dt1111.Rows.Count > 0)
+                                {
+                                    for (int i = 0; i < dt1111.Rows.Count; i++)
+                                    {
+                                        <option value="@dt1111.Rows[i]["Id"]">@dt1111.Rows[i]["Brandname"]</option>
+                                    }
+                                }
+                            }
+                        </select>
+
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <table class="display nowrap table table-responsive" id="tblstockbalance">
+                        <thead class="theadb text-center">
+                            <tr>
+                                <th>ID</th>
+                                <th>Brand Name</th>
+                                <th>Product Name</th>
+                                <th>Unit</th>
+                                <th>Available Stock</th>
+                                
+                            </tr>
+                        </thead>
+                        <tbody class="text-center" id="tbl">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel1"><i class="fa fa-times"></i></button>
+                <button type="button" class="btn btncolor" id="btnsub_manufacture"><i class="fa fa-check"></i></button>
+            </div>
+            @*</form>*@
+        </div>
+    </div>
+</div>
+
+<script>
+    function Getbalanceid(product) {
+       $("#pbproduct").val(product);
+        //alert(product);
+        $.ajax({
+            url: '/Admin/GetProductstockdetail',
+            type: "GET",
+            dataType: "JSON",
+            data: { Productid: product },
+            success: function (response) {
+                //alert(response)
+                var table = $('#tblstockbalance').DataTable();
+                //alert(response)
+                var jsonArray = JSON.parse(response);
+                table.clear().draw();
+                $.each(jsonArray, function (index, item) {
+                    table.row.add([
+                        index + 1,
+                        item.Brand,
+                        item.Productname,
+                        item.Quantity + " " + item.punit,
+                        item.Balance_stock
+                    ]).draw(false);
+                });
+            }
+        })
+    }
+    $(document).ready(function () {
+        $("#pbproduct").change(function () {
+            var product = $("#pbproduct").val();
+            //alert(product);
+            $.ajax({
+                url: '/Admin/GetProductstockdetail',
+                type: "GET",
+                dataType: "JSON",
+                data: { Productid: product },
+                success: function (response) {
+                    //alert(response)
+                    var table = $('#tblstockbalance').DataTable();
+                    //alert(response)
+                    var jsonArray = JSON.parse(response);
+                    table.clear().draw();
+                    $.each(jsonArray, function (index, item) {
+                        table.row.add([
+                            index + 1,
+                            item.Brand,
+                            item.Productname,
+                            item.Quantity + " " + item.punit,
+                            item.Balance_stock
+                        ]).draw(false);
+                    });
+                }
+            })
+
+
+        })
+    })
+
+</script>
+
+
+

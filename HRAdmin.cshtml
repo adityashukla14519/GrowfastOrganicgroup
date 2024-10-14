@@ -1,0 +1,464 @@
+﻿
+@{
+    ViewBag.Title = "HR And Admin";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+<script src="~/Content/css/mailvalid.js"></script>
+
+<script>
+    function statuschange(id, status, tdstatus) {
+        //alert(id + "," + status);
+        //alert(status)
+        tdstatus = "#" + tdstatus;
+        //alert(tdstatus);
+        $.ajax({
+            url: "/Admin/Statuschangetive",
+            type: "Post",
+            dataType: "JSON",
+            data: { id: id, status: status, tblnm: 'tbl_login' },
+            success: function (data) {
+                //alert(data);
+                if (data == "Active") {
+                    //alert(data);
+                    $(tdstatus).empty();
+                    $(tdstatus).append('<i class="fa fa-check text-success"></i><span style="display:none">' + data + '</span>');
+                    //alert('<i class="fa fa-check text-success"></i><span style="display:none">' + data + '</span>')
+
+                }
+                else {
+                    //alert(data);
+                    $(tdstatus).empty();
+
+                    $(tdstatus).append('<i class="fa fa-ban text-danger"></i><span style="display:none">' + data + '</span>');
+                }
+                //location.reload();
+            },
+        });
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        var table = $('#tblhradmin').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                }
+            ]
+        });
+    });
+
+</script>
+<script>
+    function Getid(id) {
+        var up = id;
+        $.ajax({
+            url: '/Admin/UpdateHRAdmin',
+            type: "GET",
+            dataType: "JSON",
+            data: { Up: up },
+            success: function (data) {
+
+                $("#hid").val(data[0]);
+                $("#uname").val(data[1]);
+                $("#mailuid").val(data[3]);
+                $("#contact").val(data[4]);
+                $("#status").val(data[6]);
+                $("#status").removeClass("readonly");
+                $("#status").prop("disabled", false);
+                $("#branch").val(data[8]);
+                $("#branchname").val(data[7]);
+                $("#branchcode").val(data[8]);
+                $("#mtype").val(data[5]);
+
+                if (data[5] == "Sadmin") {
+                    $("#dvbranch").hide()
+                    $("#branch").attr("required", false);
+                }
+                else {
+                    $("#dvbranch").show()
+                    $("#branch").attr("required", true);
+                }
+            }
+        })
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $("#status").val("Active");
+        $("#status").addClass("readonly");
+        $("#status").prop("disabled", true);
+
+        $("#cancel").click(function () {
+            $("input[type='text'],.form-select,#hid,#status").val("");
+            $("#status").val("Active");
+            $("#status").addClass("readonly");
+            $("#status").prop("disabled", true);
+        })
+    @*var alertMessage = '@ViewBag.AlertMessage';*@
+    var msg = '@ViewBag.msg';
+
+    //if (alertMessage) {
+    //    var alertElement = '<div class="alert alert-info alert-dismissible fade show" role="alert">' +
+    //                            alertMessage +
+    //                            '<button type="button" class="btn-close mt-2" data-bs-dismiss="alert" aria-label="Close" id="btn1"></button>' +
+    //                        '</div>';
+    //    $(alertElement).insertBefore('#alert-container');
+    //    $('#btn1').on('click', function () {
+    //        window.location.href = '/Admin/Employee'; // replace with your desired URL
+    //    });
+    //}
+        if (msg) {
+            var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+                msg +
+                '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                '</div>';
+            $(alertElement).insertBefore('#alert-container');
+            setTimeout(function () {
+                $('#alert').alert('close');
+            }, 5000);
+            //$('.alert').on('closed.bs.alert', function () {
+            //    window.location.href = '/Admin/Department';
+            //});
+            //$('#btnclose').on('click', function () {
+            //    window.location.href = '/Admin/Department';
+            //});
+        }
+});
+</script>
+<script>
+    $(document).ready(function () {
+       $("#dvbranch").hide()
+       $("#mtype").change(function () {
+           var mtype = $("#mtype").val();
+           if(mtype == "Sadmin") {
+                $("#dvbranch").hide()
+                $("#branch").attr("required", false);
+            }
+            else {
+                $("#dvbranch").show()
+                $("#branch").attr("required", true);
+            }
+        })
+});
+</script>
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i>  HR And Admin</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+<div class="row mt-2 mb-3 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <button type="button" class="btn btncolor btn-sm" data-bs-toggle="modal" data-bs-target="#HRAdmin">
+            <i class="fa fa-plus" aria-hidden="true"></i> New
+        </button>
+    </div>
+</div>
+
+@using System.Data;
+@{
+    DbManager db = new DbManager();
+    Activitylog activitylog = new Activitylog();
+
+}
+
+@{ try
+    {
+        string query = "select * from tbl_login where (Type='Admin' or Type='Sadmin') and (Emailid!='hr@winaxis.in' or Emailid!='deepak@winaxis.in')";
+        activitylog.Activitylogins("tbl_login", "", query, "Failed", "", Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        DataTable dt = db.GetAllRecord(query);
+        activitylog.Activitylogupd("Success", "");
+        int count = 1;
+        if (dt.Rows.Count > 0)
+        {
+            <div class="row table table-responsive">
+                <table class="table table-responsive table-bordered" id="tblhradmin">
+                    <thead class="theadb text-l text-center">
+                        <tr>
+                            <th class="text-center">Id</th>
+                            <th class="text-center">Type</th>
+                            <th class="text-center">Username</th>
+                            <th class="text-center">Userid</th>
+                            @*<th class="text-center">Employees</th>*@
+                            <th class="text-center">Email</th>
+                            <th class="text-center">Mobile</th>
+                            <th class="text-center">Branch Name</th>
+                            <th class="text-center">Password</th>
+                            @*<th class="text-center">Created Date</th>*@
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Active/Inactive</th>
+                            <th class="text-center">Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        @for (int i = 0; i < dt.Rows.Count; i++)
+                        {
+                        <tr>
+                            <td>@(count+i)<input type="hidden" id="@dt.Rows[i]["id"]" value="@dt.Rows[i]["id"]" /></td>
+
+                            @if (dt.Rows[i]["Type"]+"" == "Admin")
+                            {
+                                <td>HR</td>
+                            }
+                            else
+                            {
+                                <td>Admin</td>
+                            }
+                            <td>@dt.Rows[i]["Username"]</td>
+                            <td>@dt.Rows[i]["Userid"]</td>
+                            <td>@dt.Rows[i]["Emailid"]</td>
+                            <td>@dt.Rows[i]["Mobile"]</td>
+
+
+                            <td>@dt.Rows[i]["Branchname"]</td>
+                            <td>@dt.Rows[i]["Password"]</td>
+
+                            @if (@dt.Rows[i]["Status"] + "" == "Active")
+                            {
+
+                                <td id="tdi_@dt.Rows[i]["id"]"><i class="fa fa-check text-success"></i><span style="display:none">@dt.Rows[i]["Status"]</span></td>
+                                <td>
+                                    <input type="checkbox" checked data-toggle="toggle" data-on="Active" data-off="Inactive" onchange="statuschange('@dt.Rows[i]["id"]','Inactive','tdi_@dt.Rows[i]["id"]')" style="font-size:7px;padding:1px">
+                                </td>
+
+                            }
+                            else
+                            {
+
+                                <td id="tda_@dt.Rows[i]["id"]"><i class="fa fa-ban text-danger"></i><span style="display:none">@dt.Rows[i]["Status"]</span></td>
+                                <td>
+                                    <input type="checkbox" data-toggle="toggle" data-on="Active" data-off="Inactive" onchange="statuschange('@dt.Rows[i]["id"]','Active','tda_@dt.Rows[i]["id"]')" style="font-size:7px;padding:1px">
+                                </td>
+                            }
+                            <td><button class="btn btncolorblue" onclick="Getid($('#@dt.Rows[i]["id"]').val())" data-bs-toggle="modal" data-bs-target="#HRAdmin"><i class="fa fa-edit"></i></button></td>
+
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class='row justify-content-center d-flex m-5' id='datanotdound'>
+                <img src='~/Content/Img/nodata1.png' style="height:50%;width:50%" />
+            </div>
+        }
+    }
+
+    catch (Exception ex)
+    {
+        try
+        {
+            Error_15_16 error_15_16 = new Error_15_16();
+            string pageUrl = "", moduleName = "", errorLine = "", errorMessage = "", errorName = "", errorTrace = "";
+            // Get the page URL, if available
+            pageUrl = System.Web.HttpContext.Current.Request.Url.AbsoluteUri;
+            // Get the module name
+            moduleName = ex.TargetSite.Module.Name;
+            // Get the error line number, if available
+            var stackTrace = ex.StackTrace;
+            if (!string.IsNullOrEmpty(stackTrace))
+            {
+                var lineNumberIndex = stackTrace.LastIndexOf(":line ");
+                if (lineNumberIndex >= 0)
+                {
+                    var lineNumber = stackTrace.Substring(lineNumberIndex + 6);
+                    var newLineIndex = lineNumber.IndexOf(Environment.NewLine);
+                    if (newLineIndex >= 0)
+                    {
+                        errorLine = lineNumber.Substring(0, newLineIndex);
+                    }
+                    else
+                    {
+                        errorLine = lineNumber;
+                    }
+                }
+            }
+            // Get the error message and name
+            if (ex.Message.ToString().Length >= 1000)
+            {
+                errorMessage = ex.Message.Substring(1, 500);
+            }
+            else
+            {
+                errorMessage = ex.Message;
+            }
+            errorName = ex.GetType().FullName;
+            // Get the error trace
+            errorTrace = ex.StackTrace;
+            error_15_16.Error_15_16ins(pageUrl, moduleName, errorLine, errorMessage.Replace("'", "`"), errorName.Replace("'", "`"), errorTrace.Replace("'", "`"), Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        }
+
+        catch
+        {
+
+        }
+    }
+    finally
+    {
+        db.connectionstate();
+    }
+
+}
+
+<script>
+    $(document).ready(function () {
+        $("#branch").change(function () {
+            var up = $("#branch").val();
+            //alert(up)
+            $.ajax({
+                url: '/Admin/GetBranch',
+                type: "GET",
+                dataType: "JSON",
+                data: { Up: up },
+                success: function (data) {
+                    //alert(data);
+                    $("#branchname").val(data[1]);
+                    $("#branchcode").val(data[9]);
+                }
+            })
+
+        })
+    })
+</script>
+
+<!-- Modal HRAdmin-->
+<div class="modal fade" id="HRAdmin" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-5idden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <form action="/Admin/HRAdmin" method="post" class="needs-validation" novalidate>
+                <div class="modal-header justify-content-center nevigationstrip">
+                    <h5 class="modal-title text-uppercase" id="staticBackdropLabel">HR and Admin Info</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="col-sm-12">
+                        <div class="col mb-3">
+                            <input type="hidden" id="hid" name="hid" />
+                            <h6 class="mt-2">Type </h6>
+                            <select class="form-select shadow-none" id="mtype" name="mtype" required>
+                                <option selected disabled value="">Select one</option>
+                                <option  value="Sadmin">Admin</option>
+                                <option value="Admin">Hr</option>
+
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a valid option.
+                            </div>
+                        </div>
+                        <div class="col mb-3" id="dvbranch">
+                            <h6 class="mt-2">Branch Name</h6>
+                            <select class="form-select shadow-none" id="branch" name="branch" required>
+                                <option selected disabled value="">Select one</option>
+                                @{
+                                    string query1 = "select * from tbl_branch";
+                                    DataTable dt1 = db.GetAllRecord(query1);
+                                    if (dt1.Rows.Count > 0)
+                                    {
+                                        for (int i = 0; i < dt1.Rows.Count; i++)
+                                        {
+                                            if (dt1.Rows[i]["Status"] + "" == "Active")
+                                            {
+                                                <option value="@dt1.Rows[i]["Branchid"]">@dt1.Rows[i]["Branch"]</option>
+                                            }
+                                        }
+                                    }
+                                }
+                            </select>
+                            <input type="hidden" name="branchname" id="branchname" />
+                            <input type="hidden" name="branchcode" id="branchcode" />
+
+                            <div class="invalid-feedback">
+                                Please select a valid option.
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">User name</h6>
+                            <input type="text" class="form-control shadow-none" name="uname" id="uname" required onkeyup="validateTextbox(this)" pattern="^[a-zA-Z ]*$" placeholder="Enter user name" title="Please enter only letters, and spaces" />
+                            <div class="invalid-feedback">
+                                Please enter only letters, and spaces
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Enter Email Id</h6>
+                            <input type="email" class="form-control shadow-none" id="mailuid" placeholder="Enter email ID" name="mailuid" required oninput="validateEmail('mailuid','spmail')" /><span id="spmail"></span>
+                            <span id="spmail"></span>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Contact</h6>
+                            <input type="text" class="form-control shadow-none" name="contact" id="contact" required placeholder="Enter Contact" oninput="validateNumericInput(this, 10, 'spnumd')" />
+                            <div class="invalid-feedback" id="spnumd">
+                                Please enter only numbers
+                            </div>
+                        </div>
+                        @*<div class="mb-3">
+            <h6 class="mt-2">Designation Order Number</h6>
+            <input type="text" class="form-control shadow-none" name="designumber" id="designumber" required onkeyup="validateTextbox(this)" pattern="^[0-9]*$" title="Please enter only letters, and spaces" />
+            <div class="invalid-feedback">
+                Please enter only numbers
+            </div>
+        </div>*@
+                        <div class="mb-3">
+                            <h6 class="mt-2">Status</h6>
+                            <select class="form-select shadow-none" id="status" name="status" required>
+                                @*<option selected disabled value="">Select one</option>*@
+                                <option>Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a valid status.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+                    <button type="submit" class="btn btncolor"><i class="fa fa-check"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+

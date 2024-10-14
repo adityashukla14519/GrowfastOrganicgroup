@@ -1,0 +1,589 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/Adminmaster.cshtml";
+}
+
+
+
+@using System.Data;
+@{ DbManager db = new DbManager();}
+
+<style>
+    h2 {
+        color: black;
+    }
+
+    a label {
+        color: black;
+    }
+</style>
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i>  Dashboard</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+        // create a new Date object
+        const currentDate = new Date();
+
+        // get the day, month, and year from the date object
+        const day = currentDate.getDate();
+        const month = currentDate.toLocaleString('default', { month: 'short' });
+        const year = currentDate.getFullYear();
+
+        // format the date string
+        const formattedDate = `${day} ${month} ${year}`;
+        $(".curdt").text("Summary as on " + formattedDate);
+    })
+</script>
+
+
+<div class="row mt-3 mb-3">
+    <div class="col-sm-7">
+        <h5>Today Summary</h5>
+        <span class="curdt"></span>
+    </div>
+
+    <div class="col-sm-5 justify-content-end d-flex">
+        <div class="row">
+            <div class="col-sm-6 mt-3">
+                <div class="card dashcard danger border rounded-4 border-blue" style="height: 70px !important; min-width: 120px">
+
+                    <div class="card-body approdashstat p-1">
+                        <div class="row align-items-center p-1">
+                            <div class="col">
+                                @{
+                                    string uquery = "select Count(*) as count from  [tbl_All_Message_transaction] where from_msg='SMS' and Status='Active' and StatusMessage='200'";
+                                    DataTable udt = db.GetAllRecord(uquery);
+                                    string nquery = "select top(1)* from [msg_balance] where Type='SMS' and Status='Active'";
+                                    DataTable ndt = db.GetAllRecord(nquery);
+
+                                }
+                                <a>
+                                    <h6>@udt.Rows[0]["count"]/@ndt.Rows[0]["unit"]</h6>
+                                    <label style="font-size:10px!important">SMS Balance</label>
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 mt-3">
+                <div class="card dashcard danger border rounded-4 border-blue" style="height:70px!important;min-width:120px">
+
+                    <div class="card-body approdashstat p-1">
+                        <div class="row align-items-center p-1">
+                            <div class="col">
+                                @{
+                                    string wuquery = "select Count(*) as count from [tbl_All_Message_transaction] where from_msg='Whatsapp' and Status='Active' and StatusMessage='true'";
+                                    DataTable wudt = db.GetAllRecord(wuquery);
+                                    string Wquery = "select top(1)* from [msg_balance] where Type='WhatsApp' and Status='Active'";
+                                    DataTable Wdt = db.GetAllRecord(Wquery);
+
+                                }
+                                <a>
+                                    <h6>@wudt.Rows[0]["count"]/@Wdt.Rows[0]["unit"]</h6>
+                                    <label style="font-size:10px!important">Whatsapp Balance</label>
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="col-sm-12 border border-dotted-1 border-dark-subtle"></div>
+    </div>
+</div>
+
+<style>
+    .card-body {
+        min-height: 100px;
+    }
+</style>
+
+
+
+<div class="row">
+    <div class="col-sm-3 mt-3">
+        <div class="card dashcard success border rounded-4 border-blue">
+
+            <div class="card-body approdashstat">
+                <div class="row align-items-center">
+                    <div class="col">
+                        @{
+                            string lquery = "select * from tbl_login where Type='Sadmin'";
+                            DataTable ldt = db.GetAllRecord(lquery);
+                            int lcount = ldt.Rows.Count;
+                        }
+                        <a href="#">
+                            <h2>@lcount</h2>
+                            <label class="mt-1">Admin</label>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-3 mt-3">
+        <div class="card dashcard danger border rounded-4 border-blue">
+
+            <div class="card-body approdashstat">
+                <div class="row align-items-center">
+                    <div class="col">
+                        @{
+                            string cquery = "select * from tbl_mcompany where Status='Active'";
+                            DataTable cdt = db.GetAllRecord(cquery);
+
+                        }
+                        <a>
+                            <h2>@cdt.Rows.Count</h2>
+                            <label class="mt-1">Company</label>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 mt-3">
+        <div class="card dashcard danger border rounded-4 border-danger-subtle">
+
+            <div class="card-body approdashstat">
+                <div class="row align-items-center row-cols-2 row-cols-sm-3">
+
+                    @{
+                        string locquery = "select * from tbl_department";
+                        DataTable locdt = db.GetAllRecord(locquery);
+                        int loccount = locdt.Rows.Count;
+                    }
+                    @{
+                        string degquery = "select * from tbl_designation";
+                        DataTable degdt = db.GetAllRecord(degquery);
+                        int degcount = degdt.Rows.Count;
+                    }
+                    @{
+                        string shiftquery = "select * from tbl_shift";
+                        DataTable shiftdt = db.GetAllRecord(shiftquery);
+                        int shiftcount = shiftdt.Rows.Count;
+                    }
+                    <div class="col">
+                        <a href="/Admin/Department">
+                            <h2>@loccount</h2>
+                            <label class="mt-1">Department</label>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href="/Admin/Designation">
+                            <h2>@degcount</h2>
+                            <label class="mt-1">Designation</label>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href="/Admin/Shifts">
+                            <h2>@shiftcount</h2>
+                            <label class="mt-1">Shift Timing</label>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+@{
+    string totalquery = "select * from tbl_registration";
+    DataTable totaldt = db.GetAllRecord(totalquery);
+    int totalcount = totaldt.Rows.Count;
+
+    string actquery = "select * from tbl_registration where Status='Approved'";
+    DataTable actdt = db.GetAllRecord(actquery);
+    int actcount = actdt.Rows.Count;
+
+    string inactquery = "select * from tbl_registration where Status!='Approved'";
+    DataTable inactdt = db.GetAllRecord(inactquery);
+    int inactcount = inactdt.Rows.Count;
+
+    string prequery = "select * from tbl_attendance where Date='" + DateTime.Now.ToString("yyyy-MM-dd") + "'";
+    DataTable predt = db.GetAllRecord(prequery);
+    int precount = predt.Rows.Count;
+
+    int abscount = actcount - precount;
+
+    string latequery = "select * from tbl_attendance where Punchin_time>DATEADD(MINUTE, 10, Starttime) and Date='" + DateTime.Now.ToString("yyyy-MM-dd") + "'";
+    DataTable latedt = db.GetAllRecord(latequery);
+    int latecount = latedt.Rows.Count;
+
+    string earlyquery = "select * from tbl_attendance where Punchout_time<Endtime and Date='" + DateTime.Now.ToString("yyyy-MM-dd") + "'";
+    DataTable earlydt = db.GetAllRecord(earlyquery);
+    int earlycount = earlydt.Rows.Count;
+
+    string jwd = "select * from tbl_leave where (Day(From_date)<='" + DateTime.Now.ToString("dd") + "' and Day(To_date)>='" + DateTime.Now.ToString("dd") + "') and ((MONTH(From_date)='" + DateTime.Now.ToString("MM") + "' and YEAR(From_date)='" + DateTime.Now.ToString("yyyy") + "') or (MONTH(To_date)='" + DateTime.Now.ToString("MM") + "' and YEAR(To_date)='" + DateTime.Now.ToString("yyyy") + "')) and Status='Approved'";
+    string leavequery = "select * from tbl_leave where Date='" + DateTime.Now.ToString("yyyy-MM-dd") + "'";
+    DataTable leavedt = db.GetAllRecord(jwd);
+    int leavecount = leavedt.Rows.Count;
+
+
+    string inquery = "select * from tbl_attendance where Punchin_time!=''  and Date='" + DateTime.Now.ToString("yyyy-MM-dd") + "'";
+    DataTable indt = db.GetAllRecord(inquery);
+    int incount = indt.Rows.Count;
+
+    string outquery = "select * from tbl_attendance where Punchout_time!=''  and Date='" + DateTime.Now.ToString("yyyy-MM-dd") + "'";
+    DataTable outdt = db.GetAllRecord(outquery);
+    int outcount = outdt.Rows.Count;
+
+    string onrolquery = "select * from tbl_registration where Status='Approved' and Employeementtype='Premanent'";
+    DataTable onroldt = db.GetAllRecord(onrolquery);
+    int onrolcount = onroldt.Rows.Count;
+
+    string contquery = "select * from tbl_registration where Status='Approved' and Employeementtype='Provisonal'";
+    DataTable contdt = db.GetAllRecord(contquery);
+    int contcount = contdt.Rows.Count;
+
+    string wfoquery = "select * from tbl_registration where Status='Approved' and Premises='Office Work'";
+    DataTable wfodt = db.GetAllRecord(wfoquery);
+    int wfocount = wfodt.Rows.Count;
+
+    string wfhquery = "select * from tbl_registration where Status='Approved' and Premises='Field Work'";
+    DataTable wfhdt = db.GetAllRecord(wfhquery);
+    int wfhcount = wfhdt.Rows.Count;
+}
+
+<div class="row mt-3 mb-3">
+    <h5>Employee Info</h5>
+    <span class="curdt"></span>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="col-sm-12 border border-dotted-1 border-dark-subtle"></div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-2 mt-3">
+        <div class="card dashcard info border rounded-4 border-info-subtle">
+
+            <div class="card-body approdashstat">
+                <div class="row align-items-center">
+                    <div class="col">
+
+                        <a href='/Admin/EmployeeInfo?type=all&date=@DateTime.Now.ToString("yyyy-MM-dd") '>
+                            <h2>@totalcount</h2>
+                            <label class="mt-1">Total Employees</label>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-2 mt-3">
+        <div class="card dashcard info border rounded-4 border-danger-subtle">
+
+            <div class="card-body approdashstat">
+                <div class="row align-items-center">
+                    <div class="col">
+
+                        <a href='/Admin/EmployeeInfo?type=active&date=@DateTime.Now.ToString("yyyy-MM-dd") '>
+                            <h2>@actcount</h2>
+                            <label class="mt-1">Active</label>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-2 mt-3">
+        <div class="card dashcard info border rounded-4 border-danger-subtle">
+
+            <div class="card-body approdashstat">
+                <div class="row align-items-center">
+                    <div class="col">
+
+                        <a href='/Admin/EmployeeInfo?type=inactive&date=@DateTime.Now.ToString("yyyy-MM-dd")'>
+                            <h2>@inactcount</h2>
+                            <label class="mt-1">Inactive</label>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 mt-3">
+        <div class="card dashcard danger border rounded-4 border-danger-subtle">
+
+            <div class="card-body approdashstat">
+                <div class="row align-items-center row-cols-2 row-cols-sm-3">
+
+
+                    <div class="col">
+                        <a href='/Admin/EmployeeInfo?type=present&date=@DateTime.Now.ToString("yyyy-MM-dd")  '>
+                            <h2>@precount</h2>
+                            <label class="mt-1">Present</label>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href='/Admin/EmployeeInfo?type=absent&date=@DateTime.Now.ToString("yyyy-MM-dd") '>
+                            <h2>@abscount</h2>
+                            <label class="mt-1">Absent</label>
+                        </a>
+                    </div>
+                    @*<div class="col">
+                            <a href='/Admin/EmployeeInfo?type=late-comers&date=@DateTime.Now.ToString("yyyy-MM-dd") '>
+                                <h2>@latecount</h2>
+                                <label class="mt-1">Late Comers</label>
+                            </a>
+                        </div>*@
+
+                    @*<div class="col">
+                            <a href='/Admin/EmployeeInfo?type=early-leavers&date=@DateTime.Now.ToString("yyyy-MM-dd")'>
+                                <h2>@earlycount</h2>
+                                <label class="mt-1">Early Leavers</label>
+                            </a>
+                        </div>*@
+                    <div class="col">
+                        <a href='/Admin/EmployeeInfo?type=on-leave&date=@DateTime.Now.ToString("yyyy-MM-dd") '>
+                            <h2>@leavecount</h2>
+                            <label class="mt-1">On Leave</label>
+                        </a>
+                    </div>
+                    @*&locationId=&=subLocationId&departmentId=&subDepartmentId=&designationId=&shiftId=&areaId=*@
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="row mt-3 mb-3">
+    <h5>Location Info</h5>
+    <span class="curdt"></span>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="col-sm-12 border border-dotted-1 border-dark-subtle"></div>
+    </div>
+</div>
+
+<div class="col-sm-12 mt-3">
+    <div class="card dashcard danger border rounded-4 border-danger-subtle">
+        <div class="card-body approdashstat">
+            <div class="row align-items-center row-cols-2 row-cols-sm-4">
+                @{
+                    DataTable companydt = db.GetAllRecord("select Distinct Companyid from tbl_company");
+                    int companycount = companydt.Rows.Count;
+
+                    DataTable zonedt = db.GetAllRecord("select  Distinct Zoneid from tbl_zone");
+                    int zonecount = zonedt.Rows.Count;
+
+                    DataTable regiondt = db.GetAllRecord("select Distinct Regionid from tbl_region");
+                    int regioncount = regiondt.Rows.Count;
+
+                    DataTable divisiondt = db.GetAllRecord("select Distinct Divisionid from tbl_division");
+                    int divisioncount = divisiondt.Rows.Count;
+
+                    DataTable branch2dt = db.GetAllRecord("select Distinct Branchid from tbl_branch1");
+                    int branch2count = branch2dt.Rows.Count;
+
+                    DataTable teamdt = db.GetAllRecord("select Distinct Teamid from tbl_team");
+                    int teamcount = teamdt.Rows.Count;
+
+                    DataTable groupdt = db.GetAllRecord("select Distinct Groupid from tbl_group");
+                    int groupcount = groupdt.Rows.Count;
+
+
+                }
+                <div class="col">
+                    <a href="/Admin/Company">
+                        <h2>@companycount</h2>
+                        <label class="mt-1">Company</label>
+                    </a>
+                </div>
+                <div class="col">
+                    <a href="/Admin/Zone">
+                        <h2>@zonecount</h2>
+                        <label class="mt-1">Zone</label>
+                    </a>
+                </div>
+                <div class="col">
+                    <a href="/Admin/Region">
+                        <h2>@regioncount</h2>
+                        <label class="mt-1">Region</label>
+                    </a>
+                </div>
+                <div class="col">
+                    <a href="/Admin/Division">
+                        <h2>@divisioncount</h2>
+                        <label class="mt-1">Division</label>
+                    </a>
+                </div>
+                <div class="col">
+                    <a href="/Admin/Branch2">
+                        <h2>@branch2count</h2>
+                        <label class="mt-1">Branch</label>
+                    </a>
+                </div>
+                <div class="col">
+                    <a href="/Admin/Team">
+                        <h2>@teamcount</h2>
+                        <label class="mt-1">Team</label>
+                    </a>
+                </div>
+                <div class="col">
+                    <a href="/Admin/Group">
+                        <h2>@groupcount</h2>
+                        <label class="mt-1">Group</label>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="row mt-3 mb-3">
+    <h5>Attendance Info</h5>
+    <span class="curdt"></span>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="col-sm-12 border border-dotted-1 border-dark-subtle"></div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-2 mt-3">
+        <div class="card dashcard success border rounded-4 border-success-subtle">
+            <div class="card-body approdashstat">
+                <div class="row align-items-center">
+                    <div class="col">
+
+                        <a href="/Admin/AttendanceInfo?type=&date=@DateTime.Now.ToString("yyyy-MM-dd")">
+                            <h2>@precount</h2>
+                            <label class="mt-1">Attendance Logs</label>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-sm-3 mt-3">
+        <div class="card dashcard danger border rounded-4 border-danger-subtle">
+
+            <div class="card-body approdashstat">
+                <div class="row align-items-center row-cols-2">
+
+                    <div class="col">
+                        <a href='/Admin/AttendanceInfo?type=in&date=@DateTime.Now.ToString("yyyy-MM-dd") '>
+                            <h2>@incount</h2>
+                            <label class="mt-1">Employee in</label>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href='/Admin/AttendanceInfo?type=out&date=@DateTime.Now.ToString("yyyy-MM-dd") '>
+                            <h2>@outcount</h2>
+                            <label class="mt-1">Employee out</label>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-sm-4 mt-3">
+        <div class="card dashcard danger border rounded-4 border-danger-subtle">
+
+            <div class="card-body approdashstat">
+                <div class="row align-items-center row-cols-2 row-cols-sm-2">
+                    <div class="col">
+
+                        <a href="/Admin/EmployeeInfo?type=permanent&date=@DateTime.Now.ToString("yyyy-MM-dd") ">
+                            <h2 class="text-normal">@onrolcount</h2>
+                            <label class="mt-1 text-normal">Permanent</label>
+                        </a>
+                    </div>
+                    <div class="col">
+
+                        <a href="/Admin/EmployeeInfo?type=provision&date=@DateTime.Now.ToString("yyyy-MM-dd") ">
+                            <h2>@contcount</h2>
+                            <label class="mt-1">Provisional</label>
+                        </a>
+                    </div>
+                    @*<div class="col">
+                            <a href="#">
+                                <h2>1</h2>
+                                <label class="mt-1">Unknown Users</label>
+                            </a>
+                        </div>*@
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-3 mt-3">
+        <div class="card dashcard danger border rounded-4 border-danger-subtle">
+
+            <div class="card-body approdashstat">
+                <div class="row align-items-center row-cols-2 row-cols-sm-2">
+                    <div class="col">
+
+                        <a href="#">
+                            <h2>@wfocount</h2>
+                            <label class="mt-1">Office Work</label>
+                        </a>
+                    </div>
+                    <div class="col">
+
+                        <a href="#">
+                            <h2>@wfhcount</h2>
+                            <label class="mt-1">Field Work</label>
+                        </a>
+                    </div>
+                    @*<div class="col">
+                            <a href="#">
+                                <h2>1</h2>
+                                <label class="mt-1">Unknown Users</label>
+                            </a>
+                        </div>*@
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="row mb-5"></div>
+
+
+
+

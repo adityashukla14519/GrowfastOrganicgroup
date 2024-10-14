@@ -1,0 +1,345 @@
+﻿
+@{
+    ViewBag.Title = "OrderInfo";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+
+@model List<Order>
+@using System.Globalization;
+@{ int count1 = 0;}
+<script>
+    $(document).ready(function () {
+        $('#tblattendance').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom'
+                }
+            ]
+        });
+
+
+    });
+</script>
+@using System.Data;
+@{ EncryptDecrypt ed = new EncryptDecrypt();}
+@{ DbManager db = new DbManager();}
+
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i> Order Info <i class="fa fa-angle-double-right"></i> @ViewBag.nm Order</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+
+<div class="row table table-responsive">
+    <table class="table table-responsive table-bordered" id="tblattendance">
+        <thead class="theadb text-center">
+            <tr>
+                <th class="text-center">Sn</th>
+                <th class="text-center">Order ID</th>
+                <th class="text-center">Customer Name</th>
+                @*<th class="text-center">Total_amount</th>*@
+
+                <th class="text-center">Product Name</th>
+                <th class="text-center">Product Price</th>
+                <th class="text-center">Datetime</th>
+                <th class="text-center">Driver Name</th>
+                @*<th class="text-center">Drivermobile</th>*@
+                <th class="text-center">Vehicle</th>
+                @*<th class="text-center">Vehicleid</th>*@
+                <th class="text-center">Transport Status</th>
+            </tr>
+        </thead>
+        <tbody class="text-center">
+            @foreach (var Order in Model)
+            {
+                count1++;
+            <tr>
+                <td>@count1</td>
+                <td>
+                    @Order.OrderID
+             
+                </td>
+                <td>
+                   
+                    <button data-bs-target="#cmpmdl" data-bs-toggle="modal" class="btn btn-success" onclick="getCmpdetail('@Order.CustomerID')" data-bs-cmpid=" @Order.CustomerID">@Order.Customer_name</button>
+                            </td>
+                @*<td>@Order.Total_amount</td>*@
+         
+            <td>
+            
+                <button data-bs-target="#productmdl" data-bs-toggle="modal" class="btn btn-success" onclick="getProductdetail('@Order.Product_id')" data-bs-productid=" @Order.Product_id">@Order.Product_name</button>
+                        </td>
+                <td>@Order.Product_price</td>
+                <td>@Order.Datetime.ToString("yyyy-MM-dd")</td>
+                       <td>
+                           <button data-bs-target="#drivermdl" data-bs-toggle="modal" class="btn btn-success" onclick="getDriverdetail('@Order.Driverid')" data-bs-driverid=" @Order.Driverid">@Order.Drivername</button>
+                </td>
+                @*<td>@Order.Drivermobile</td>*@
+            <td>
+                
+                <button data-bs-target="#vehiclemdl" data-bs-toggle="modal" class="btn btn-success" onclick="getVehicledetail('@Order.Vehicleid')" data-bs-Vehicleidid=" @Order.Vehicleid" >@Order.Vehiclename</button>
+                        </td>
+                <td>@Order.Transport_status</td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<div class="modal fade" id="vehiclemdl" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-5idden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header justify-content-center nevigationstrip">
+                <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Vehicle Info</h5>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped table-bordered">
+                    <tr>
+                        <td>   <span class="card-title"><b> Type </b></span></td>
+                        <td><span id="Vehicletype"></span></td>
+                        <td>     <span class="card-title"><b>Name  </b></span></td>
+                        <td><span id="Vehiclename"></span></td>
+                    </tr>
+                    <tr>
+                        <td> <span class="card-text"><b>Vehcle Number </b></span></td>
+                        <td><span id="Vehicleno"></span></td>
+                        <td>     <span class="card-text"><b>Color  </b></span></td>
+                        <td><span id="Color"></span></td>
+                    </tr>
+                </table>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="drivermdl" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-5idden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header justify-content-center nevigationstrip">
+                <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Driver Info</h5>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped table-bordered">
+                    <tr>
+                        <td>   <span class="card-title"><b> Name </b></span></td>
+                        <td><span id="DName"></span></td>
+                        <td>     <span class="card-title"><b>Mobile Number  </b></span></td>
+                        <td><span id="Mobile_no"></span></td>
+                    </tr>
+                    <tr>
+                        <td> <span class="card-text"><b>Email </b></span></td>
+                        <td><span id="DEmail"></span></td>
+                        <td>     <span class="card-text"><b>Department  </b></span></td>
+                        <td><span id="Department_name"></span></td>
+                    </tr>
+                    <tr>
+                        <td> <span class="card-text"><b>Address </b></span></td>
+                        <td><span id="DAddress"></span></td>
+                        <td>     <span class="card-text"><b>Branchname  </b></span></td>
+                        <td><span id="Branchname"></span></td>
+                    </tr>
+                </table>
+            
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="productmdl" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-5idden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header justify-content-center nevigationstrip">
+                <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Product Info</h5>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped table-bordered">
+                    <tr>
+                        <td>   <span class="card-title"><b> Name </b></span></td>
+                        <td><span id="PName"></span></td>
+                        <td>     <span class="card-title"><b>Price  </b></span></td>
+                        <td><span id="Price"></span></td>
+                    </tr>
+                    <tr>
+                        <td> <span class="card-text"><b>Discount </b></span></td>
+                        <td><span id="Discount"></span></td>
+                        <td>     <span class="card-text"><b>Ptype  </b></span></td>
+                        <td><span id="Ptype"></span></td>
+                    </tr>
+                </table>
+                @*<div class="col dv" style="margin-bottom:5px;">
+                        <div class="card card1">
+
+                            <div class="card-body">
+                             <br />
+                           <br />
+                               <br />
+                           <br />
+                                <span class="card-text"><b>Attachment : </b><span id="Attachment"></span></span><br />
+
+                            </div>
+                        </div>
+                    </div>*@
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cmpmdl" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-5idden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header justify-content-center nevigationstrip">
+                <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Customer Info</h5>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped table-bordered">
+                    <tr>
+                        <td>   <span class="card-title"><b> Name </b></span></td>
+                        <td><span id="Name"></span></td>
+                        <td>     <span class="card-title"><b>Mobile  </b></span></td>
+                        <td><span id="Mobile"></span></td>
+                    </tr>
+                    <tr>
+                        <td> <span class="card-text"><b>Email </b></span></td>
+                        <td><span id="Email"></span></td>
+                        <td>     <span class="card-text"><b>Address  </b></span></td>
+                        <td><span id="Address"></span></td>
+                    </tr>
+                </table>
+                @*<div class="col dv" style="margin-bottom:5px;">
+                        <div class="card card1">
+
+                            <div class="card-body">
+                             <br />
+                           <br />
+                               <br />
+                           <br />
+                                <span class="card-text"><b>Attachment : </b><span id="Attachment"></span></span><br />
+
+                            </div>
+                        </div>
+                    </div>*@
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+<script>
+
+    function getCmpdetail(Cmpid) {
+   /*     alert(Cmpid)*/
+        $.ajax({
+            url: '/Admin/getcustomerdetails',
+            type: "GET",
+            dataType: "JSON",
+            data: { Cmpid: Cmpid },
+            success: function (data) {
+                var jsonArray = JSON.parse(data);
+                $("#Name").text(jsonArray[0]["Name"]);
+                $("#Mobile").text(jsonArray[0]["Mobile"]);
+                $("#Email").text(jsonArray[0]["Email"]);
+                $("#Address").text(jsonArray[0]["Address"]);
+        
+            }
+        });
+    }
+</script>
+<script>
+
+    function getProductdetail(productid) {
+     /*   alert(productid)*/
+        $.ajax({
+            url: '/Admin/getproductdetails',
+            type: "GET",
+            dataType: "JSON",
+            data: { productid: productid },
+            success: function (data) {
+                var jsonArray = JSON.parse(data);
+                $("#PName").text(jsonArray[0]["Name"]);
+                $("#Price").text(jsonArray[0]["Price"]);
+                $("#Discount").text(jsonArray[0]["Discount"]);
+                $("#Ptype").text(jsonArray[0]["Ptype"]);
+
+            }
+        });
+    }
+</script>
+<script>
+
+    function getDriverdetail(driverid) {
+      /*  alert(driverid)*/
+        $.ajax({
+            url: '/Admin/getdriverdetails',
+            type: "GET",
+            dataType: "JSON",
+            data: { driverid: driverid },
+            success: function (data) {
+                var jsonArray = JSON.parse(data);
+                $("#DName").text(jsonArray[0]["Name"]);
+                $("#Mobile_no").text(jsonArray[0]["Mobile_no"]);
+                $("#DEmail").text(jsonArray[0]["Email"]);
+                $("#Department_name").text(jsonArray[0]["Department_name"]);
+                $("#DAddress").text(jsonArray[0]["Address"]);
+                $("#Branchname").text(jsonArray[0]["Branchname"]);
+            }
+        });
+    }
+</script>
+<script>
+
+    function getVehicledetail(Vehicleid) {
+        //alert(Vehicleid)
+        $.ajax({
+            url: '/Admin/getvehicledetails',
+            type: "GET",
+            dataType: "JSON",
+            data: { Vehicleid: Vehicleid },
+            success: function (data) {
+                var jsonArray = JSON.parse(data);
+                $("#Vehicletype").text(jsonArray[0]["Vehicletype"]);
+                $("#Vehiclename").text(jsonArray[0]["Vehiclename"]);
+                $("#Vehicleno").text(jsonArray[0]["Vehicleno"]);
+                $("#Color").text(jsonArray[0]["Color"]);
+            }
+        });
+    }
+</script>

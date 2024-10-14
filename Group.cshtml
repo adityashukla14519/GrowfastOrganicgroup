@@ -1,0 +1,1131 @@
+﻿
+@{
+    ViewBag.Title = "Group";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+
+
+@using System.Data;
+@{
+    DbManager db = new DbManager();
+    Activitylog activitylog = new Activitylog();
+
+}
+<script>
+    $(document).ready(function () {
+        var year = $("#year");
+        var currentYear = (new Date()).getFullYear();
+        for (var i = 2023; i <= currentYear; i++) {
+            var option = $("<option />");
+            option.html(i);
+            option.val(i);
+            if (i === currentYear) {
+                option.prop("selected", true);
+            }
+            year.append(option);
+        }
+
+        var monthSelect = $('#month');
+        var currentMonth = new Date().getMonth() + 1; // JavaScript months are zero-based
+
+        // Loop through options to find and select the current month
+        monthSelect.find('option').each(function () {
+            if (parseInt($(this).val()) === currentMonth) {
+                $(this).prop('selected', true);
+                return false; // exit loop
+            }
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        var year = $("#year1");
+        var currentYear = (new Date()).getFullYear();
+        for (var i = 2023; i <= currentYear; i++) {
+            var option = $("<option />");
+            option.html(i);
+            option.val(i);
+            if (i === currentYear) {
+                option.prop("selected", true);
+            }
+            year.append(option);
+        }
+
+        var monthSelect = $('#month1');
+        var currentMonth = new Date().getMonth() + 1; // JavaScript months are zero-based
+
+        // Loop through options to find and select the current month
+        monthSelect.find('option').each(function () {
+            if (parseInt($(this).val()) === currentMonth) {
+                $(this).prop('selected', true);
+                return false; // exit loop
+            }
+        });
+    });
+</script>
+<script>
+    function statuschange(id, status, tdstatus) {
+        tdstatus = "#" + tdstatus;
+        $.ajax({
+            url: "/Admin/ORGStatuschangetive",
+            type: "Post",
+            dataType: "JSON",
+            data: { id: id, status: status, tblnm: 'tbl_zone' },
+            success: function (data) {
+                if (data == "Active") {
+                    $(tdstatus).empty();
+                    $(tdstatus).append('<i class="fa fa-check text-success"></i><span style="display:none">' + data + '</span>');
+
+                }
+                else {
+                    $(tdstatus).empty();
+
+                    $(tdstatus).append('<i class="fa fa-ban text-danger"></i><span style="display:none">' + data + '</span>');
+                }
+            },
+        });
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        var table = $('#tbldesignation').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                }
+            ]
+        });
+    });
+
+</script>
+<script>
+    var selectedothValues = [];
+    function Getid(up, month1, year1) {
+        //alert(up)
+        $.ajax({
+            url: '/Admin/UpdateGroup',
+            type: "GET",
+            dataType: "JSON",
+            data: { Up: up, Month: month1, Year: year1 },
+            success: function (data) {
+                var jsonArray = JSON.parse(data);
+                $("#tblotherresource").show();
+                //alert(jsonArray[0].Month)
+                $("#group").val(jsonArray[0].Groups);
+                $("#hid").val(jsonArray[0].Groupid);
+                $("#month").val(jsonArray[0].Month);
+                /* var newmonth = jsonArray[0].Month;*/
+                //var month = $("#month");
+
+                //if (month.val() != newmonth) {
+                //    month.val(newmonth).trigger('change');
+                //}
+
+                $("#year").val(jsonArray[0].Year);
+                //var newyear = jsonArray[0].Year;
+                //var year = $("#year");
+
+                //if (year.val() != newyear) {
+                //    year.val(newyear).trigger('change');
+                //}
+                $('#month').select2({
+                    dropdownParent: $('#Group')
+                });
+                $('#year').select2({
+                    dropdownParent: $('#Group')
+                });
+                $.each(jsonArray, function (index, item) {
+                    var membertype1 = "";
+                    if (item.Member_type == "Head") {
+                        membertype1 = item.Member_type;
+                    }
+                    else {
+                        membertype1 = item.Member_type + "" + item.Employee_rowid;
+                    }
+                    selectedothValues.push(membertype1);
+                    //alert(item.Employee_rowid)
+
+                    var newRow = "<tr>" +
+                        "<td>" +
+                        "" + item.Employee_rowid +
+                        "</td>" +
+                        "<td>" +
+                        "" + item.Member_type +
+                        "</td>" +
+                        "<td>" +
+                        "" + item.Employee_name +
+                        "</td>" +
+                        "<td>" +
+                        "" + item.Employee_id +
+                        "</td>" +
+                        /*"<td></td>  ";*/
+                        "<td><i class='fa fa-trash' style='color:red;cursor:pointer' onclick='removeRowexpense(this)'></i></td> "
+                    $("#table-other-body").append(newRow);
+
+                });
+            }
+        })
+    }
+
+    $(document).ready(function () {
+        $("#month,#year").change(function () {
+            var month = $("#month").val();
+            var year = $("#year").val();
+            var up = $("#hid").val();
+            var tbody = document.getElementById("table-other-body");
+            tbody.innerHTML = "";
+            $("#tblotherresource").hide();
+            selectedothValues = [];
+            $.ajax({
+                url: '/Admin/UpdateGroup',
+                type: "GET",
+                dataType: "JSON",
+                data: { Up: up, Month: month, Year: year },
+                success: function (data) {
+                    //alert(data)
+                    var jsonArray = JSON.parse(data);
+                    $("#tblotherresource").show();
+                    $("#group").val(jsonArray[0].Groups);
+                    $("#hid").val(jsonArray[0].Groupid);
+                    $("#month").val(jsonArray[0].Month);
+                    $("#year").val(jsonArray[0].Year);
+                    $.each(jsonArray, function (index, item) {
+                        var membertype1 = "";
+                        if (item.Member_type == "Head") {
+                            membertype1 = item.Member_type;
+                        }
+                        else {
+                            membertype1 = item.Member_type + "" + item.Employee_rowid;
+                        }
+                        selectedothValues.push(membertype1);
+                        //alert(item.Employee_rowid)
+
+                        var newRow = "<tr>" +
+                            "<td>" +
+                            "" + item.Employee_rowid +
+                            "</td>" +
+                            "<td>" +
+                            "" + item.Member_type +
+                            "</td>" +
+                            "<td>" +
+                            "" + item.Employee_name +
+                            "</td>" +
+                            "<td>" +
+                            "" + item.Employee_id +
+                            "</td>" +
+                            /*"<td></td>  ";*/
+                            "<td><i class='fa fa-trash' style='color:red;cursor:pointer' onclick='removeRowexpense(this)'></i></td> "
+                        $("#table-other-body").append(newRow);
+
+                    });
+                }
+            })
+
+        });
+    })
+</script>
+<script>
+    $(document).ready(function () {
+        $("#status").val("Active");
+        $("#status").addClass("readonly");
+        $("#status").prop("disabled", true);
+
+        $("#cancel").click(function () {
+            $("input[type='text'],.form-select,#hid,#status").val("");
+
+            var tbody = document.getElementById("table-other-body");
+            tbody.innerHTML = "";
+            $("#tblotherresource").hide();
+            selectedothValues = [];
+
+            $("#status").val("Active");
+            $("#status").addClass("readonly");
+            $("#status").prop("disabled", true);
+        })
+
+    var msg = '@ViewBag.msg';
+        if (msg) {
+            var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+                msg +
+                '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                '</div>';
+            $(alertElement).insertBefore('#alert-container');
+            setTimeout(function () {
+                $('#alert').alert('close');
+            }, 5000);
+        }
+});
+</script>
+<script>
+
+    $(document).ready(function () {
+        $("#membertype").change(function () {
+            var month = $("#month").val();
+            var year = $("#year").val();
+            var membertype = $("#membertype").val();
+            if (membertype == "Head") {
+                $.ajax({
+                    url: '/Admin/GetEmployee',
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { Desig: "GL_TL", pagename: "Group", Month: month, Year: year },
+                    success: function (data) {
+                        $("#employee").empty();
+                        $("#employee").append(data);
+
+                    }
+                })
+            }
+            else {
+                $.ajax({
+                    url: '/Admin/GetEmployee',
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { Desig: "SR_BE", pagename: "Group", Month: month, Year: year },
+                    success: function (data) {
+                        $("#employee").empty();
+                        $("#employee").append(data);
+
+                    }
+                })
+            }
+        })
+    })
+</script>
+<script>
+    $(document).ready(function () {
+        $("#employee").change(function () {
+            var employee = $("#employee").val();
+            $.ajax({
+                url: '/Admin/GetEmpdata',
+                type: "GET",
+                dataType: "JSON",
+                data: { Empid: employee },
+                success: function (data) {
+                    //alert(data)
+                    $("#employeename").val(data[2]);
+                    $("#employeeid").val(data[0]);
+
+                }
+            })
+
+        })
+    })
+</script>
+<script>
+    $(document).ready(function () {
+        $("#reportfor").change(function () {
+            var month = $("#month1").val();
+            var year = $("#year1").val();
+            var reportfor = $("#reportfor").val();
+            $.ajax({
+                url: "/Admin/GetSalesORG",
+                type: "Get",
+                data: { Type: reportfor, Month: month, Year: year },
+                success: function (response) {
+                    $("#orglist").empty();
+                    $("#orglist").append(response);
+
+                }
+            })
+
+        });
+
+        $("#orglist,#month1,#year1").change(function () {
+            var orglist = $("#orglist").val();
+            var reportfor = $("#reportfor").val();
+            var month = $("#month1").val();
+            var year = $("#year1").val();
+            $.ajax({
+                url: "/Admin/GetOrgPageDetails",
+                type: "Get",
+                data: { Type: reportfor, OrgId: orglist, Pagename: 'Group', Month: month, Year: year },
+                success: function (response) {
+                    //alert(response);
+                    var jsonArray = "";
+                    if (response != "") {
+                        jsonArray = JSON.parse(response);
+                        //alert(jsonArray)
+                    }
+                    var table = $('#tbldesignation').DataTable();
+                    table.clear().draw();
+                    $.each(jsonArray, function (index, item) {
+                        //alert(item.Groupid);
+                        var data1 = "";
+                        $.ajax({
+                            url: "/Admin/UpdateGroup",
+                            type: "Get",
+                            data: { Up: item.Groupid, Month: item.Month, Year: item.Year },
+                            success: function (response1) {
+                                //alert(response1);
+                                data1 += "<table class='table table-responsive'>";
+                                data1 += "<thead class='theadb text-center'>";
+                                data1 += "<tr><th>Member Type</th><th>Employee id</th><th>Employee name</th><th>Action</th></tr>";
+                                data1 += "</thead>";
+                                data1 += "<tbody>";
+                                //alert(response1)
+                                var jsonArray1 = JSON.parse(response1);
+                                $.each(jsonArray1, function (index, item1) {
+                                    data1 += "<tr>";
+                                    if (item1.Member_type == "Head") {
+                                        data1 += "<td>" + item1.Member_type + " (GL/TL)</td>";
+                                    }
+                                    else {
+
+                                        data1 += "<td>" + item1.Member_type + " (SR/BE)</td>";
+                                    }
+
+                                    data1 += "<td>" + item1.Employee_id + "</td>";
+                                    data1 += "<td>" + item1.Employee_name + "</td>";
+                                    if (jsonArray1.length > 1) {
+                                        data1 += "<td><button class='btn btncolorblue' onclick='DeleteORG(" + item1.Id + ")'><i class='fa fa-trash'></i></button></td>";
+                                    }
+                                    else {
+                                        data1 += "<td></td>";
+                                    }
+
+                                    data1 += "</tr>";
+                                })
+
+                                data1 += "</tbody>";
+                                data1 += "</table>";
+
+
+                                var status = "";
+                                if (item.Status == "Active") {
+
+                                    status = "<i class='fa fa-check text-success'></i>";
+
+                                }
+                                else {
+                                    status = "<i class='fa fa-check text-danger'></i>";
+
+                                }
+
+                                table.row.add([
+                                    index + 1,
+                                    item.Month + "-" + item.Year,
+                                    item.Groupid,
+                                    item.Groups,
+                                    data1,
+                                    status,
+                                    "<button class='btn btncolorblue' onclick=\"Getid('" + item.Groupid + "','" + item.Month + "','" + item.Year + "')\" data-bs-toggle='modal' data-bs-target='#Group'><i class='fa fa-edit'></i></button><button class='btn btncolorblue' onclick=\"DeleteORGall('" + item.Groupid + "','" + item.Month + "','" + item.Year + "')\" data-bs-toggle='modal' data-bs-target='#Group'><i class='fa fa-trash'></i></button>"
+                                ]).draw(false);
+                            }
+                        })
+                        //alert(data1)
+
+                    })
+                }
+            })
+
+        });
+
+    })
+</script>
+
+<script>
+    function DeleteanyORG(id, Tablename) {
+        $.ajax({
+            url: '/Admin/DeleteanyORG',
+            type: "GET",
+            dataType: "JSON",
+            data: { Up: id, tablename: Tablename },
+            success: function (data) {
+                //alert(data)
+                location.reload();
+            }
+        })
+    }
+    function DeleteORG(id) {
+        let text = "Are you sure you want to delete?";
+        Swal.fire({
+            title: "Confirmation",
+            text: text,
+            /* icon: "warning",*/
+            showCancelButton: true,
+            confirmButtonColor: "#009846",
+            confirmButtonText: " Yes ",
+            cancelButtonColor: "#00A0E3",
+            cancelButtonText: " No ",
+            allowOutsideClick: false,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                DeleteanyORG(id, 'tbl_group');
+            }
+        });
+    }
+</script>
+
+<script>
+    function DeleteanyORGall(id, pagename,month,year) {
+        $.ajax({
+            url: '/Admin/DeleteanyAllORG',
+            type: "GET",
+            dataType: "JSON",
+            data: { Up: id, pagename: pagename, Month: month, Year: year },
+            success: function (data) {
+                //alert(data)
+                location.reload();
+            }
+        })
+    }
+    function DeleteORGall(id,month,year) {
+        let text = "Are you sure you want to delete?";
+        Swal.fire({
+            title: "Confirmation",
+            text: text,
+            /* icon: "warning",*/
+            showCancelButton: true,
+            confirmButtonColor: "#009846",
+            confirmButtonText: " Yes ",
+            cancelButtonColor: "#00A0E3",
+            cancelButtonText: " No ",
+            allowOutsideClick: false,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                DeleteanyORGall(id, 'Group',month,year);
+            }
+        });
+    }
+</script>
+
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i>  Group</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+<div class="row mt-3 mb-3 row-cols-3 row-cols-sm-6">
+
+    <div class="col">
+        <label for="exampleDataList" class="form-label">Group Of</label><br />
+        <select class="form-control shadow-none mt-1" id="reportfor" name="reportfor">
+            <option selected value="">Select One</option>
+            <option value="Company">Company</option>
+            <option value="Zone">Zone</option>
+            <option value="Region">Region</option>
+            <option value="Division">Division</option>
+            <option value="Branch">Branch</option>
+            <option value="Team">Team</option>
+            <option value="Group">Group</option>
+        </select>
+    </div>
+
+    <div class="col">
+        <label>Name</label><br />
+        <select class="form-control shadow-none mt-1" id="orglist" name="orglist">
+            <option value="" selected>Select One</option>
+
+        </select>
+    </div>
+    <div class="col mb-3">
+        <label for="exampleDataList" class="form-label">Month</label><br />
+        <select class="form-control shadow-none mt-1" id="month1" name="month1">
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+        </select>
+
+    </div>
+    <div class="col mb-3">
+        <label for="exampleDataList" class="form-label">Year</label><br />
+        <select class="form-control shadow-none mt-1" id="year1" name="year1">
+        </select>
+    </div>
+    <div class="col justify-content-end d-flex pt-4" style="width:150px">
+
+        @*<button class="btn btncolor mt-2" id="search" style="height:30px;width:100px">Search</button>*@
+    </div>
+</div>
+
+<div class="row mt-2 mb-3 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <button type="button" class="btn btncolor btn-sm" data-bs-toggle="modal" data-bs-target="#Group">
+            <i class="fa fa-plus" aria-hidden="true"></i> New
+        </button>
+    </div>
+</div>
+
+
+
+@{
+    try
+    {
+        string query = "Select Distinct Groupid,Groups,Status,Month,Year from tbl_group where Status='Active' and Month_Year='" + DateTime.Now.ToString("M-yyyy") + "' group by Groupid,Groups,Status,Month,Year";
+        activitylog.Activitylogins("tbl_group", "", query, "Failed", "", Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        DataTable dt = db.GetAllRecord(query);
+        activitylog.Activitylogupd("Success", "");
+        int count = 1;
+        <div class="row table table-responsive">
+            <table class="table table-responsive table-bordered" id="tbldesignation">
+                <thead class="theadb text-l text-center">
+                    <tr>
+                        <th class="text-center">Id</th>
+                        <th class="text-center">Month-Year</th>
+                        <th class="text-center">Group id</th>
+                        <th class="text-center">Group Name</th>
+                        <th class="text-center">Members</th>
+                        <th class="text-center">Status</th>
+                        @*<th class="text-center">Active/Inactive</th>*@
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                    @if (dt.Rows.Count > 0)
+                    {
+
+                        for (int i = 0; i < dt.Rows.Count; i++)
+                        {
+                            DataTable cdt = db.GetAllRecord("Select * from tbl_group where Status='Active' and Groupid='" + dt.Rows[i]["Groupid"] + "' and Month_Year='" + DateTime.Now.ToString("M-yyyy") + "' and Month_Year='" + DateTime.Now.ToString("M-yyyy") + "' order by Member_type asc");
+                            <tr>
+                                <td>@(count+i)</td>
+                                <td>@dt.Rows[i]["Month"]-@dt.Rows[i]["Year"]</td>
+                                <td>@dt.Rows[i]["Groupid"]</td>
+                                <td>@dt.Rows[i]["Groups"]</td>
+
+                                <td>
+                                    <table class="table table-responsive">
+                                        <thead class="theadb text-center">
+                                            <tr>
+                                                <th>Member Type</th>
+                                                <th>Employee id</th>
+                                                <th>Employee name</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (cdt.Rows.Count > 0)
+                                            {
+                                                for (int j = 0; j < cdt.Rows.Count; j++)
+                                                {
+                                                    <tr>
+                                                        @if (@cdt.Rows[j]["Member_type"] + "" == "Head")
+                                                        {
+                                                            <td>@cdt.Rows[j]["Member_type"] (GL/TL)</td>
+                                                        }
+                                                        else
+                                                        {
+
+                                                            <td>@cdt.Rows[j]["Member_type"] (SR/BE)</td>
+                                                        }
+
+                                                        <td>@cdt.Rows[j]["Employee_id"]</td>
+                                                        <td>@cdt.Rows[j]["Employee_name"]</td>
+                                                        @if (cdt.Rows.Count > 1)
+                                                        {
+                                                            <td><button class="btn btncolorblue" onclick="DeleteORG('@cdt.Rows[j]["Id"]')"><i class="fa fa-trash"></i></button></td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td></td>
+                                                        }
+
+                                                    </tr>
+                                                }
+                                            }
+
+
+                                        </tbody>
+                                    </table>
+                                </td>
+                                @if (@dt.Rows[i]["Status"] + "" == "Active")
+                                {
+
+                                    <td id="tdi_@dt.Rows[i]["Groupid"]"><i class="fa fa-check text-success"></i><span style="display:none">@dt.Rows[i]["Status"]</span></td>
+                                    @*<td>
+                                            <input type="checkbox" checked data-toggle="toggle" data-on="Active" data-off="Inactive" onchange="statuschange('@dt.Rows[i]["Groupid"]','Inactive','tdi_@dt.Rows[i]["Groupid"]')" style="font-size:7px;padding:1px">
+                                        </td>*@
+
+                                }
+                                else
+                                {
+
+                                    <td id="tda_@dt.Rows[i]["Groupid"]"><i class="fa fa-ban text-danger"></i><span style="display:none">@dt.Rows[i]["Status"]</span></td>
+                                    @*<td>
+                                            <input type="checkbox" data-toggle="toggle" data-on="Active" data-off="Inactive" onchange="statuschange('@dt.Rows[i]["Groupid"]','Active','tda_@dt.Rows[i]["Groupid"]')" style="font-size:7px;padding:1px">
+                                        </td>*@
+                                }
+                                <td><button class="btn btncolorblue" onclick="Getid('@dt.Rows[i]["Groupid"]','@dt.Rows[i]["Month"]','@dt.Rows[i]["Year"]')" data-bs-toggle="modal" data-bs-target="#Group"><i class="fa fa-edit"></i></button> 
+                                    <button class="btn btncolorblue" onclick="DeleteORGall('@dt.Rows[i]["Groupid"]','@dt.Rows[i]["Month"]','@dt.Rows[i]["Year"]')"><i class="fa fa-trash"></i></button></td>
+
+                            </tr>
+                        }
+
+                    }
+                    @*else
+                            {
+                            < div class='row justify-content-center d-flex m-5' id='datanotdound'>
+                                <img src = '~/Content/Img/nodata1.png' style="height:50%;width:50%" />
+                            </div>
+                        }*@
+                </tbody>
+            </table>
+        </div>
+    }
+
+    catch (Exception ex)
+    {
+        try
+        {
+            Error_15_16 error_15_16 = new Error_15_16();
+            string pageUrl = "", moduleName = "", errorLine = "", errorMessage = "", errorName = "", errorTrace = "";
+            // Get the page URL, if available
+            pageUrl = System.Web.HttpContext.Current.Request.Url.AbsoluteUri;
+            // Get the module name
+            moduleName = ex.TargetSite.Module.Name;
+            // Get the error line number, if available
+            var stackTrace = ex.StackTrace;
+            if (!string.IsNullOrEmpty(stackTrace))
+            {
+                var lineNumberIndex = stackTrace.LastIndexOf(":line ");
+                if (lineNumberIndex >= 0)
+                {
+                    var lineNumber = stackTrace.Substring(lineNumberIndex + 6);
+                    var newLineIndex = lineNumber.IndexOf(Environment.NewLine);
+                    if (newLineIndex >= 0)
+                    {
+                        errorLine = lineNumber.Substring(0, newLineIndex);
+                    }
+                    else
+                    {
+                        errorLine = lineNumber;
+                    }
+                }
+            }
+            // Get the error message and name
+            if (ex.Message.ToString().Length >= 1000)
+            {
+                errorMessage = ex.Message.Substring(1, 500);
+            }
+            else
+            {
+                errorMessage = ex.Message;
+            }
+            errorName = ex.GetType().FullName;
+            // Get the error trace
+            errorTrace = ex.StackTrace;
+            error_15_16.Error_15_16ins(pageUrl, moduleName, errorLine, errorMessage.Replace("'", "`"), errorName.Replace("'", "`"), errorTrace.Replace("'", "`"), Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        }
+
+        catch
+        {
+
+        }
+    }
+    finally
+    {
+        db.connectionstate();
+    }
+
+}
+
+
+<script>
+    $(document).ready(function () {
+        $("#tblotherresource").hide();
+        $("#add-other-res").click(function () {
+            // alert("ok");
+            var membertype = $("#membertype").val();
+            var employee = $("#employee").val();
+            var employeename = $("#employeename").val();
+            var employeeid = $("#employeeid").val();
+            //alert(employeename)
+            if (membertype == null || membertype == "") {
+                spotherresource.innerHTML = "Warning : Please Select membertype";
+                spotherresource.style.color = "Red";
+
+            }
+            else if (employee == null || employee == "") {
+                spotherresource.innerHTML = "Warning : Please Select employee ";
+                spotherresource.style.color = "Red";
+
+            }
+            else {
+
+                if (membertype == "Head") {
+                    membertype1 = membertype;
+                }
+                else {
+                    membertype1 = membertype + "" + employee;
+                }
+                //alert(membertype1)
+                if (selectedothValues.includes(membertype1)) {
+                    // Reset the dropdown value
+                    spotherresource.innerHTML = "Warning : This option has already been selected. Please choose a different option.";
+                    spotherresource.style.color = "Red";
+                }
+                else {
+                    // Add the selected option to the array of selected values
+                    selectedothValues.push(membertype1);
+
+                    spotherresource.innerHTML = "";
+                    $("#tblotherresource").show();
+
+                    var newRow = "<tr>" +
+                        "<td>" +
+                        "" + employee +
+                        "</td>" +
+                        "<td>" +
+                        "" + membertype +
+                        "</td>" +
+                        "<td>" +
+                        "" + employeename +
+                        "</td>" +
+                        "<td>" +
+                        "" + employeeid +
+                        "</td>" +
+                        "<td><i class='fa fa-trash' style='color:red;cursor:pointer' onclick='removeRowexpense(this)'></i></td> ";
+                    $("#table-other-body").append(newRow);
+
+                }
+            }
+        })
+    })
+</script>
+<script>
+
+    function removeRowexpense(element) {
+
+        var selectedOption = "";
+        var row = element.parentNode.parentNode;
+        var selectedOption1 = row.querySelector('td:nth-child(1)').innerText;
+        var selectedOption2 = row.querySelector('td:nth-child(2)').innerText;
+        if (selectedOption2 == "Head") {
+            selectedOption = selectedOption2
+        }
+        else {
+            var selectedOption = selectedOption2 + "" + selectedOption1;
+        }
+
+        var index = selectedothValues.indexOf(selectedOption);
+        selectedothValues.splice(index, 1);
+        row.parentNode.removeChild(row);
+
+    }
+</script>
+
+<script>
+    $(document).ready(function () {
+        // Your document ready function code here
+        $('#month').select2({
+            dropdownParent: $('#Group')
+        });
+        $('#year').select2({
+            dropdownParent: $('#Group')
+        });
+        $('#employee').select2({
+            dropdownParent: $('#Group')
+        });
+        $('#reportfor').select2({
+        });
+        $('#orglist').select2({
+        });
+        $('#month1').select2({
+        });
+        $('#year1').select2({
+        });
+    });
+</script>
+
+<!-- Modal Group-->
+<div class="modal fade" id="Group" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <form action="/Admin/Group" method="post" class="needs-validation" novalidate>
+
+                <div class="modal-header justify-content-center nevigationstrip">
+                    <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Group Info</h5>
+                </div>
+                <div class="modal-body">
+                    <span id="spotherresource"></span>
+                    <div id="alert-container1"></div>
+                    <div class="row row-cols-1 row-cols-sm-3">
+                        <div class="col mb-3">
+                            <input type="hidden" id="hid" name="hid" />
+                            <h6 class="mt-2">Group Name</h6>
+                            <input type="text" class="form-control shadow-none" name="group" maxlength="50" id="group" required onkeyup="validateTextbox(this)" pattern="^[a-zA-Z ]*$" title="Please enter only letters, and spaces" />
+                            <div class="invalid-feedback">
+                                Please enter only letters, and spaces
+                            </div>
+                        </div>
+                        <div class="col mb-3 pt-2">
+                            <label for="exampleDataList" class="form-label">Month</label><br />
+                            <select class="form-control shadow-none mt-1" id="month" name="month">
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                            <input type="hidden" id="empid" name="empid" />
+                            <input type="hidden" id="desig" name="desig" />
+                            <input type="hidden" id="depart" name="depart" />
+                            <input type="hidden" id="managernm" name="managernm" />
+                        </div>
+                        <div class="col mb-3 pt-2">
+                            <label for="exampleDataList" class="form-label">Year</label><br />
+                            <select class="form-control shadow-none mt-1" id="year" name="year">
+                            </select>
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Member Type</h6>
+                            <select class="form-select shadow-none" id="membertype" name="membertype" required>
+                                <option selected disabled value="">Select one</option>
+                                <option>Head</option>
+                                <option>Member</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a valid status.
+                            </div>
+                        </div>
+                        <div class="col mb-4">
+                            <h6 class="mt-2">Employee</h6>
+                            <select class="form-control shadow-none" id="employee" name="employee" required>
+                                <option selected disabled value="">Select</option>
+                            </select>
+                            <input type="hidden" name="employeeid" id="employeeid" />
+                            <input type="hidden" name="employeename" id="employeename" />
+                        </div>
+                        <div class="col mb-2 text-end">
+                            <button type="button" class="btn btn-primary" style="margin-top:38px"><i class="fa fa-plus" id="add-other-res"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="row row-cols-1 row-cols-sm-1">
+                        <div class="col">
+                            <div class="col-sm-12">
+                                <table class="table table-responsive" id="tblotherresource">
+                                    <thead class="thead">
+                                        <tr>
+                                            <th @*style="display:none"*@>Id</th>
+                                            <th>Member_Type</th>
+                                            <th>Employee_Name</th>
+                                            <th @*style="display:none"*@>Employee_id</th>
+                                            <th>Delete</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-other-body">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+                    <button type="button" class="btn btncolor" id="btnsub"><i class="fa fa-check"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<script>
+    $(document).ready(function () {
+        $("#btnsub").click(function () {
+            var hid = $("#hid").val();
+            var group = $("#group").val();
+            var month = $("#month").val();
+            var year = $("#year").val();
+            //alert(pron);
+            var rowCount = $("#tblotherresource tr").length;
+            //alert(rowCount);
+            if (group == null || group == "") {
+                spotherresource.innerHTML = "Warning : Please Enter group Name";
+                spotherresource.style.color = "Red";
+            } else if (rowCount > 1) {
+                // Hide the last two columns
+                var restable = $("#tblotherresource").DataTable();
+                var rowCount = restable.rows().count();
+                //alert(rowCount);
+                //remove last two rows start
+
+                //var resLastColumnIndex = restable.columns().count() - 1;
+                //var resSecondLastColumnIndex = restable.columns().count() - 2;
+                //restable.columns([resLastColumnIndex]).visible(false);
+                ////restable.columns([resLastColumnIndex, resSecondLastColumnIndex]).visible(false);
+
+                //// Get the table data as an array of objects
+                //var restableData = restable.rows().data().toArray();
+                //// Iterate over each row and remove the last two columns
+                //restableData.forEach(function (row) {
+                //    row.pop(); // Remove the last column
+                //    row.pop(); // Remove the second-last column
+                //});
+                //remove last one row end
+                //remove last one row start
+                var resLastColumnIndex = restable.columns().count() - 1;
+
+                restable.columns([resLastColumnIndex]).visible(false);
+
+                var restableData = restable.rows().data().toArray();
+                //alert("ok")
+                // Iterate over each row and remove the last column
+                restableData.forEach(function (row) {
+                    row.pop(); // Remove the last column
+                });
+                //remove last one row end
+                // Get the table headings as an array of strings, excluding the last two columns
+                var restableHeadings = restable.columns().header().toArray().map(function (heading) {
+                    return heading.textContent;
+                }).slice(0, -1); // This slices the array to exclude the last two elements
+
+                //alert(restableHeadings)
+                // Create an object to hold the table data and headings
+                var restableObject = {
+                    tableHeadings: restableHeadings,
+                    tableData: restableData
+                };
+                //alert(restableHeadings)
+                //alert(restableData)
+                //alert(restableObject)
+                // Other resource table end
+                var formData = new FormData();
+                formData.append("restableObject", JSON.stringify(restableObject));
+                formData.append("hid", hid);
+                formData.append("group", group);
+                formData.append("Month", month);
+                formData.append("Year", year);
+
+                // Send the table object to the controller using AJAX
+                $.ajax({
+                    url: '/Admin/Group',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false, // Set contentType to false for FormData
+                    processData: false, // Set processData to false for FormData
+                    success: function (response) {
+                        //$("#Group").modal("hide");
+                        //alert(response)
+                        if (response) {
+                            var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+                                response +
+                                '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                                '</div>';
+                            $(alertElement).insertBefore('#alert-container1');
+                            setTimeout(function () {
+                                $('#alert').alert('close');
+                            }, 1000);
+
+                            $('.alert').on('closed.bs.alert', function () {
+                                window.location.href = '/Admin/Group';
+                            });
+                            //$('#btnclose').on('click', function () {
+                            //    window.location.href = '/Admin/ProductName';
+                            //});
+                        }
+                        // Handle the response from the controller if needed
+                        //alert(response);
+
+                        //window.location.reload;
+
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle any error that occurs during the AJAX request
+                        //alert(error);
+                    }
+                });
+            } else {
+                spotherresource.innerHTML = "Warning : Please Select At Least One Member or Head";
+                spotherresource.style.color = "Red";
+            }
+        });
+    });
+</script>
+
+
+
+
+@*<div class="row">
+    <div class="col-3">
+        <button type="button" class="btn btncolor btn-sm" id="copyorg">
+            COPY ORG
+        </button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#copyorg").click(function () {
+            $.ajax({
+                url: "/Admin/CopyORG",
+                type: "Get",
+                data: { Page: "Group" },
+                success: function (response) {
+                    location.reload(true);
+                }
+            })
+
+        });
+    })
+</script>*@
+
+
+
+
+
+
+
+

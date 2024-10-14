@@ -1,0 +1,2676 @@
+﻿
+@{
+    ViewBag.Title = "salerentry";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+<style>
+    .p-2 {
+        border: 2px solid black;
+        margin-bottom: 10px
+    }
+</style>
+<style>
+    th {
+        text-transform: uppercase;
+    }
+
+    .dotted {
+        border-right: 1px dashed #000000;
+    }
+
+    .btn-outline-info.p-1.m-0.rounded-1 {
+        font-size: 13px !important;
+    }
+
+    button {
+        padding: 5px !important;
+        font-size: 12px !important;
+    }
+
+    body {
+        font-size: 13px;
+    }
+
+    .dropicon {
+        font-size: 12px;
+        font-weight: bold;
+        margin-bottom: 5px
+    }
+
+    label {
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 5px
+    }
+
+    main {
+        font-size: 12px;
+    }
+
+    .form-control {
+        font-size: 15px;
+    }
+
+    a {
+        text-decoration: none;
+        /* color: #FFF383 !important;*/
+    }
+
+    colps:hover {
+        color: #54B4D3 !important;
+    }
+
+    .list-unstyled li a {
+        text-decoration: none;
+        color: #FFF383 !important;
+    }
+
+        .list-unstyled li a:hover {
+            text-decoration: none;
+            color: #54B4D3 !important;
+        }
+
+    .nav-item.nav-link a {
+        color: #FFF383 !important;
+    }
+
+    .form-control {
+        box-shadow: none;
+    }
+
+    .modal-body {
+        max-height: calc(100vh - 200px); /* adjust the value as needed */
+        overflow-y: auto;
+    }
+
+    #btnpro .profile {
+        visibility: hidden;
+        width: 60px;
+        background-color: #54B4D3;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 0;
+        /* Position the tooltip */
+        position: absolute;
+        z-index: 1;
+        top: 50px;
+        right: 2%;
+    }
+
+    #btnpro:hover .profile {
+        visibility: visible;
+    }
+
+    #btsignout .signout {
+        visibility: hidden;
+        width: 60px;
+        background-color: #54B4D3;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 0;
+        /* Position the tooltip */
+        position: absolute;
+        z-index: 1;
+        top: 50px;
+        right: 2%;
+    }
+
+    .offcanvas .offcanvas-body .nav-item .nav-link {
+        color: #FFF383 !important;
+    }
+
+        .offcanvas .offcanvas-body .nav-item .nav-link :hover {
+            color: #54B4D3 !important;
+        }
+
+    #btsignout:hover .signout {
+        visibility: visible;
+    }
+
+    #logoimg {
+        height: 50px;
+        width: 60%;
+    }
+
+    .theadb {
+        background-color: #00A0E3 !important;
+        color: white !important;
+    }
+    /* Readonly field background color change*/
+    .readonly {
+        background-color: #e4e1e1; /* Default background color for required fields */
+    }
+
+        .readonly:invalid {
+            background-color: #e4e1e1; /* Background color for invalid required fields */
+        }
+
+        .readonly:focus {
+            background-color: #e4e1e1; /* Reset the background color when focused */
+        }
+
+    .sidebar-transition {
+        transition: width 0.3s ease-in-out; /* Adjust the duration and easing as needed */
+    }
+</style>
+
+<script>
+    let startTime;
+    let timerInterval;
+
+    // Function to start the stopwatch
+    function startStopwatch() {
+        startTime = new Date().getTime();
+        timerInterval = setInterval(updateStopwatch, 10); // Update every 10 milliseconds
+    }
+
+    // Function to update and display the stopwatch time
+    function updateStopwatch() {
+        const currentTime = new Date().getTime();
+        const elapsedTime = currentTime - startTime;
+        displayTime(elapsedTime);
+    }
+
+    // Function to format and display the time with two digits for each unit
+    function displayTime(elapsedTime) {
+        const milliseconds = Math.floor(elapsedTime % 1000);
+        const seconds = Math.floor((elapsedTime / 1000) % 60);
+        const minutes = Math.floor((elapsedTime / (1000 * 60)) % 60);
+        const hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+
+        // Ensure two digits for each unit with leading zeros
+        const timeDisplay = `${padWithZero(hours)}:${padWithZero(minutes)}:${padWithZero(seconds)}`;
+        $("#stopwatch").text(timeDisplay);
+        $("#stopwatchinp").val(timeDisplay);
+    }
+
+    // Function to pad a number with leading zeros to reach a certain length
+    function padWithZero(num, length = 2) {
+        const numString = num.toString();
+        return numString.length >= length ? numString : '0'.repeat(length - numString.length) + numString;
+    }
+
+    // Start the stopwatch when the page loads
+    window.onload = startStopwatch;
+</script>
+
+<!-- Dknocks script-->
+<script>
+    function FindUser(mobile, spmsg) {
+        var mobid = "#" + mobile;
+        var mobileinp = $(mobid).val();
+        const mobileLength = mobileinp.length;
+        //alert(mobileLength)
+        $(".BSA").show();
+        $("#btn_dknocks").show();
+        if (mobileLength > 2) {
+            $.ajax({
+                url: "/Home/GetCustomer",
+                type: "GET",
+                dataType: "JSON",
+                data: { Mobile: mobileinp },
+                success: function (data) {
+                    //alert(data);
+                    var spid = "#" + spmsg;
+                    //alert(spid)
+                    $("#name").val("");
+                    $("#email").val("");
+                    $("#pincode").val("");
+                    $("#Statename").val("");
+                    $("#Cityname").val("");
+                    $("#block").val("");
+                    $("#tahsil").val("");
+                    $("#address").val("");
+                    $("#customerid").val("");
+                    $("#leadid").val("");
+                    $("#name").attr("readonly", false);
+                    $("#email").attr("readonly", false);
+                    $("#pincode").attr("readonly", false);
+                    $("#Statename").attr("readonly", false);
+                    $("#Cityname").attr("readonly", false);
+                    $("#block").attr("readonly", false);
+                    $("#tahsil").attr("readonly", false);
+                    $("#address").attr("readonly", false);
+
+                    $("#name").removeClass("readonly");
+                    $("#email").removeClass("readonly");
+                    $("#pincode").removeClass("readonly");
+                    $("#Statename").removeClass("readonly");
+                    $("#Cityname").removeClass("readonly");
+                    $("#block").removeClass("readonly");
+                    $("#tahsil").removeClass("readonly");
+                    $("#address").removeClass("readonly");
+
+                    $(".BSA").show();
+                    $("#dvformdemo").hide();
+                    /*$("#dvformbsa").show();*/
+                    $("#btn_dknocks").show();
+                    if (data == "Mobile Already Exist" || data == "Mobile Already Exist") {
+                        $(spid).text(data);
+
+
+                        
+                    }
+                    else {
+                        var jsonarray = JSON.parse(data);
+                        $("#name").val(jsonarray[0]["Name"]);
+                        $("#email").val(jsonarray[0]["Email"]);
+                        $("#pincode").val(jsonarray[0]["Postal_code"]);
+                        $("#Statename").val(jsonarray[0]["State"]);
+                        $("#Cityname").val(jsonarray[0]["City"]);
+                        $("#block").val(jsonarray[0]["Block"]);
+                        $("#tahsil").val(jsonarray[0]["Tahsil"]);
+                        $("#address").val(jsonarray[0]["Address"]);
+
+                        $("#customerid").val(jsonarray[0]["Customer_id"]);
+                        $("#leadid").val('@Session["Leadid"]');
+
+
+                        $("#name").attr("readonly", true);
+                        $("#email").attr("readonly", true);
+                        $("#pincode").attr("readonly", true);
+                        $("#Statename").attr("readonly", true);
+                        $("#Cityname").attr("readonly", true);
+                        $("#block").attr("readonly", true);
+                        $("#tahsil").attr("readonly", true);
+                        $("#address").attr("readonly", true);
+
+                        $("#name").addClass("readonly");
+                        $("#email").addClass("readonly");
+                        $("#pincode").addClass("readonly");
+                        $("#Statename").addClass("readonly");
+                        $("#Cityname").addClass("readonly");
+                        $("#block").addClass("readonly");
+                        $("#tahsil").addClass("readonly");
+                        $("#address").addClass("readonly");
+
+                        $(".BSA").hide();
+
+                        $("#dvformdemo").show();
+                        /*$("#dvformbsa").hide();*/
+                        $("#btn_dknocks").hide();
+                    }
+
+                }
+            })
+        }
+
+    }
+
+</script>
+
+<!-- Demo script -->
+<script>
+    $(document).ready(function () {
+        $("#typeproduct").change(function () {
+            $("#dvformorder").hide();
+            var ptype = $(this).val();
+
+            var date = $("#date").val();
+            var supemp = $("#supemp").val();
+
+            //alert(irrigation)
+            if (date == "" || date == null) {
+                $("#spmsgdemo").text("Please Select Date")
+            } else if (supemp == "" || supemp == null) {
+                $("#spmsgdemo").text("Please Select SR/BE/GL/TL")
+            }
+            else {
+                $("#spmsgdemo").text("")
+                //alert(ptype)
+                $.ajax({
+                    url: '/Home/onchange',
+                    type: 'GET',
+                    data: { ptype: ptype },
+                    success: function (data) {
+                        var jsonarray = JSON.parse(data);
+                        if (jsonarray.length != 0) {
+                            //alert("ok")
+                            $('#pbproduct').empty();
+                            $('#pbproduct').append('<option value="" selected disabled>Select One</option>');
+                            $.each(jsonarray, function (index, Demo) {
+                                $('#pbproduct').append('<option value="' + Demo.proid + '">' + Demo.Brand + '</option>');
+                            });
+                        } else {
+                            alert('No data available for pbproduct.');
+                        }
+                    },
+                    error: function () {
+                        alert('Failed to fetch pbproduct data.');
+                    }
+                });
+
+                $.ajax({
+                    url: '/Home/GetAllProduct',
+                    type: 'GET',
+                    data: { ptype: ptype },
+                    success: function (response) {
+                        var jsonarray = JSON.parse(response);
+                        if (jsonarray.length != 0) {
+                            var table = $('#tblproductb').DataTable();
+                            //alert(response)
+                            var jsonArray = JSON.parse(response);
+                            table.clear().draw();
+                            $.each(jsonArray, function (index, item) {
+                                var lastbtn = "";
+                                if (item.incart == "In Cart") {
+                                    lastbtn += '<a style="border-radius:15px;" onclick="viewproductincart(' + item.Id + ') class="ms-2 me-1 btn btncolor btn-sm" id="btsignout"> <b> View to Cart</b> </a>';
+                                }
+                                else {
+                                    lastbtn += ' <a style="border-radius:15px;" id="addcart_' + item.Id + '" class="ms-2 me-1 btn btncolor btn-sm" onclick="productincart(' + item.Id + ')"> <b> Add to Cart</b> </a>';
+                                }
+                                table.row.add([
+                                    index + 1,
+                                    "<img/>",
+                                    item.Brand,
+                                    item.Productname,
+                                    item.Quantity + " " + item.punit,
+                                    lastbtn,
+                                ]).draw(false);
+                            });
+                        } else {
+                            alert('No data available for pbproduct.');
+                        }
+                    },
+                    error: function () {
+                        alert('Failed to fetch pbproduct data.');
+                    }
+                });
+            }
+
+            
+        });
+    });
+</script>
+
+<!-- BSA script-->
+<script>
+    $(document).ready(function () {
+        $('#dvnextmeet').hide();
+        $('#dvpercon').hide();
+        $('input[name="crfrd"]').on('change', function () {
+            var crfrd = $('input[name="crfrd"]:checked').val();
+            if (crfrd === 'Know') {
+                $('#dvcrfrd').show();
+                $('#dvpercon').hide();
+                $('#dvnextmeet').hide();
+                $("#btn_submit").text("Next");
+                $('#dvprobing').show();
+
+
+            } else if (crfrd === 'Do not Know') {
+                $('#dvcrfrd').hide();
+                $('#dvpercon').show();
+                $('#dvnextmeet').show();
+                $("#btn_submit").text("Close");
+                $('#dvprobing').hide();
+
+
+            }
+        });
+    });
+</script>
+
+
+<script>
+    $(document).ready(function () {
+        // Attach a change event to the checkboxes
+        $('input[name="crop"]').on('change', function () {
+            upcrop();
+        });
+
+        // Function to update the selected crops in the textbox
+        function upcrop() {
+            const selectedcrop = $('input[name="crop"]:checked').map(function () {
+                return this.value;
+            }).get();
+            $('#cropnm').val(selectedcrop.join(', '));
+            if (cropother("Other") == true) {
+                $("#cropnm").val("");
+                $("#dvcropnm").show();
+            }
+            else {
+                $("#dvcropnm").hide();
+            }
+        }
+        // Function to find a specific value in the selected crops
+        function cropother(valueToFind) {
+            const selectedcrop = $('#cropnm').val().split(', ');
+            return selectedcrop.includes(valueToFind);
+        }
+
+        // Initial update when the page loads
+        upcrop();
+
+
+    });
+</script>
+<script>
+    function validcheck(crpid, ferid, iaid) {
+        //alert(crpid)
+        if ($.trim($(crpid).val()) === '') {
+            alert('Select at least one Crop detail');
+            return false; // Prevent form submission
+        }
+        if ($.trim($(ferid).val()) === '') {
+            alert('Select at least one fertilizernm');
+            return false; // Prevent form submission
+        }
+
+
+    }
+
+    $(document).ready(function () {
+        // Attach a change event to the checkboxes
+        $('input[name="fertilizer"]').on('change', function () {
+            upfertilizer();
+        });
+
+        // Function to update the selected fertilizer in the textbox
+        function upfertilizer() {
+            const selectedfertilizer = $('input[name="fertilizer"]:checked').map(function () {
+                return this.value;
+            }).get();
+            $('#fertilizernm').val(selectedfertilizer.join(', '));
+            if (fertilizerother("Other") == true) {
+                $('#fertilizernm').val("");
+                $("#dvfertilizernm").show();
+            }
+            else {
+                $("#dvfertilizernm").hide();
+            }
+        }
+        // Function to find a specific value in the selected fertilizer
+        function fertilizerother(valueToFind) {
+            const selectedfertilizer = $('#fertilizernm').val().split(', ');
+            return selectedfertilizer.includes(valueToFind);
+        }
+
+        // Initial update when the page loads
+        upfertilizer();
+
+
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $("#pbproduct").change(function () {
+            $("#dvformorder").hide();
+            var product = $("#pbproduct").val();
+            //alert(product);
+            $.ajax({
+                url: '/Home/GetProducFullDetails',
+                type: "GET",
+                dataType: "JSON",
+                data: { Productid: product },
+                success: function (response) {
+                    //alert(response)
+                    var table = $('#tblstockbalance').DataTable();
+                    //alert(response)
+                    var jsonArray = JSON.parse(response);
+                    table.clear().draw();
+                    $.each(jsonArray, function (index, item) {
+                        table.row.add([
+                            index + 1,
+                            item.Brand,
+                            item.Productname,
+                            item.Quantity + " " + item.punit,
+                            //item.Balance_stock
+                        ]).draw(false);
+                    });
+                    //alert(jsonArray[0].proid)
+                    $("#pproductid").val(jsonArray[0].proid);
+                    $("#pproductname").val(jsonArray[0].Productname);
+                    $("#pbrandname").val(jsonArray[0].Brand);
+                    $("#pproductcategory").val(jsonArray[0].ProductCategory);
+                    $("#pproductunittype").val(jsonArray[0].punit);
+                }
+            })
+        })
+    })
+</script>
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">User <i class="fa fa-angle-double-right"></i> Sales Entry </label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+    var msg = '@ViewBag.msg';
+    if (msg) {
+        var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+            msg +
+            '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+            '</div>';
+        $(alertElement).insertBefore('#alert-container');
+        setTimeout(function () {
+            $('#alert').alert('close');
+        }, 5000);
+        //$('.alert').on('closed.bs.alert', function () {
+        //    window.location.href = '/User/Department';
+        //});
+        //$('#btnclose').on('click', function () {
+        //    window.location.href = '/User/Department';
+        //});
+    }
+});
+</script>
+
+<!-- Your HTML code goes here for alert Message -->
+<div class="row mt-3 mb-1 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col"></div>
+</div>
+
+<style>
+    .form-select .form-control {
+        padding: 5px !important;
+    }
+
+    .nevigationstripblue {
+        background-color: #00A0E3;
+        color: black;
+        height: 22px;
+    }
+</style>
+
+<script>
+    $(document).ready(function () {
+        $("#supemp").change(function () {
+            $("#dvformorder").hide();
+            var up = $("#supemp").val();
+            //alert(up)
+            $.ajax({
+                url: '/Home/GetEmployee',
+                type: "GET",
+                dataType: "JSON",
+                data: { Hid: up },
+                success: function (data) {
+                    var jsonArray = JSON.parse(data);
+                    //alert(jsonArray[0].Name);
+                    $("#empname").val(jsonArray[0].Name);
+                    $("#empid").val(jsonArray[0].Employee_id);
+                    $("#emprowid").val(jsonArray[0].Id);
+                }
+            })
+        })
+    })
+</script>
+<script>
+    $(document).ready(function () {
+        $("#supempc").change(function () {
+            $("#dvformorder").hide();
+            var up = $("#supempc").val();
+            //alert(up)
+            $.ajax({
+                url: '/Home/GetEmployeec',
+                type: "GET",
+                dataType: "JSON",
+                data: { Hid: up },
+                success: function (data) {
+                    var jsonArray = JSON.parse(data);
+                    
+                }
+            })
+        })
+    })
+</script>
+<script>
+    $(document).ready(function () {
+        $('#date').change(function () {
+            var selectedDate = $(this).val();
+            $.ajax({
+                type: "POST",
+                url: "/Home/StoreDateInSession",
+                data: { date: selectedDate },
+                success: function (response) {
+                    //alert("Date stored successfully!");
+                    @*$("#vdtt").text("");
+                    $("#vdtt").text('@Session["SelectedDate"]');*@
+                    //alert('@Session["SelectedDate"]')
+                },
+                error: function (xhr, status, error) {
+                    alert("Error storing date: " + error);
+                }
+            });
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $("#dvvehicles").show();
+        $("#dvvehicler").hide();
+
+        $("#vehicleid").attr("required", true);
+        $("#vehicletype").change(function () {
+            var vehicletype = $("#vehicletype").val();
+            //alert(vehicletype);
+            $.ajax({
+                url: '/Home/GetVehicle',
+                type: "GET",
+                dataType: "JSON",
+                data: { Type: vehicletype },
+                success: function (data) {
+                    // alert(data);
+                    $("#vehicleid").empty();
+                    $("#vehicleid").append(data);
+                }
+
+            })
+        })
+
+    })
+</script>
+
+<script>
+    $(document).ready(function () {
+        $("#driverid").change(function () {
+            var driverid = $("#driverid").val();
+            if (driverid == "Other") {
+                $("#drivername").attr("readonly", false);
+                $("#drivercontact").attr("readonly", false);
+
+                $("#drivername").removeClass("readonly");
+                $("#drivercontact").removeClass("readonly");
+
+                $("#drivername").val("");
+                $("#drivercontact").val("");
+            }
+            else {
+                $("#drivername").attr("readonly", true);
+                $("#drivercontact").attr("readonly", true);
+
+                $("#drivername").addClass("readonly");
+                $("#drivercontact").addClass("readonly");
+                $.ajax({
+                    url: '/Home/GetEmployeed',
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { Hid: driverid },
+                    success: function (data) {
+                        // alert(data);
+                        var jsonArray = JSON.parse(data);
+                        $("#drivername").val(jsonArray[0].Name);
+                        $("#drivercontact").val(jsonArray[0].Mobile_no);
+                    }
+
+                })
+            }
+        })
+    })
+</script>
+
+@using System.Data;
+@{
+    DbManager db = new DbManager();
+    Activitylog activitylog = new Activitylog();
+    Error_15_16 error_15_16 = new Error_15_16();
+}
+
+<script>
+    $(document).ready(function () {
+        $('#supemp').select2({
+        });
+        $('#supempc').select2({
+        });
+    })
+</script>
+<input type="hidden" id="loc" name="loc" value="Lucknow" />
+<input type="hidden" id="latitude" name="latitude" value="26.8971361" />
+<input type="hidden" id="longitude" name="longitude" value="80.9668008" />
+
+<input type="hidden" id="hid" name="hid" />
+<input type="hidden" id="Leadid" name="Leadid" />
+<input type="hidden" id="Rowid" name="Rowid" />
+<input type="hidden" id="customerid" name="customerid" />
+<input type="hidden" id="leadid" name="leadid" />
+<input type="hidden" id="stopwatchinp" name="stopwatchinp" />
+
+
+@*<h6 id="vdtt">@Session["SelectedDate"]</h6>*@
+
+<div class="row">
+    <div class="col">
+       
+            <div class="row">
+                <div class="col text-start">
+
+                </div>
+                @*<div class="col-12 text-end">
+                <label class="text-uppercase text-end">
+                    <p class="text-end text-light fs-6 ps-2 pe-2 bg-danger rounded-3" id="stopwatch">00:00:00</p>
+                </label>
+            </div>*@
+                @*<div class="col-12 text-start">
+                    <div class="rounded-1 pt-2 pb-1"><div><h6 class=" ps-2"> Location : <i id="location"></i></h6></div></div>
+                </div>*@
+
+            </div>
+
+            <div class="row row-cols-1 row-cols-sm-3 dvsupport1" id="dvsupportsub">
+                <div class="col mb-2">
+                    <h6 class="mt-2">Select Date <i class="text-danger">*</i></h6>
+                    <input type="datetime-local" id="date" name="date" class="form-control shadow-none" />
+
+                </div>
+                <div class="col mb-2 dvsupport1" id="dvsupport">
+                    <h6 class="mt-2">Select GL/TL/SR/BE<i class="text-danger">*</i></h6>
+                    <select class="form-select shadow-none" id="supemp" name="supemp">
+                        <option selected disabled value="">Select one</option>
+                        @{
+                            string query5 = "";
+                            query5 = "select * from tbl_registration where Employee_Type='Suser' and designation_order='7' and Status='Approved'";
+
+                            DataTable dt5 = db.GetAllRecord(query5);
+                            if (dt5.Rows.Count > 0)
+                            {
+                                for (int i = 0; i < dt5.Rows.Count; i++)
+                                {
+                                    if (dt5.Rows[i]["Status"] + "" == "Approved")
+                                    {
+
+                                        <option value="@dt5.Rows[i]["Employee_id"]">@dt5.Rows[i]["Name"] (@dt5.Rows[i]["Employee_id"])</option>
+                                    }
+                                }
+
+                            }
+
+                        }
+
+                    </select>
+
+                    <input type="hidden" id="empname" name="empname" />
+                    <input type="hidden" id="empid" name="empid" />
+                    <input type="hidden" id="emprowid" name="emprowid" />
+                    <label class="text-danger" id="spempselect"></label>
+                </div>
+                <div class="col justify-content-end d-flex dvsupport1 mt-3">
+
+                </div>
+
+            </div>
+            <div class="p-2" id="dvform">
+                <h3>Customer Dknocks and BSA</h3>
+                <h5 id="spmsg" class="text-danger"></h5>
+                <div class="row row-cols-2 row-cols-sm-3">
+                    <div class="col mb-2">
+                        <h6 class="mt-2">Mobile Number <i class="text-danger">*</i></h6>
+                        <input type="text" class="form-control shadow-none" id="mobile" name="mobile" maxlength="10" required oninput="validateNumericInput(this, 10, 'spnum'),FindUser('mobile', 'spnum1')" pattern="^[0-9]{10,}$" title="Please enter only letters, and spaces" />
+                        <div class="invalid-feedback" id="spnum">
+                            Please enter valid mobile number
+                        </div>
+                        <div id="spnum1" class="text-danger">
+
+                        </div>
+                    </div>
+                    <div class="col mb-2">
+                        <h6 class="mt-2">Name <i class="text-danger">*</i></h6>
+                        <input type="text" class="form-control shadow-none" id="name" name="name" maxlength="50" required oninput="validateTextbox(this)" pattern="^[A-Za-z0-9 ]*$" title="Please enter only letters, and spaces" />
+                        <div class="invalid-feedback">
+                            Please enter valid name
+                        </div>
+                    </div>
+
+                    <div class="col mb-2">
+                        <h6 class="mt-2">Email</h6>
+                        <input type="email" class="form-control shadow-none" id="email" name="email" maxlength="50" oninput="validateEmail('email','spmail')" />
+                        <span id="spmail"> </span>
+                    </div>
+
+                </div>
+                <div class="row row-cols-2 row-cols-sm-4">
+                    <div class="col mb-2">
+                        <h6 class="mt-2">Pincode <i class="text-danger">*</i></h6>
+                        <input type="text" class="form-control shadow-none" id="pincode" name="pincode" maxlength="6" required oninput="validateNumericInput(this, 6, 'spnump');" onkeyup="getStateCityDetails()" pattern="^[0-9]{6,}$" title="Please enter only letters, and spaces" />
+                        <div class="invalid-feedback" id="spnump">
+                            Please enter only letters, and spaces
+                        </div>
+
+                    </div>
+                    <div class="col mb-2">
+                        <h6 class="mt-2">State <i class="text-danger">*</i></h6>
+                        <input type="text" class="form-control shadow-none readonly" id="Statename" name="Statename" maxlength="25" readonly required onkeyup="validateTextbox(this)" />
+                        <div class="invalid-feedback">
+                            Please enter valid state
+                        </div>
+                    </div>
+
+                    <div class="col mb-2">
+                        <h6 class="mt-2">District <i class="text-danger">*</i></h6>
+                        <input type="text" class="form-control shadow-none readonly" id="Cityname" name="Cityname" maxlength="25" readonly required onkeyup="validateTextbox(this)" />
+                        <div class="invalid-feedback">
+                            Please enter valid district
+                        </div>
+                    </div>
+                    <div class="col mb-2">
+                        <h6 class="mt-2">Block <i class="text-danger">*</i></h6>
+                        <input type="text" class="form-control shadow-none" id="block" name="block" maxlength="25" required onkeyup="validateTextbox(this)" />
+                        <div class="invalid-feedback">
+                            Please enter valid block
+                        </div>
+                    </div>
+                    <div class="col mb-2">
+                        <h6 class="mt-2">Tahsil <i class="text-danger">*</i></h6>
+                        <input type="text" class="form-control shadow-none" id="tahsil" name="tahsil" maxlength="25" required onkeyup="validateTextbox(this)" />
+                        <div class="invalid-feedback">
+                            Please enter valid tahsil
+                        </div>
+
+                    </div>
+                    <div class="col mb-2">
+                        <h6 class="mt-2">Address <i class="text-danger">*</i></h6>
+                        <input type="text" class="form-control shadow-none" id="address" name="address" maxlength="250" required onkeyup="validateTextbox(this)" />
+                        <div class="invalid-feedback">
+                            Please enter valid address
+                        </div>
+                    </div>
+                    <div class="col mb-2">
+                        <h6 class="mt-2">Occupation</h6>
+                        <input type="text" class="form-control shadow-none" id="occupation" name="occupation" maxlength="100" onkeyup="validateTextbox(this)" pattern="^[A-Za-z ]*$" title="Please enter only letters, and spaces" />
+                        <div class="invalid-feedback">
+                            Please enter only letters, and spaces
+                        </div>
+                    </div>
+                    <div class="col mb-2">
+                        <h6 class="mt-2">Land/Irrigation Details <i class="text-danger">*</i></h6>
+                        <input type="text" class="form-control shadow-none readonly" id="irrigation" name="irrigation" maxlength="100" readonly onkeyup="validateTextbox(this)" pattern="^[A-Za-z ]*$" title="Please enter only letters, and spaces" value="Agriculture" />
+
+                    </div>
+
+                </div>
+
+                <div class="row row-cols-1 row-cols-sm-2 BSA">
+                    <div class="col mb-3">
+                        <h6 class="mt-2">Crop/Fertilizer Details <i class="text-danger">*</i></h6>
+                        <div class="row row-cols-sm-3 row-cols-2">
+                            <div class="col">
+                                <input type="radio" value="Know" name="crfrd" checked /> <span class="fs-6 ms-1">Know</span>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="row row-cols-1 row-cols-sm-2 BSA" id="dvcrfrd">
+
+                    <div class="col mb-3">
+                        <h6>Land In Acre(एकड़)</h6>
+                        <select class="form-control shadow-none" id="irrigationc" name="irrigationc">
+                            <option value="" disabled selected> Select One</option>
+                            <option> Less than 1</option>
+                            <option> 1 </option>
+                            <option> 2 </option>
+                            <option> 3 </option>
+                            <option> 4 </option>
+                            <option> 5 </option>
+                            <option> 6 </option>
+                            <option> 7 </option>
+                            <option> 8 </option>
+                            <option> 9 </option>
+                            <option> 10 </option>
+                            <option> More than 10 </option>
+
+
+                        </select>
+
+                    </div>
+                    <div class="col mb-3">
+                        <h6 class="mt-2">Irrigation Equipment <i class="text-danger">*</i></h6>
+                        <div class="row row-cols-sm-3 row-cols-2">
+                            <div class="col">
+                                <input type="radio" value="Yes" name="irrieq" /> <span class="fs-6 ms-1">Yes</span>
+
+                            </div>
+                            <div class="col">
+                                <input type="radio" value="No" name="irrieq" checked/> <span class="fs-6 ms-1">No</span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="col mb-3">
+                        <h6 class="mt-2">Crop Details <i class="text-danger">*</i></h6>
+                        <div class="row row-cols-sm-2 row-cols-2">
+                            <div class="col">
+                                <input type="checkbox" value="Wheat" name="crop" /> <span class="fs-6 ms-1">Wheat</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Paddy" name="crop" /> <span class="fs-6 ms-1">Paddy</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Jowar" name="crop" /> <span class="fs-6 ms-1">Jowar</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Pigeon Pea" name="crop" /> <span class="fs-6 ms-1">Pigeon Pea</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Soybean" name="crop" /> <span class="fs-6 ms-1">Soybean</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Cotton" name="crop" /> <span class="fs-6 ms-1">Cotton</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Opium" name="crop" /> <span class="fs-6 ms-1">Opium</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Sugarcane" name="crop" /> <span class="fs-6 ms-1">Sugarcane</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Gram" name="crop" /> <span class="fs-6 ms-1">Gram</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Urad" name="crop" /> <span class="fs-6 ms-1">Urad</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Lentil (Masoor)" name="crop" /> <span class="fs-6 ms-1">Lentil (Masoor)</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Onion" name="crop" /> <span class="fs-6 ms-1">Onion</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Millet (Bajra)" name="crop" /> <span class="fs-6 ms-1">Millet (Bajra)</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Potato" name="crop" /> <span class="fs-6 ms-1">Potato</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Mentha" name="crop" /> <span class="fs-6 ms-1">Mentha</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Maize" name="crop" /> <span class="fs-6 ms-1">Maize</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Garlic" name="crop" /> <span class="fs-6 ms-1">Garlic</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Chili" name="crop" /> <span class="fs-6 ms-1">Chili</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Fruits" name="crop" /> <span class="fs-6 ms-1">Fruits</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Other" name="crop" /> <span class="fs-6 ms-1">Other</span>
+                            </div>
+
+                            <div class="col-12 col-sm-12 mb-3" id="dvcropnm">
+                                <h6 class="mt-2">Enter Crop Detail <i class="text-danger">*</i></h6>
+                                <input type="text" class="form-control shadow-none" name="cropnm" id="cropnm" oninput="validateTextbox(this)" pattern="^[,a-zA-Z0-9 ]*$" title="Please enter only letters, and spaces" />
+                                <div class="invalid-feedback">
+                                    Please enter only letters, and spaces
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col mb-3">
+                        <h6 class="mt-2">Fertilizer <i class="text-danger">*</i></h6>
+                        <div class="row row-cols-sm-2 row-cols-2">
+                            <div class="col">
+                                <input type="checkbox" value="NPK" name="fertilizer" /> <span class="fs-6 ms-1">NPK</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="DAP" name="fertilizer" /> <span class="fs-6 ms-1">DAP</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Urea" name="fertilizer" /> <span class="fs-6 ms-1">Urea</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Potash" name="fertilizer" /> <span class="fs-6 ms-1">Potash</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Calcium Sulfate" name="fertilizer" /> <span class="fs-6 ms-1">Calcium Sulfate</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Organic Manure" name="fertilizer" /> <span class="fs-6 ms-1">Organic Manure</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Prom" name="fertilizer" /> <span class="fs-6 ms-1">Prom</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Sulphur" name="fertilizer" /> <span class="fs-6 ms-1">Sulphur</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Zinc" name="fertilizer" /> <span class="fs-6 ms-1">Zinc</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Zypsum" name="fertilizer" /> <span class="fs-6 ms-1">Zypsum</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Micronutients" name="fertilizer" /> <span class="fs-6 ms-1">Micronutients</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="P.G.R." name="fertilizer" /> <span class="fs-6 ms-1">P.G.R.</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Pesticides" name="fertilizer" /> <span class="fs-6 ms-1">Pesticides</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Insecticides" name="fertilizer" /> <span class="fs-6 ms-1">Insecticides</span>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" value="Herbicides" name="fertilizer" /> <span class="fs-6 ms-1">Herbicides</span>
+                            </div>
+                            <div class="col">
+
+                                <input type="checkbox" value="Other" name="fertilizer" /> <span class="fs-6 ms-1">Other</span>
+                            </div>
+                            <div class="col-12 col-sm-12  mb-3" id="dvfertilizernm">
+                                <h6 class="mt-2">Enter Fertilizer Detail <i class="text-danger">*</i></h6>
+                                <input type="text" class="form-control shadow-none" name="fertilizernm" id="fertilizernm" oninput="validateTextbox(this)" pattern="^[,a-zA-Z0-9 ]*$" title="Please enter only letters, and spaces" />
+                                <div class="invalid-feedback">
+                                    Please enter only letters, and spaces
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="row row-cols-1 row-cols-sm-2 BSA" id="dvprobing">
+                    <div class="col-12 col-sm-12">
+                        <h6> PROBING (Customer's interesting Area ?) </h6>
+                    </div>
+                    <div class="col mb-2">
+                        <h6 class="mt-2">Which crop are you interested in planting? <i class="text-danger">*</i></h6>
+                        <div class="row row-cols-sm-3 row-cols-3">
+                            <div class="col">
+                                <input type="radio" value="Traditional" name="interested" /> <span class="fs-6 ms-1">Traditional</span>
+                            </div>
+                            <div class="col">
+                                <input type="radio" value="Commercial" name="interested" /> <span class="fs-6 ms-1">Commercial</span>
+                            </div>
+                            <div class="col">
+                                <input type="radio" value="Both" name="interested" /> <span class="fs-6 ms-1">Both</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col mb-2">
+                        <h6 class="mt-2">What problems do you face in growing crops? <i class="text-danger">*</i></h6>
+                        <textarea rows="4" placeholder="Enter Here" class="form-control shadow-none" id="problems" name="problems"></textarea>
+                        <div class="invalid-feedback" id="spnum33">
+                            Please enter only letters, and spaces
+                        </div>
+                    </div>
+                    <div class="col mb-2">
+                        <h6 class="mt-2">Would you like to do commercial farming? <i class="text-danger">*</i></h6>
+                        <div class="row row-cols-sm-3 row-cols-3">
+                            <div class="col">
+                                <input type="radio" value="Yes" name="commercial" /> <span class="fs-6 ms-1">Yes</span>
+                            </div>
+                            <div class="col">
+                                <input type="radio" value="No" name="commercial" /> <span class="fs-6 ms-1">No</span>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col mb-2">
+                        <h6 class="mt-2">Would you be interested if I told you how to grow more profitable crops? <i class="text-danger">*</i></h6>
+                        <div class="row row-cols-sm-3 row-cols-3">
+                            <div class="col">
+                                <input type="radio" value="Yes" name="profitable" /> <span class="fs-6 ms-1">Yes</span>
+                            </div>
+                            <div class="col">
+                                <input type="radio" value="No" name="profitable" /> <span class="fs-6 ms-1">No</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+
+                </div>
+
+                <div class="row row-cols-1 row-cols-sm-3 mb-1 mt-4 pb-2">
+                    <div class="col"></div>
+                    <div class="col"></div>
+                    <div class="col justify-content-end d-flex"><button type="button" class="btn btncolor shadow-none btn-lg fs-6" id="btn_dknocks" style="width:100px">Submit </button></div>
+                </div>
+
+            </div>
+
+
+
+            @*<div class=" p-2" id="dvformbsa">
+            <h3>Customer BSA</h3>
+
+
+            <div class="row row-cols-1 row-cols-sm-3 mb-1 mt-4 pb-2">
+                <div class="col"></div>
+                <div class="col"></div>
+                <div class="col justify-content-end d-flex"><button type="button" class="btn btncolor shadow-none btn-lg fs-6" id="btn_bsa" style="width:100px">Next </button></div>
+            </div>
+        </div>*@
+
+            <div class=" p-2" id="dvformdemo">
+                <h3>Customer Demo and Order</h3>
+                <h5 id="spmsgdemo" class="text-danger"></h5>
+                <div class="row row-cols-1 row-cols-sm-2">
+                    <div class="col mb-3">
+                        <h6 class="mt-2">Demo for<i class="text-danger">*</i></h6>
+                        <select class="form-select shadow-none" id="typeproduct" name="typeproduct" required>
+                            <option selected disabled value="">Select</option>
+                            <option value="Plant">Plant</option>
+                            <option value="Other">Other</option>
+                            <!-- Add other options as needed -->
+                        </select>
+                    </div>
+                    <div class="col mb-3">
+
+                        <h6 class="mt-2">Select Product For Demo<i class="text-danger">*</i></h6>
+                        <select class="form-select shadow-none" id="pbproduct" name="pbproduct" required>
+                            <option selected disabled value="">Select</option>
+                            @*@{
+                            string query1111 = "select DISTINCT proid,Brand from tbl_pro_price_circlar where Status='Active' ORDER BY proid ASC";
+                            DataTable dt1111 = db.GetAllRecord(query1111);
+                            if (dt1111.Rows.Count > 0)
+                            {
+                                for (int i = 0; i < dt1111.Rows.Count; i++)
+                                {
+                                    <option value="@dt1111.Rows[i]["proid"]">@dt1111.Rows[i]["Brand"]</option>
+                                }
+                            }
+                        }*@
+                        </select>
+
+                        @*<input type="hidden" name="protype" id="protype" />*@
+                        <input type="hidden" name="pproductid" id="pproductid" />
+                        <input type="hidden" name="pproductname" id="pproductname" />
+                        <input type="hidden" name="pbrandname" id="pbrandname" />
+                        <input type="hidden" name="pproductcategory" id="pproductcategory" />
+                        <input type="hidden" name="pproductunittype" id="pproductunittype" />
+                        @*<input type="hidden" name="credit" id="credit" />*@
+
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <table class="display nowrap table table-responsive" id="tblstockbalance">
+                            <thead class="theadb text-center">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Brand Name</th>
+                                    <th>Product Name</th>
+                                    <th>Unit</th>
+                                    @*<th>Available Stock</th>*@
+
+                                </tr>
+                            </thead>
+                            <tbody class="text-center" id="tbl">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="row row-cols-1 row-cols-sm-3 mb-1 mt-4 pb-2">
+                    <div class="col"></div>
+                    <div class="col"></div>
+                    <div class="col justify-content-end d-flex"><button type="button" class="btn btncolor shadow-none btn-lg fs-6" id="btn_demo1" style="width:100px">Next </button></div>
+                </div>
+
+
+            </div>
+
+            <div class=" p-2" id="dvformorder">
+                <h3>Customer Order</h3>
+                <h5 id="spmsg" class="text-danger"></h5>
+
+                <div class="row">
+                    <div class="col-sm-12">
+                        <table class="display nowrap table table-responsive" id="tblproductb">
+                            <thead class="theadb text-center">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Image</th>
+                                    <th>Brand Name</th>
+                                    <th>Product Name</th>
+                                    <th>Unit</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-center" id="tbl">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="row row-cols-1 row-cols-sm-3 mb-1 mt-4 pb-2">
+                    <div class="col"></div>
+                    <div class="col"></div>
+                    <div class="col justify-content-end d-flex"><button type="button" class="btn btncolor shadow-none btn-lg fs-6" id="btn_ordernext" style="width:100px">Next </button></div>
+                </div>
+            </div>
+
+            <div class="p-2" id="dvformorderselectedproduct">
+
+            </div>
+            <div class="p-2" id="dvformordercheckout">
+
+            </div>
+            <div class="p-2" id="dvformconfirmpayment">
+                <h6 class="mt-2">Payment Confirm by<i class="text-danger">*</i></h6>
+                <select class="form-select shadow-none" id="supempc" name="supempc">
+                    <option selected disabled value="">Select one</option>
+                    @{
+                        string query51 = "";
+                        query51 = "select * from tbl_registration where Employee_Type='Suser' and Status='Approved' and (designation_order>=0 and designation_order<= 4)";
+
+                        DataTable dt51 = db.GetAllRecord(query51);
+                        if (dt51.Rows.Count > 0)
+                        {
+                            for (int i = 0; i < dt51.Rows.Count; i++)
+                            {
+                                <option value="@dt51.Rows[i]["Employee_id"]">@dt51.Rows[i]["Name"] (@dt51.Rows[i]["Employee_id"])</option>
+
+                            }
+
+                        }
+
+                    }
+
+                </select>
+
+                <input type="hidden" id="sempnamec" name="sempnamec" />
+                <input type="hidden" id="sempidc" name="sempidc" />
+                <input type="hidden" id="semprowidc" name="semprowidc" />
+                <div class="col-12 col-sm-6 mb-3">
+                    <h6 class="mt-2">Expected Delivery From Date</h6>
+                    <input type="date" class="form-control shadow-none" id="Expectedfrom" name="Expectedfrom" required />
+                    <div class="invalid-feedback">
+                        Please enter only numbers
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 mb-3">
+                    <h6 class="mt-2">Expected Delivery To Date</h6>
+                    <input type="date" class="form-control shadow-none" id="Expectedto" name="Expectedto" required />
+                    <div class="invalid-feedback">
+                        Please enter only numbers
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-12 mb-3">
+                    <h6 class="mt-2">Expected Delivery Remark</h6>
+                    <textarea class="form-control shadow-none" id="expectedRemark" name="expectedRemark"></textarea>
+                    <div class="invalid-feedback">
+                        Please enter Remark
+                    </div>
+                </div>
+
+                <div class="row row-cols-1 row-cols-sm-2">
+                    <div class="mb-3">
+                        <h6>Vehicle Type</h6>
+                        <select class="form-select shadow-none" id="vehicletype" name="vehicletype" required>
+                            <option value="" selected disabled>Select one</option>
+                            <option value="Own">Own</option>
+                            <option value="Rented">Rented</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select a valid status.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Driver</h6>
+                        <select class="form-select shadow-none mt-2" id="driverid" name="driverid" required>
+                            <option selected value="">Select one</option>
+                            @{
+                                string query511 = "select * from tbl_registration where Status='Approved' and Employee_Type='Tuser'";
+                                DataTable dt511 = db.GetAllRecord(query511);
+                                if (dt511.Rows.Count > 0)
+                                {
+                                    for (int i = 0; i < dt511.Rows.Count; i++)
+                                    {
+                                        <option value="@dt511.Rows[i]["Employee_id"]">@dt511.Rows[i]["Name"] </option>
+
+                                    }
+                                }
+                            }
+                            <option value="Other">Other</option>
+                        </select>
+
+                    </div>
+                    <div class="mb-3" id="dvvehicles">
+                        <h6>Vehicle</h6>
+                        <select class="form-select shadow-none mt-2" id="vehicleid" name="vehicleid">
+                            <option selected value="">Select one</option>
+                            @{
+                                string query6 = "select * from tbl_vehicle where /*Branchid='" + Session["ubrcode"] + "' and*/ Status='Active'";
+                                DataTable dt1 = db.GetAllRecord(query6);
+                                if (dt1.Rows.Count > 0)
+                                {
+                                    for (int i = 0; i < dt1.Rows.Count; i++)
+                                    {
+                                        <option value="@dt1.Rows[i]["Vehicleid"]">@dt1.Rows[i]["Vehicle_name"] (@dt1.Rows[i]["Registration_no"])</option>
+
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col mb-3 dvvehicles">
+                        <h6>Driver Name</h6>
+                        <input type="text" class="form-control shadow-none" id="drivername" name="drivername" required placeholder="Enter Driver Name" />
+                        <div class="invalid-feedback" id="spnum">
+                            Please enter only numbers
+                        </div>
+                    </div>
+                    <div class="col mb-3 dvvehicles">
+                        <h6>Driver Contact</h6>
+                        <input type="text" class="form-control shadow-none" id="drivercontact" name="drivercontact" required placeholder="Enter Driver Contact" oninput="validateNumericInput(this,10,'spnum')" />
+                        <div class="invalid-feedback" id="spnum">
+                            Please enter only numbers
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="col-12 col-sm-12 text-end"><button type="button" class="btn btncolor shadow-none btn-lg fs-6" id="btn_final_submit" style="width:100px">Final Submit </button></div>
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+        
+    </div>
+</div>
+
+
+
+
+
+<script>
+    $(document).ready(function () {
+        $("#dvformorder").hide();
+        $("#dvformconfirmpayment").hide();
+        $("#dvformdemo").hide();
+        //Door Knocks Process
+        $("#btn_dknocks").click(function () {
+            var date = $("#date").val();
+            var supemp = $("#supemp").val();
+            var loc = $('#loc').val();
+            var latitude = $('#latitude').val();
+            var longitude = $('#longitude').val();
+
+            var spnum1 = $("#spnum1").text().trim();
+            var name = $("#name").val();
+            var mobile = $("#mobile").val();
+            var email = $('#email').val();
+            var address = $("#address").val();
+            var pincode = $("#pincode").val();
+            var tahsil = $('#tahsil').val();
+            var block = $('#block').val();
+            var Cityname = $('#Cityname').val();
+            var Statename = $('#Statename').val();
+            var occupation = $('#occupation').val();
+            var stopwatchinp = $('#stopwatchinp').val();
+            var org = '@Session["Groupidh"]';
+
+            var crfrd = $('input[name="crfrd"]:checked').val();
+            var irrigationc = $('#irrigationc').val();
+            var irrieq = $('input[name="irrieq"]:checked').val();
+            var cropnm = $('#cropnm').val();
+            var fertilizernm = $('#fertilizernm').val();
+            var interested = $('input[name="interested"]:checked').val();
+            var problems = $('#problems').val();
+            var commercial = $('input[name="commercial"]:checked').val();
+            var profitable = $('input[name="profitable"]:checked').val();
+            var customerid = $('#customerid').val();
+            var leadid = $('#leadid').val();
+            //alert(irrieq)
+            if (date == "" || date == null) {
+                $("#spmsg").text("Please Select Date")
+            } else if (supemp == "" || supemp == null) {
+                $("#spmsg").text("Please Select SR/BE/GL/TL")
+            } else if (spnum1 != "") {
+                $("#spmsg").text("This contact number already Exist")
+            } else if (name == "") {
+                $("#spmsg").text("Please Enter Name")
+            } else if (mobile == "") {
+                $("#spmsg").text("Please Enter Contact number")
+            } else if (address == "") {
+                $("#spmsg").text("Please Enter Address")
+            } else if (pincode == "") {
+                $("#spmsg").text("Please Enter Pincide")
+            } else if (block == "" || block == null) {
+                $("#spmsg").text("Please Enter Block")
+            } else if (tahsil == "" || tahsil == null) {
+                $("#spmsg").text("Please Enter Tahsil")
+            } else if (crfrd == "") {
+                $("#spmsg").text("Please Select Crop fertilizer details")
+            } else if (irrigationc == "" || irrigationc == null) {
+                $("#spmsg").text("Please Select Land In Acre")
+            } else if (irrieq == "" || irrieq == null) {
+                $("#spmsg").text("Please Select irrigation equipment")
+            } else if (cropnm == "" || cropnm == null) {
+                $("#spmsg").text("Please Select Crops")
+            } else if (fertilizernm == "" || fertilizernm == null) {
+
+                $("#spmsg").text("Please Select fertilizer")
+            } else if (interested == "" || interested == null) {
+
+                $("#spmsg").text("Please Select interested area")
+            }
+            else if (problems == "" || problems == null) {
+                $("#spmsg").text("Please Select problems")
+            }
+            else if (commercial == "" || commercial == null) {
+                $("#spmsg").text("Please Select 1")
+            }
+            else if (profitable == "" || profitable == null) {
+                $("#spmsg").text("Please Select 2")
+            } else {
+
+                $("#btn_dknocks").attr("disabled", true);
+                var formData = new FormData();
+                formData.append("loc", loc);
+                formData.append("latitude", latitude);
+                formData.append("longitude", longitude);
+                formData.append("support", "No");
+                formData.append("irrigation", "Agriculture");
+                formData.append("mobile", mobile);
+                formData.append("name", name);
+                formData.append("email", email);
+                formData.append("address", address);
+                formData.append("tahsil", tahsil);
+                formData.append("block", block);
+                formData.append("Cityname", Cityname);
+                formData.append("Statename", Statename);
+                formData.append("pincode", pincode);
+                formData.append("occupation", occupation);
+                formData.append("stopwatchinp", stopwatchinp);
+                formData.append("date", date);
+                formData.append("address", address);
+
+                formData.append("crfrd", crfrd);
+                formData.append("irrigationc", irrigationc);
+                formData.append("irrieq", irrieq);
+                formData.append("cropnm", cropnm);
+                formData.append("fertilizernm", fertilizernm);
+                formData.append("interested", interested);
+                formData.append("problems", problems);
+                formData.append("commercial", commercial);
+                formData.append("profitable", profitable);
+
+                //alert(formData.get("empid"))
+                $.ajax({
+                    url: '/Home/DknocksBSA',
+                    type: "Post",
+                    data: formData,
+                    contentType: false, // Set contentType to false for FormData
+                    processData: false, // Set processData to false for FormData
+                    success: function (data) {
+                        //alert(data)
+                        $("#btn_dknocks").attr("disabled", true);
+                        Swal.fire({
+                            icon: "success",
+                            title: "Success",
+                            showConfirmButton: false,
+                            timer: 3000,
+                            position: 'center',
+                            customClass: {
+                                popup: 'custom-swal-popup-class',
+                            }
+                        });
+
+                        location.reload(true);
+
+                    }
+                })
+            }
+        })
+
+        //BSA Process
+        $("#btn_bsa").click(function () {
+            var loc = $('#loc').val();
+            var latitude = $('#latitude').val();
+            var longitude = $('#longitude').val();
+            var date = $("#date").val();
+
+            var crfrd = $('#crfrd').val();
+            var irrigationc = $('#irrigationc').val();
+            var irrieq = $('#irrieq').val();
+            var cropnm = $('#cropnm').val();
+            var fertilizernm = $('#fertilizernm').val();
+            var interested = $('#interested').val();
+            var problems = $('#problems').val();
+            var commercial = $('#commercial').val();
+            var stopwatchinp = $('#stopwatchinp').val();
+            var customerid = $('#customerid').val();
+            var leadid = $('#leadid').val();
+            var org = '@Session["Groupidh"]';
+            //alert(irrigation)
+            if (crfrd == "") {
+
+            } else if (irrigationc == "") {
+
+            } else if (irrieq == "") {
+
+            } else if (cropnm == "") {
+
+            } else if (fertilizernm == "") {
+
+            } else if (interested == "") {
+
+            }
+            else if (problems == "") {
+
+            }
+            else if (commercial == "") {
+
+            }
+            else if (profitable == "") {
+
+            } else {
+
+                $("#btn_bsa").attr("disabled", true);
+                var formData = new FormData();
+                formData.append("loc", loc);
+                formData.append("latitude", latitude);
+                formData.append("longitude", longitude);
+                formData.append("support", "No");
+                formData.append("crfrd", crfrd);
+                formData.append("irrigationc", irrigationc);
+                formData.append("irrieq", irrieq);
+                formData.append("cropnm", cropnm);
+                formData.append("fertilizernm", fertilizernm);
+                formData.append("interested", interested);
+                formData.append("problems", problems);
+                formData.append("commercial", commercial);
+                formData.append("profitable", profitable);
+                formData.append("stopwatchinp", stopwatchinp);
+                formData.append("customerid", customerid);
+                formData.append("leadid", leadid);
+                formData.append("date", date);
+                $.ajax({
+                    url: '/Home/BSA',
+                    type: "Post",
+                    data: formData,
+                    contentType: false, // Set contentType to false for FormData
+                    processData: false, // Set processData to false for FormData
+                    success: function (data) {
+                        //alert(data)
+
+                        $("#btn_bsa").attr("disabled", true);
+                        Swal.fire({
+                            icon: "success",
+                            title: data,
+                            showConfirmButton: false,
+                            timer: 3000,
+                            position: 'center',
+                            customClass: {
+                                popup: 'custom-swal-popup-class',
+                            }
+                        });
+                    }
+                })
+            }
+        })
+
+        //Demo Process
+        $("#btn_demo").click(function () {
+            var loc = $('#loc').val();
+            var latitude = $('#latitude').val();
+            var longitude = $('#longitude').val();
+            var pproductid = $("#pproductid").val();
+            var pproductname = $('#pproductname').val();
+            var pbrandname = $("#pbrandname").val();
+            var pproductcategory = $("#pproductcategory").val();
+            var pproductunittype = $('#pproductunittype').val();
+            var typeproduct = $('#typeproduct').val();
+            var stopwatchinp = $('#stopwatchinp').val();
+            var customerid = $('#customerid').val();
+            var leadid = $('#leadid').val();
+            var org = '@Session["Groupidh"]';
+            var date = $("#date").val();
+            //alert(irrigation)
+            if (pproductid == "") {
+                alert(pproductid)
+            } else if (pproductname == "") {
+                alert(pproductname)
+            } else if (pbrandname == "") {
+                alert(pbrandname)
+            } else if (pproductcategory == "") {
+                alert(pproductcategory)
+            } else if (pproductunittype == "") {
+                alert(pproductunittype)
+            } else if (typeproduct == "") {
+                alert(typeproduct)
+            }  else {
+                alert("OK")
+                $("#btn_demo").attr("disabled", true);
+                var formData = new FormData();
+                formData.append("loc", loc);
+                formData.append("latitude", latitude);
+                formData.append("longitude", longitude);
+                formData.append("support", "No");
+                formData.append("doubtname", "No Doubts");
+                formData.append("pproductid", pproductid);
+                formData.append("pproductname", pproductname);
+                formData.append("pbrandname", pbrandname);
+                formData.append("pproductcategory", pproductcategory);
+                formData.append("pproductunittype", pproductunittype);
+                formData.append("typeproduct", typeproduct);
+                formData.append("Order","Yes");
+                formData.append("customerid", customerid);
+                formData.append("leadid", leadid);
+                formData.append("stopwatchinp", stopwatchinp);
+                formData.append("date", date);
+                $.ajax({
+                    url: '/Home/Demo',
+                    type: "Post",
+                    data: formData,
+                    contentType: false, // Set contentType to false for FormData
+                    processData: false, // Set processData to false for FormData
+                    success: function (data) {
+                        //alert(data)
+
+                        Swal.fire({
+                            icon: "success",
+                            title: data,
+                            showConfirmButton: false,
+                            timer: 3000,
+                            position: 'center',
+                            customClass: {
+                                popup: 'custom-swal-popup-class',
+                            }
+                        });
+                    }
+                })
+            }
+        })
+
+        //Demo Process
+        $("#btn_demo1").click(function () {
+            var date = $("#date").val();
+            var supemp = $("#supemp").val();
+            var pbproduct = $("#pbproduct").val();
+            var ptype = $("#typeproduct").val();
+            //alert(irrigation)
+            if (date == "" || date == null) {
+                $("#spmsgdemo").text("Please Select Date")
+            } else if (supemp == "" || supemp == null) {
+                $("#spmsgdemo").text("Please Select SR/BE/GL/TL")
+            } else if (pbproduct == "" || pbproduct == null) {
+                $("#spmsgdemo").text("Please Select Product for demo")
+            }
+            else {
+                $("#dvformorder").show();
+                $.ajax({
+                    url: '/Home/GetAllProduct',
+                    type: 'GET',
+                    data: { ptype: ptype },
+                    success: function (response) {
+                        var jsonarray = JSON.parse(response);
+                        if (jsonarray.length != 0) {
+                            var table = $('#tblproductb').DataTable();
+                            //alert(response)
+                            var jsonArray = JSON.parse(response);
+                            table.clear().draw();
+                            $.each(jsonArray, function (index, item) {
+                                var lastbtn = "";
+                                if (item.incart == "In Cart") {
+                                    lastbtn += '<a style="border-radius:15px;" onclick="viewproductincart(' + item.Id + ') class="ms-2 me-1 btn btncolor btn-sm" id="btsignout"> <b> View to Cart</b> </a>';
+                                }
+                                else {
+                                    lastbtn += ' <a style="border-radius:15px;" id="addcart_' + item.Id + '" class="ms-2 me-1 btn btncolor btn-sm" onclick="productincart(' + item.Id + ')"> <b> Add to Cart</b> </a>';
+                                }
+                                table.row.add([
+                                    index + 1,
+                                    "<img/>",
+                                    item.Brand,
+                                    item.Productname,
+                                    item.Quantity + " " + item.punit,
+                                    lastbtn,
+                                ]).draw(false);
+                            });
+                        } else {
+                            alert('No data available for pbproduct.');
+                        }
+                    },
+                    error: function () {
+                        alert('Failed to fetch pbproduct data.');
+                    }
+                });
+            }
+        })
+
+        $("#btn_ordernext").click(function () {
+            var date = $("#date").val();
+            var supemp = $("#supemp").val();
+            var pbproduct = $("#pbproduct").val();
+            var ptype = $("#typeproduct").val();
+            //alert(irrigation)
+            if (date == "" || date == null) {
+                $("#spmsgdemo").text("Please Select Date")
+            } else if (supemp == "" || supemp == null) {
+                $("#spmsgdemo").text("Please Select SR/BE/GL/TL")
+            } else if (pbproduct == "" || pbproduct == null) {
+                $("#spmsgdemo").text("Please Select Product for demo")
+            }
+            else {
+                $("#dvformorder").show();
+                $.ajax({
+                    url: '/Home/ViewSelectedProduct',
+                    type: 'GET',
+                    data: { customerid: '@Session["Customer_id"]', proid: '', leadid: '@Session["Leadid"]', typeproduct: ptype },success: function (response) {
+                        $('#dvformorderselectedproduct').empty();
+                        $('#dvformorderselectedproduct').append(response);
+                    },
+                    error: function () {
+                        alert('Failed to fetch pbproduct data.');
+                    }
+                });
+            }
+        })
+
+
+
+    })
+
+
+    function cartdetails() {
+            var ptype = $("#typeproduct").val();
+             $.ajax({
+                    url: '/Home/ViewSelectedProduct',
+                    type: 'GET',
+                 data: { customerid: '@Session["Customer_id"]', proid: '', leadid: '@Session["Leadid"]', typeproduct: ptype },
+                 success: function (response) {
+                        $('#dvformorderselectedproduct').empty();
+                        $('#dvformorderselectedproduct').append(response);
+                    },
+                    error: function () {
+                        alert('Failed to fetch pbproduct data.');
+                    }
+                });
+        }
+    function productincart(Id) {
+        var cusid = $("#customerid").val();
+        var acid = "#a_" + cusid;
+        var aid = "#addcart_" + Id;
+        var aidb = aid + " b";
+        $.ajax({
+            url: '/Home/Addtocart',
+            type: "GET",
+            dataType: "JSON",
+            data: { id: Id, Customer: cusid },
+            success: function (data) {
+                //alert(data)
+                 $(aidb).text("View In Cart");
+
+                // Change the onclick attribute
+                //$(aid).attr("href", "/User/ViewSelectedProduct?customerid=@ViewBag.customerid&proid=" + Id + "&leadid=@ViewBag.leadid");
+                //var count = parseInt($("#crcount").text());
+                @*if (count == 0) {
+                    $(acid).attr("href", "/User/ViewSelectedProduct?customerid=@ViewBag.customerid&proid=&leadid=@ViewBag.leadid");
+                }
+                count = count + 1;
+                //alert(count)
+                $("#crcount").html(count);*@
+            }
+        })
+    }
+
+    function Viewcheckout() {
+        // alert("ok")
+            var ptype = $("#typeproduct").val();
+            /*alert(ptype)*/
+            $.ajax({
+                url: '/Home/Viewcheckout',
+                type: 'GET',
+                data: { customerid: '@Session["Customer_id"]', proid: '', leadid: '@Session["Leadid"]', typeproduct: ptype },
+                success: function (response) {
+                    $('#dvformordercheckout').empty();
+                    $('#dvformordercheckout').append(response);
+                    $("#dvcard_bborders").show();
+                    $("#dvcard_hborders").addClass("theadb");
+                    $("#btn_vieworder").hide();
+                },
+                error: function () {
+                    alert('Failed to fetch pbproduct data.');
+                }
+            });
+    }
+
+</script>
+
+<style>
+    .totals .totals-item {
+        float: right;
+        clear: both;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+        .totals .totals-item label {
+            float: left;
+            clear: both;
+            width: 79%;
+            text-align: right;
+        }
+
+        .totals .totals-item .totals-value {
+            float: right;
+            width: 21%;
+            text-align: right;
+        }
+
+    .totals .totals-item-total {
+        font-family: "HelveticaNeue-Medium", "Helvetica Neue Medium";
+    }
+</style>
+<script>
+    $(document).ready(function () {
+        
+        $(document).on('click', '#btn_chdetails', function () {
+            //Details
+            $("#btn_chdetails").hide();
+            $("#dvcard_bdetails").show();
+            $("#dvcard_hdetails").removeClass("bg-light");
+            $("#dvcard_hdetails").addClass("theadb");
+
+
+            $("#lbl_details").html('Customer Details');
+            $("#detnamenum").html('')
+
+            //Address
+            $("#btn_chaddress").hide();
+            $("#dvcard_baddredd").hide();
+            $("#dvcard_haddredd").addClass("bg-light");
+            $("#dvcard_haddredd").removeClass("theadb");
+
+            //Order Summery
+            $("#dvcard_bborders").hide();
+            $("#dvcard_hborders").addClass("bg-light");
+            $("#dvcard_hborders").removeClass("theadb");
+            $("#btn_vieworder").hide();
+
+            //Payment Method
+            $("#dvcard_bconorder").hide();
+            $("#dvcard_hconorder").removeClass("theadb");
+            $("#dvcard_hconorder").addClass("bg-light");
+
+            //continue
+            $("#dv_continue").show();
+            $("#btn_conorder").hide();
+
+        })
+            $(document).on('click', '#btn_chaddress', function () {
+            //Address
+            $("#btn_chaddress").hide();
+            $("#dvcard_baddredd").show();
+            $("#dvcard_haddredd").removeClass("bg-light");
+            $("#dvcard_haddredd").addClass("theadb");
+
+            $("#lbl_address").html('Delivery Adderss');
+            $("#spanaddress").html('')
+
+
+            //Details
+            $("#btn_chdetails").show();
+            $("#dvcard_bdetails").hide();
+            $("#dvcard_hdetails").addClass("bg-light");
+            $("#dvcard_hdetails").removeClass("theadb");
+
+            //Order Summery
+            $("#dvcard_bborders").hide();
+            $("#dvcard_hborders").addClass("bg-light");
+            $("#dvcard_hborders").removeClass("theadb");
+            $("#btn_vieworder").hide();
+
+            //Payment Method
+            $("#dvcard_bconorder").hide();
+            $("#dvcard_hconorder").removeClass("theadb");
+            $("#dvcard_hconorder").addClass("bg-light");
+
+            //continue
+            $("#dv_continue").show();
+            $("#btn_conorder").hide();
+
+        })
+             $(document).on('click', '#btn_vieworder', function () {
+            //Address
+            $("#btn_chaddress").show();
+            $("#dvcard_baddredd").hide();
+            $("#dvcard_haddredd").addClass("bg-light");
+            $("#dvcard_haddredd").removeClass("theadb");
+
+            $("#lbl_ordersummary").html('Order Summary');
+            $("#spordersummary").html('')
+
+            //Details
+            $("#btn_chdetails").show();
+            $("#dvcard_bdetails").hide();
+            $("#dvcard_hdetails").addClass("bg-light");
+            $("#dvcard_hdetails").removeClass("theadb");
+
+            //Order Summery
+            $("#dvcard_bborders").show();
+            $("#dvcard_hborders").removeClass("bg-light");
+            $("#dvcard_hborders").addClass("theadb");
+
+            //Payment Method
+            $("#dvcard_bconorder").hide();
+            $("#dvcard_hconorder").removeClass("theadb");
+            $("#dvcard_hconorder").addClass("bg-light");
+
+            //continue
+            $("#dv_continue").show();
+            $("#btn_conorder").show();
+            $("#btn_vieworder").hide();
+        })
+           $(document).on('click', '#btn_conorder', function () {
+            $("#dv_continue").hide();
+            //$("#dvcard_bconorder").show();
+            //$("#dvcard_hconorder").addClass("theadb");
+        })
+
+        $(document).on('click', '#btn_nextdetails', function () {
+            var cname = $("#cname").val();
+            var cnmobile = $("#cnmobile").val();
+            if (cnmobile == null || cnmobile == "") {
+                $("#sppersonal").text("Warning : Enter Mobile");
+            } else if (cname == null || cname == "") {
+                $("#sppersonal").text("Warning : Enter Name");
+            } else {
+                $("#dvcard_hdetails").removeClass("theadb");
+                $("#dvcard_hdetails").addClass("bg-light");
+                $("#btn_chdetails").show();
+                $("#dvcard_bdetails").hide();
+                $("#lbl_details").html('Customer Details <i class="fa fa-check text-success" fa="fa_details"></i>');
+                $("#detnamenum").html('<b>' + cname + '</b> +91 ' + cnmobile)
+                $("#lblmobile").html(cnmobile);
+                $("#lbl_address").html('Delivery Adderss');
+                $("#spanaddress").html('')
+
+                $("#btn_chaddress").hide();
+                $("#dvcard_baddredd").show();
+                $("#dvcard_haddredd").addClass("theadb");
+                $("#btn_vieworder").hide();
+            }
+        })
+            $(document).on('click', '#btn_nextaddress', function () {
+            var shippingaddr = $("#shippingaddr").val();
+            var shippingpostal = $("#shippingpostal").val();
+
+            var shippingblock = $("#shippingblock").val();
+            var shippingtahsil = $("#shippingtahsil").val();
+
+            var shippingdist = $("#shippingdist").val();
+            var shippingstate = $("#shippingstate").val();
+
+            if (shippingaddr == null || shippingaddr == "") {
+                $("#spshpping").text("Warning : Enter Shipping Address");
+            }
+            else if (shippingblock == null || shippingblock == "") {
+                $("#spshpping").text("Warning : Enter Block");
+            } else if (shippingtahsil == null || shippingtahsil == "") {
+                $("#spshpping").text("Warning : Enter Tahsil");
+            } else if (shippingpostal == null || shippingpostal == "") {
+                $("#spshpping").text("Warning : Enter Shipping Postal Code");
+            }
+            else if (shippingdist == null || shippingdist == "") {
+                $("#spshpping").text("Warning : Enter District");
+            } else if (shippingstate == null || shippingstate == "") {
+                $("#spshpping").text("Warning : Enter State");
+            } else {
+                var fulladdress = shippingaddr + "," + shippingblock + "," + shippingtahsil + "," + shippingdist + "," + shippingstate + "," + shippingpostal;
+                $("#dvcard_haddredd").removeClass("theadb");
+                $("#dvcard_haddredd").addClass("bg-light");
+                $("#btn_chaddress").show();
+                $("#dvcard_baddredd").hide();
+                $("#lbl_address").html('Delivery Adderss <i class="fa fa-check text-success" id="fa_address"></i>');
+                $("#spanaddress").html('<b>' + fulladdress + '</b>');
+                $("#lbl_ordersummary").html('Order Summary');
+                $("#spordersummary").html('')
+
+                //$("#btn_chaddress").hide();
+                $("#dvcard_bborders").show();
+                $("#dvcard_hborders").addClass("theadb");
+
+                $("#btn_conorder").show();
+                $("#btn_vieworder").hide();
+            }
+        })
+             $(document).on('click', '#btn_conorder', function () {
+            $("#dv_continue").hide();
+            $("#dvcard_bconorder").show();
+            $("#dvcard_hconorder").addClass("theadb");
+
+            $("#lbl_ordersummary").html('Order Summary <i class="fa fa-check text-success" id="fa_summary"></i>');
+           // $("#spordersummary").html('<b> dt.Rows.Count Item</b>')
+            $("#sptotalpayble").html('<b class="text-danger">Total Amount : Rs. ' + $("#totalval").val() + '</b>')
+
+
+            $("#dvcard_bborders").hide();
+            $("#dvcard_hborders").removeClass("theadb");
+            $("#dvcard_hborders").addClass("bg-light");
+            $("#btn_vieworder").show();
+
+           /* var totalval = $("#totalval").val();*/
+            //if (parseFloat(totalval) > 10000) {
+            //    $("#scod").hide();
+            //    $("#lblscod").hide();
+            //}
+                                })
+
+            
+    })
+</script>
+<script>
+    $(document).ready(function () {
+        $("#contact_info").hide();
+        $(".hidden").hide();
+        $("#dvchequedate").hide();
+        //$("#payslip").hide();
+        $(document).on('change', 'input[name="payment"]', function () {
+            $(".hidden").hide();
+            $("#dvcard_bconorder").show();
+            $("#dvchequedate").hide();
+            var selectedValue = $('input[name="payment"]:checked').val();
+            //alert(selectedValue)
+            //$("#payslip").show();
+            if (selectedValue == "upi") {
+                $("#upiDetails").show();
+            } else if (selectedValue == "qr") {
+                $("#qrCodeDetails").show();
+            } else if (selectedValue == "check") {
+                $("#dvchequedate").show();
+                /*$("#cashAmount").show();*/
+            } else if (selectedValue == "cash") {
+                /*$("#cashAmount").show();*/
+            }
+        }); // Close the change event handler
+
+            $(document).on('change', '#addresscheck', function () {
+            var addressCheckbox = document.getElementById("addresscheck");
+
+            // Check if the checkbox is checked
+            if (addressCheckbox.checked) {
+                $("#shippingaddr").val("");
+                $("#shippingpostal").val("");
+                $("#shippingblock").val("");
+                $("#shippingtahsil").val("");
+                $("#shippingdist").val("");
+                $("#shippingstate").val("");
+            } else {
+                @*$("#shippingaddr").val("@address");
+                $("#shippingpostal").val("@pincode");
+                $("#shippingblock").val("@block");
+                $("#shippingtahsil").val("@tahsil");
+                $("#shippingdist").val("@district");
+                $("#shippingstate").val("@state");*@
+            }
+
+        });
+        $(document).on('change', '#contactcheck', function () {
+            var addressCheckbox = document.getElementById("contactcheck");
+
+            // Check if the checkbox is checked
+            if (addressCheckbox.checked) {
+                $("#contact_info").show();
+                $("#cnmailuid").val("");
+                $("#cnmobile").val("");
+            } else {
+
+                $("#contact_info").hide();
+                @*$("#cnmailuid").val("@mail");
+                $("#cnmobile").val("@mobile");*@
+            }
+
+        });
+
+        $(document).on('click', '#confirm_order', function () {
+
+            var utrcheck = $("#utrcheck").val();
+            var selectedValue = $('input[name="payment"]:checked').val();
+            if (selectedValue != null && selectedValue != "") {
+                
+                if (selectedValue == "upi" || selectedValue == "qr" || selectedValue == "cash") {
+                    if (utrcheck != "") {
+                        $("#confirm_order").hide();
+
+                        $("#dvformconfirmpayment").show();
+                    }
+                    else {
+                        $("#confirm_order").show();
+                        $("#spvalidmsg").text("Warning : Please Enter Valid UTR no or cheque No. If Payment Type Cash Then Enter Amount");
+                    }
+                }
+                else if (selectedValue == "check") {
+                    if (utrcheck == "" || utrcheck == null) {
+                        $("#confirm_order").show();
+                        $("#spvalidmsg").text("Warning : Please Enter Valid UTR no or cheque No. If Payment Type Cash Then Enter Amount");
+                    }
+                    else if (chequedate == "") {
+                        $("#confirm_order").show();
+                        $("#spvalidmsg").text("Warning : Please Select cheque date");
+                    }
+                    else {
+                        $("#confirm_order").hide();
+
+                        $("#dvformconfirmpayment").show();
+                    }
+                }
+
+            }
+            else {
+                $("#spvalidmsg").text("Please Choose Any One Payment Option");
+            }
+
+        })
+
+
+    });
+</script>
+<script>
+    function incrementCart(customerid, ProductId, cartId, Quantity, price, ptype, offerprice, bulkprice) {
+        //alert("incrementCart")
+        var Quantity1 = parseInt(Quantity) + 1;
+        $.ajax({
+            url: '/Home/Increment_InCart', // Controller action URL
+            type: 'POST',
+            data: { customerid: customerid, ProductId: ProductId, CartId: cartId, ProductQty: Quantity1, Price: price, Ptype: ptype, offerprice: offerprice, bulkprice: bulkprice },
+            success: function (result) {
+                alert("Success")
+                cartdetails();
+            }
+        });
+    }
+</script>
+<script>
+    function decrementCart(customerid, ProductId, cartId, Quantityp, price, ptype, offerprice, bulkprice) {
+        var Quantity = parseInt(Quantityp)
+        if (Quantity > 1) {
+            var Quantity1 = Quantity - 1;
+            $.ajax({
+                url: '/Home/Decrement_InCart', // Controller action URL
+                type: 'POST',
+                data: { customerid: customerid, ProductId: ProductId, CartId: cartId, ProductQty: Quantity1, Price: price, Ptype: ptype, offerprice: offerprice, bulkprice: bulkprice },
+                success: function (result) {
+                    cartdetails();
+                }
+            });
+        }
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $("#btn_final_submit").click(function () {
+            var utrcheck = $("#utrcheck").val();
+            var chequedate = $("#chequedate").val();
+            var amount = $("#amount").val();
+
+
+            var Expectedfrom = $("#Expectedfrom").val();
+            var Expectedto = $("#Expectedto").val();
+            var expectedRemark = $("#expectedRemark").val();
+
+            var driverid = $("#driverid").val();
+            var vehicleid = $("#vehicleid").val();
+            var drivername = $("#drivername").val();
+            var drivercontact = $("#drivercontact").val();
+
+            var supempc = $("#supempc").val();
+            var vehicletype = $("#vehicletype").val();
+
+            var pproductid = $("#pproductid").val();
+            var pproductname = $("#pproductname").val();
+            var pbrandname = $("#pbrandname").val();
+            var pproductcategory = $("#pproductcategory").val();
+            var pproductunittype = $("#pproductunittype").val();
+
+
+
+            var selectedValue = $('input[name="payment"]:checked').val();
+            if (selectedValue != null && selectedValue != "") {
+                //alert(utrcheck)
+                if (selectedValue == "upi" || selectedValue == "qr" || selectedValue == "cash") {
+                    if (utrcheck != "") {
+                        if (supempc == "" || supempc == null) {
+                            $("#spvalidmsg").text("Please Choose Payment Confirm by");
+                        } else if (Expectedfrom == "" || Expectedfrom == null || Expectedto == "" || Expectedto == null || expectedRemark == "" || expectedRemark == null) {
+                            $("#spvalidmsg").text("Please Choose Expected Delivery From and To date and Enter Remark");
+                        } else if (vehicletype == "" || vehicletype == null || vehicleid == "" || vehicleid == null) {
+                            $("#spvalidmsg").text("Please Choose vehicle type and Vehicle");
+                        } else if (drivername == "" || drivername == null || drivercontact == "" || drivercontact == null) {
+                            $("#spvalidmsg").text("Please Select Driver If other then Enter Driver name and Contact");
+                        }
+                        else {
+
+                        /*if (payslip != null && payslip != "") {*/
+                        //alert("Order Confirmed");
+                        var restable = $("#tblproduct").DataTable();
+                        // Remove the last row from the DataTable
+                        var restableHeadings = restable.columns().header().toArray().map(function (heading) {
+                            return heading.textContent;
+                        });
+                        var restableData = restable.rows().data().toArray();
+                        //alert(restable.rows().count());
+                        // Create an object to hold the table data and headings
+                        var restableObject = {
+                            tableHeadings: restableHeadings,
+                            tableData: restableData
+                        };
+                       // alert(restableHeadings); alert(restableData);
+                        //alert(JSON.stringify(restableObject))
+                        /* var payslip = $('#payslip')[0].files[0];*/
+                        Swal.fire({
+                            title: "<i class='fa fa-spinner fa-spin'></i>",
+                            text: "Please wait while we process your request...",
+                            showConfirmButton: false,
+                            position: 'center',
+                            customClass: {
+                                popup: 'custom-swal-popup-class',
+                            },
+                            allowOutsideClick: false,
+                            allowEscapeKey: false
+                        });
+                       // alert($("#totalpriceall").val());
+                        var formData = new FormData();
+
+                        formData.append("restableObject", JSON.stringify(restableObject));
+                        /* formData.append('payslip', payslip);*/
+                        formData.append('utrcheck', utrcheck);
+                        //formData.append("customerid", '@ViewBag.customerid');
+                        //formData.append("leadid", '@ViewBag.leadid');
+                        formData.append("cname", $("#cname").val());
+                        formData.append("cnmailuid", $("#cnmailuid").val());
+                        formData.append("cnmobile", $("#cnmobile").val());
+                        formData.append("shippingaddr", $("#shippingaddr").val());
+                        formData.append("shippingpostal", $("#shippingpostal").val());
+                        formData.append("shippingblock", $("#shippingblock").val());
+                        formData.append("shippingtahsil", $("#shippingtahsil").val());
+                        formData.append("shippingdist", $("#shippingdist").val());
+                        formData.append("shippingstate", $("#shippingstate").val());
+                        formData.append("mail", $("#cnmailuid").val());
+                        formData.append("paymentmethod", $('input[name="payment"]:checked').val());
+                        formData.append("totalprice", $("#totalpriceall").val());
+                        formData.append('chequedate', chequedate);
+                        formData.append('Expectedfrom', Expectedfrom);
+                        formData.append('Expectedto', Expectedto);
+                        formData.append('expectedRemark', expectedRemark);
+
+                        formData.append('driverid', driverid);
+                        formData.append('vehicleid', vehicleid);
+                        formData.append('drivername', drivername);
+                        formData.append('drivercontact', drivercontact);
+
+                        formData.append("loc", $("#loc").val());
+                        formData.append("latitude", $("#latitude").val());
+                            formData.append("longitude", $("#longitude").val());
+
+                            formData.append('pproductid', pproductid);
+                            formData.append('pproductname', pproductname);
+                            formData.append('pbrandname', pbrandname);
+                            formData.append('pproductcategory', pproductcategory);
+                            formData.append('pproductunittype', pproductunittype);
+                        // Send the table object to the controller using AJAX
+                        $.ajax({
+                            url: '/Home/FinalSubmit',
+                            type: 'Post',
+                            data: formData,
+                            contentType: false, // Set contentType to false for FormData
+                            processData: false, // Set processData to false for FormData
+                            success: function (response) {
+                                //alert(response);
+                                //alert(response)
+                                $("#confirm_order").show();
+                                if (response == "Success") {
+                                    
+                                    window.location.href = "/Home/salerentry";
+                                }
+                            },
+                            error: function (xhr, status, error) {
+                                // Handle any error that occurs during the AJAX request
+                                $("#confirm_order").show();
+                                $("#spvalidmsg").text("Error");
+                                alert("Error")
+                            }
+                        });
+
+                        //}
+                        //else {
+                        //    $("#confirm_order").show();
+                        //    $("#spvalidmsg").text("Warning : Please Upload Payment Receipt");
+                        //}
+
+                        }
+                    }
+                    else {
+                        $("#confirm_order").show();
+                        /* $("#spvalidmsg").text("Warning : Please Upload Payment Receipt");*/
+                        $("#spvalidmsg").text("Warning : Please Enter Valid UTR no or cheque No. If Payment Type Cash Then Enter Amount");
+                    }
+                }
+                else if (selectedValue == "check") {
+                    if (utrcheck == "" || utrcheck == null) {
+                        $("#confirm_order").show();
+                        /* $("#spvalidmsg").text("Warning : Please Upload Payment Receipt");*/
+                        $("#spvalidmsg").text("Warning : Please Enter Valid UTR no or cheque No. If Payment Type Cash Then Enter Amount");
+                    }
+                    else if (chequedate == "") {
+                        $("#confirm_order").show();
+                        /* $("#spvalidmsg").text("Warning : Please Upload Payment Receipt");*/
+                        $("#spvalidmsg").text("Warning : Please Select cheque date");
+                    }
+                    else {
+                        if (supempc == "" || supempc == null) {
+                            $("#spvalidmsg").text("Please Choose Payment Confirm by");
+                        } else if (Expectedfrom == "" || Expectedfrom == null || Expectedto == "" || Expectedto == null || expectedRemark == "" || expectedRemark == null) {
+                            $("#spvalidmsg").text("Please Choose Expected Delivery From and To date and Enter Remark");
+                        } else if (vehicletype == "" || vehicletype == null || vehicleid == "" || vehicleid == null) {
+                            $("#spvalidmsg").text("Please Choose vehicle type and Vehicle");
+                        } else if (drivername == "" || drivername == null || drivercontact == "" || drivercontact == null) {
+                            $("#spvalidmsg").text("Please Select Driver If other then Enter Driver name and Contact");
+                        }
+                        else {
+                            //alert("ok")
+                            /*if (payslip != null && payslip != "") {*/
+                            //alert("Order Confirmed");
+                            var restable = $("#tblproduct").DataTable();
+                            // Remove the last row from the DataTable
+                            var restableHeadings = restable.columns().header().toArray().map(function (heading) {
+                                return heading.textContent;
+                            });
+                            var restableData = restable.rows().data().toArray();
+                            //alert(restable.rows().count());
+                            // Create an object to hold the table data and headings
+                            var restableObject = {
+                                tableHeadings: restableHeadings,
+                                tableData: restableData
+                            };
+                            // alert(restableHeadings); alert(restableData);
+                            // alert(JSON.stringify(restableObject))
+                            /* var payslip = $('#payslip')[0].files[0];*/
+                            Swal.fire({
+                                title: "<i class='fa fa-spinner fa-spin'></i>",
+                                text: "Please wait while we process your request...",
+                                showConfirmButton: false,
+                                position: 'center',
+                                customClass: {
+                                    popup: 'custom-swal-popup-class',
+                                },
+                                allowOutsideClick: false,
+                                allowEscapeKey: false
+                            });
+                            //alert($("#totalpriceall").val());
+                            var formData = new FormData();
+
+                            formData.append("restableObject", JSON.stringify(restableObject));
+                            /* formData.append('payslip', payslip);*/
+                            formData.append('utrcheck', utrcheck);
+                            //formData.append("customerid", '@ViewBag.customerid');
+                            //formData.append("leadid", '@ViewBag.leadid');
+                            formData.append("cname", $("#cname").val());
+                            formData.append("cnmailuid", $("#cnmailuid").val());
+                            formData.append("cnmobile", $("#cnmobile").val());
+                            formData.append("shippingaddr", $("#shippingaddr").val());
+                            formData.append("shippingpostal", $("#shippingpostal").val());
+                            formData.append("shippingblock", $("#shippingblock").val());
+                            formData.append("shippingtahsil", $("#shippingtahsil").val());
+                            formData.append("shippingdist", $("#shippingdist").val());
+                            formData.append("shippingstate", $("#shippingstate").val());
+                            formData.append("mail", $("#cnmailuid").val());
+                            formData.append("paymentmethod", $('input[name="payment"]:checked').val());
+                            formData.append("totalprice", $("#totalpriceall").val());
+                            formData.append('chequedate', chequedate);
+                            formData.append('Expectedfrom', Expectedfrom);
+                            formData.append('Expectedto', Expectedto);
+                            formData.append('expectedRemark', expectedRemark);
+
+                            formData.append('driverid', driverid);
+                            formData.append('vehicleid', vehicleid);
+                            formData.append('drivername', drivername);
+                            formData.append('drivercontact', drivercontact);
+
+                            formData.append("loc", $("#loc").val());
+                            formData.append("latitude", $("#latitude").val());
+                            formData.append("longitude", $("#longitude").val());
+
+                            formData.append('pproductid', pproductid);
+                            formData.append('pproductname', pproductname);
+                            formData.append('pbrandname', pbrandname);
+                            formData.append('pproductcategory', pproductcategory);
+                            formData.append('pproductunittype', pproductunittype);
+                            // Send the table object to the controller using AJAX
+                            $.ajax({
+                                url: '/Home/FinalSubmit',
+                                type: 'Post',
+                                data: formData,
+                                contentType: false, // Set contentType to false for FormData
+                                processData: false, // Set processData to false for FormData
+                                success: function (response) {
+                                    //alert(response);
+                                    //alert(response)
+                                    $("#confirm_order").show();
+                                    if (response == "Success") {
+                                        window.location.href = "/Home/salerentry";
+                                    }
+                                },
+                                error: function (xhr, status, error) {
+                                    // Handle any error that occurs during the AJAX request
+                                    $("#confirm_order").show();
+                                    $("#spvalidmsg").text("Error");
+                                    alert("Error")
+                                }
+                            });
+
+                            //}
+                            //else {
+                            //    $("#confirm_order").show();
+                            //    $("#spvalidmsg").text("Warning : Please Upload Payment Receipt");
+                            //}
+                        }
+                    }
+                }
+
+
+            }
+            else {
+                $("#confirm_order").show();
+                $("#spvalidmsg").text("Warning : Please Choose Any One Payment Option");
+            }
+        })
+    })
+</script>
+
+
+<script>
+    var textBox = "";
+    var span = "";
+    var customeridval = "", ProductIdval = "", cartIdval = "", priceval = "", ptypeval = "", offerpriceval = "", bulkpriceval = "";
+    $(document).ready(function () {
+
+
+        // Attach a click event listener to the document
+        $(document).click(function (event) {
+            // alert(textBox);
+            // Check if the click occurred outside the textbox and the textbox has a non-empty value
+            if (textBox !== "" && !textBox.is(event.target) && textBox.val() !== "") {
+                handleClickOutside(textBox, span);
+            }
+        });
+
+
+    });
+    function quantity(textboxId, spanid, customeridv, ProductIdv, cartIdv, pricev, ptypev, offerpricev, bulkpricev) {
+        //alert("jkh")
+        var textBoxIdSelector = "#" + textboxId;
+        textBox = $(textBoxIdSelector);
+        var spanIdSelector = "#" + spanid;
+        span = $(spanIdSelector);
+
+
+        customeridval = customeridv, ProductIdval = ProductIdv, cartIdval = cartIdv, priceval = pricev, offerpriceval = offerpricev, bulkpriceval = bulkpricev;
+        ptypeval = ptypev;
+        span.hide();
+        textBox.show();
+
+    }
+
+    function handleClickOutside(textbox, span) {
+        var textBoxValue = textbox.val();
+        //alert('Textbox value: ' + textBoxValue);
+        textbox.val(""); // Clear the textbox value
+        //alert(priceval)
+        var customerid = customeridval;
+        var ProductId = ProductIdval;
+        var cartId = cartIdval;
+        var price = priceval;
+        var ptype = ptypeval;
+        var offerprice = offerpriceval;
+        var bulkprice = bulkpriceval;
+
+        var Quantity = parseInt(textBoxValue);
+        //alert(Quantity);
+        //alert(price)
+        if (Quantity > 0) {
+            $.ajax({
+                url: '/Home/Decrement_InCart', // Controller action URL
+                type: 'POST',
+                data: { customerid: customerid, ProductId: ProductId, CartId: cartId, ProductQty: Quantity, Price: price, Ptype: ptype, offerprice: offerprice, bulkprice: bulkprice },
+                success: function (result) {
+                    cartdetails()
+                }
+            });
+        }
+
+
+
+        span.show();
+        textBox.hide();
+    }
+</script>
+
+<script>
+    function deleteRecord(customerid, ProductId, cartId) {
+        let text = "If You want to Delete\n Press OK.";
+        Swal.fire({
+            title: "Confirmation",
+            text: text,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#009846",
+            confirmButtonText: "Ok",
+            cancelButtonColor: "#00A0E3",
+            cancelButtonText: "Cancel",
+            allowOutsideClick: false,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/Home/DeletefromCart',
+                    type: 'POST',
+                    data: { Customerid: customerid, ProductId: ProductId, CartId: cartId },
+                    dataType: "JSON",
+                    success: function (data) {
+                        cartdetails()
+                    },
+                });
+            }
+        });
+    }
+</script>
+
+
+<script>
+    // Function to fetch state and city details based on pincode using postalpincode.in API
+    function getStateCityDetails() {
+        // Construct the API URL
+        var pincode = $("#pincode").val();
+
+        if (pincode.length == 6) {
+            //alert(pincode)
+            const apiUrl = `https://api.postalpincode.in/pincode/${pincode}`;
+
+            // Make a GET request to the API
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const postOfficeData = data[0];
+                    if (postOfficeData && postOfficeData.Status === 'Success') {
+                        const state = postOfficeData.PostOffice[0].State;
+                        const district = postOfficeData.PostOffice[0].District;
+                        $("#Statename").val(state);
+                        $("#Cityname").val(district);
+
+                        //alert(`State: ${state}, City: ${city}`);
+                    } else {
+                        //alert('Invalid pincode or data not found.');
+                        var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert"> Invalid pincode or data not found. <button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+                        $(alertElement).insertBefore('#alert-container');
+                        setTimeout(function () {
+                            $('#alert').alert('close');
+                        }, 5000);
+
+                        return false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    }
+
+
+</script>
+
+@*<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCpVqODKtrTUdriBGR-wRVulkc7AnwBhWw&callback=initMap&libraries=maps,marker&v=beta" async defer></script>
+
+    <script>
+        function initMap() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    var latitude = position.coords.latitude;
+                    var longitude = position.coords.longitude;
+                    var location = { lat: latitude, lng: longitude };
+                    //alert(latitude + " ------- " + longitude)
+                    var geocoder = new google.maps.Geocoder;
+                    //alert(location)
+                    geocoder.geocode({ 'location': location }, function (results, status) {
+                        if (status === 'OK') {
+                            if (results[0]) {
+                                var address = results[0].formatted_address;
+                                document.getElementById("location").innerHTML = address;
+                                document.getElementById("loc").value = address;
+                                document.getElementById("latitude").value = position.coords.latitude;
+                                document.getElementById("longitude").value = position.coords.longitude;
+                            } else {
+                                alert('No address found for the current location.');
+                            }
+                        } else {
+                            alert('Geocoder failed due to: ' + status);
+                        }
+                    });
+                }, function (error) {
+                    alert("An error occurred while retrieving the location: " + error.message);
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+    </script>*@
+
+

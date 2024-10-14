@@ -1,0 +1,277 @@
+﻿
+@{
+    ViewBag.Title = "Regenerate";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+@using System.Data;
+@{
+    DbManager db = new DbManager();
+    string query = "select * from  " + ViewBag.t + "  where Id='" + ViewBag.i + "' order by Id desc";
+    DataTable dt = db.GetAllRecord(query);
+}
+
+<script src="https://rawgit.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i>  Regenerate and Resend Receipt</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+
+@if (dt.Rows.Count > 0)
+{
+    if (ViewBag.rt == "Advance Payment Receipt")
+    {
+        string jhsd = "select top(1) * from tbl_order_transaction where Order_id='" + dt.Rows[0]["Order_id"] + "'";
+        DataTable trdt = db.GetAllRecord(jhsd);
+        string squery = "select * from tbl_order where Order_id='" + dt.Rows[0]["Order_id"] + "' and Status='Active' and Order_status!='Cancelled'";
+        DataTable sdt = db.GetAllRecord(squery);
+        string productname = "";
+        if (sdt.Rows.Count > 0)
+        {
+            for (int i = 0; i < sdt.Rows.Count; i++)
+            {
+                if (productname == "")
+                {
+                    productname = sdt.Rows[i]["Product_name"] + "";
+                }
+                else
+                {
+                    productname += ", " + sdt.Rows[i]["Product_name"] + " ";
+                }
+            }
+        }
+
+        <div class="row  row-cols-sm-1">
+            <div class="col" id="dvinvoice">
+                <div class='row row-cols-1 row-cols-sm-1 p-2 pb-0 no-print' id='invoice1'>
+                    <div class='col'>
+                        <table class='table-bordered border-1 border-dark print-div' style='border:3px solid black'>
+                            <tr> <td colspan='8'> <div class='row mb-2'></div><div class='row mb-2'> <div class='col-3 col-sm-3 justify-content-start'> <img src=' @URL.MainUrl()Content/Img/Growfast Logo.png' style='height:40px;' /> <br /> </div> <div class='col-7 col-sm-7 text-center '> <label>Corporate office - RS Plaza 3rd floor Ring Road Kalyanpur near Jagrani Hospital Lucknow (U.P)-226022<br /> Regional office - Plot no.12, karamveer Nagar, Nizamuddin Chouraha A&P International School, Bhopal </label><br /> <label class='fw-bold'>PHONE NO- 9415344987</label><br /> <label>  Email: agriculturegod@gmail.com</label><br /><label class='fw-bold pe-2'>Website: www.growfastgroups.com </label> </div> <div class='col-2 col-sm-2 text-start pe-1'> </div></div> <div class='row mb-1'><div class='col-8 col-sm-8 justify-content-start'>  </div></div> </td> </tr>
+                            <tr class='text-black'> <td class='text-center' colspan='8'> <label><b>ADVANCE RECEIPT (CUSTOMER COPY)</b></label> </td> </tr>
+                            <tr class='text-black'><td class='text-left' style='width: 50%;'> <label><b>ORDER NO :  @dt.Rows[0]["Order_id"] </b></label></td><td class='text-left' style='width: 50%;'><label><b>DATE : @DateTime.Now.ToString("dd-MM-yyyy") </b></label></td> </tr>
+                            <tr class='text-black'><td class='text-left' style='width: 50%;'><label><b>RECEIVED WITH THANKS FROM  </b><br> @dt.Rows[0]["Customer_name"] <br> @dt.Rows[0]["Customer_address"] <br>MOB -  @dt.Rows[0]["Customer_mobile"] </label> </td><td class='text-left' style='width: 50%;'><label><label><img src=' @URL.MainUrl()Content/Img/verified.png' style='height: 35px; ' />verified</label></label></td></tr>
+                            <tr class='text-black'> <td class='text-left' colspan='8'> <label><b>ADVANCE AMOUNT  OF  RS.  @Convert.ToDecimal(trdt.Rows[0]["Amount"] + "").ToString("0.00") /-  by  @trdt.Rows[0]["Payment_method"] </b></label></td> </tr>
+                            <tr class='text-black'> <td class='text-left' colspan='8'> <label><b>PRODUCT-  @productname  </b></label> </td> </tr>
+                            <tr><td><label>By Growfast</label></td><td><label><b>PAYMENT DATE :  @DateTime.Parse(trdt.Rows[0]["Datetime"] + "").ToString("dd-MM-yyyy") </b></label></td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-2 mb-2 row-cols-1 row-cols-sm-1">
+
+            <div class="col justify-content-end d-flex">
+                <button type="button" class="btn btncolor me-2" style="height:30px;width:100px" id="sendreceipt" onclick="Generate('gen', '@dt.Rows[0]["Order_id"]', '@ViewBag.i', '@dt.Rows[0]["Customer_mobile"]', '@dt.Rows[0]["Customer_name"]', '@Session["suid"]',  '@Session["suname"]', '', '@ViewBag.t', '@ViewBag.c','@dt.Rows[0]["Advancepdf"]','Advance Payment Receipt')">Generate</button> 
+                <button class='btn btncolor' style="height:30px;width:200px" onclick="Generate('gensend', '@dt.Rows[0]["Order_id"]', '@ViewBag.i', '@dt.Rows[0]["Customer_mobile"]', '@dt.Rows[0]["Customer_name"]', '@Session["suid"]',  '@Session["suname"]', '', '@ViewBag.t', '@ViewBag.c','@dt.Rows[0]["Advancepdf"]','Advance Payment Receipt')">Generate and Send</button>
+            </div>
+        </div>
+    }
+    else if (ViewBag.rt == "Product Delivery Receipt")
+    {
+        string squery12 = "select * from tbl_order where Order_id='" + dt.Rows[0]["Order_id"] + "' and Status='Active' and Order_status!='Cancelled'";
+        DataTable dt12 = db.GetAllRecord(squery12);
+        string squery12s = "select * from tbl_order_summary where Order_id='" + dt.Rows[0]["Order_id"] + "'";
+        DataTable dt12s = db.GetAllRecord(squery12s);
+
+        string descofgoods = "";
+        if (dt12.Rows.Count > 0)
+        {
+            if (dt.Rows[0]["Product_type"] + "" == "Plant")
+            {
+                if (dt12.Rows.Count > 1)
+                {
+                    descofgoods = dt.Rows[0]["Product_name"] + " " + dt.Rows[0]["Product_quantity"] + " plants with other product";
+                }
+                else
+                {
+                    descofgoods = dt.Rows[0]["Product_name"] + " " + dt.Rows[0]["Product_quantity"] + " plants";
+                }
+            }
+            else
+            {
+                if (dt12.Rows.Count > 1)
+                {
+                    descofgoods = dt.Rows[0]["Product_name"] + " " + dt.Rows[0]["Product_quantity"] + " unit with other product";
+                }
+                else
+                {
+                    descofgoods = dt.Rows[0]["Product_name"] + " " + dt.Rows[0]["Product_quantity"] + " unit";
+                }
+            }
+
+
+        }
+        <div class="row">
+            <div class="col" id="dvinvoice">
+                <div class='row row-cols-1 row-cols-sm-1 p-1 pb-0 no-print me-2' id='invoice1'>
+                    <div class='col'>
+                        <table class='table-bordered border-1 border-dark print-div' style='border:3px solid black;width:100%'> <tr> <td colspan='2'><div class='row'> <div class='col-3 col-sm-3 justify-content-start'> <img src='@URL.MainUrl()Content/Img/Growfast Logo.png' style='height:50px;' />  </div> <div class='col-8 col-sm-8 text-center text-capitalize '> </div> </div><br /><div class='row mb-2'> <div class='col-12 col-sm-12 justify-content-center'>  <h5 class='text-center'>DELIVERY ACKNOWLEDGEMENT</h5> </div> </div>  </td> </tr>  <tr class='text-black'> <td class='ps-2'> <h6 class='text-start'>Order No :  @dt.Rows[0]["Order_id"] </h6></td> <td class='ps-2'>  <h6 class='text-start'>Date :  @DateTime.Now.ToString("dd-MM-yyyy") </h6></td>  </tr>  <tr> <td colspan='2' class='ps-2'><h6 class='text-start'>Customer Name :  @dt.Rows[0]["Customer_name"] </h6> <h6 class='text-start'>Address :  @dt.Rows[0]["Customer_address"] </h6><h6 class='text-start'>Mobile No :  @dt.Rows[0]["Customer_mobile"] </h6></tr><tr> <td colspan='2'><br /><div class='row mb-2'> <div class='col-12 col-sm-12 justify-content-center'>  <h5 class='text-center'>Thanks For Purchasing With Growfast; Your Product Has Been Delivered Successfully.</h5><br /><h5 class='ps-2 text-start'>You Purchased </h5> </div> </div>  </td> </tr> <tr class='text-black'> <td> <h6 class='text-center'>@descofgoods </h6><br /> </td> <td class='text-center'>  <h6 class='text-center'>Total Amount:- Rs. @Convert.ToDouble(dt12s.Rows[0]["Total_amount"]).ToString("0.00") /- </h6><hr /><h6 class='text-center'>Advance Amount:- Rs. @Convert.ToDouble(dt12s.Rows[0]["Paid_amount"]).ToString("0.00") /- </h6><hr /> <h6 class='text-center'>Due Amount:- Rs. @(Convert.ToDouble(dt12s.Rows[0]["Total_amount"])- Convert.ToDouble(dt12s.Rows[0]["Paid_amount"])) /- </h6></td>  </tr><tr> <td colspan='2'> <div class='row'><div class='col justify-content-start'> <label>Terms and Condition</label></div></div><div class='row'> <div class='col'> <ul> <li>This receipt is digitally generated no need of signature.</li> <li> Company all services shall be Eligible after full payment of product. </li> <li>Product once sold will not be taken back and amount not refundable.</li> <li>Company provide high quality genetically improved plants and fertilizer since the growth and yield of crop depend on climatic condition, agri-management, care and other factors.</li> <li> 100 % replacement of damaged and dead plant once in a service time of 2 years after inspection.</li> <li>Product received in good condition and as mentioned in delivery acknowledgement receipt quantity.</li><li>After delivery maintenance of product as per company guidline.</li> </ul>  </div> </div><br /><br /><div class='row mb-1'><div class='col-6 col-sm-6 text-center  justify-content-center'><h6>ACCEPTED BY CUSTOMER</h6><label style='width: 50%;'><img src='@URL.MainUrl()Content/Img/verified.png' style='height: 35px; ' />OTP verified</label></div> <div class='col-6 col-sm-6 text-center justify-content-end'><h6>FOR GROWFAST ORGANIC DIAMOND PVT.LTD</h6></div></div> </td> </tr>  </table>
+                    </div>
+                </div>
+            </div>
+                </div>
+
+                <div class="row mt-2 mb-2 row-cols-1 row-cols-sm-1">
+
+                    <div class="col justify-content-end d-flex">
+                        <button type="button" class="btn btncolor me-2" style="height:30px;width:100px" id="sendreceipt" onclick="Generate('gen', '@dt.Rows[0]["Order_id"]', '@ViewBag.i', '@dt.Rows[0]["Customer_mobile"]', '@dt.Rows[0]["Customer_name"]', '@Session["suid"]',  '@Session["suname"]', '', '@ViewBag.t', '@ViewBag.c','@dt.Rows[0]["Invoicepdf"]','Product Delivery Receipt')">Generate</button> 
+                        <button class='btn btncolor' style="height:30px;width:200px" onclick="Generate('gensend', '@dt.Rows[0]["Order_id"]', '@ViewBag.i', '@dt.Rows[0]["Customer_mobile"]', '@dt.Rows[0]["Customer_name"]', '@Session["suid"]',  '@Session["suname"]', '', '@ViewBag.t', '@ViewBag.c','@dt.Rows[0]["Invoicepdf"]','Product Delivery Receipt')">Generate and Send</button>
+                    </div>
+                </div>
+                }
+                else if (ViewBag.rt == "Invoice or Bill of Supply Payment Receipt")
+                {
+                <div class="row">
+                    <div class="col">
+
+                    </div>
+                </div>
+
+
+                <div class="row mt-2 mb-2 row-cols-1 row-cols-sm-1">
+
+                    <div class="col justify-content-end d-flex">
+                        <button type="button" class="btn btncolor me-2" style="height:30px;width:100px" id="sendreceipt" onclick="Generate('gen', '@dt.Rows[0]["Order_id"]', '@ViewBag.i', '@dt.Rows[0]["Customer_mobile"]', '@dt.Rows[0]["Customer_name"]', '@Session["suid"]',  '@Session["suname"]', '', '@ViewBag.t', '@ViewBag.c','@dt.Rows[0]["Invoice_pdf"]','Invoice or Bill of Supply')">Generate</button>
+                        <button class='btn btncolor' style="height:30px;width:200px" onclick="Generate('gensend', '@dt.Rows[0]["Order_id"]', '@ViewBag.i', '@dt.Rows[0]["Customer_mobile"]', '@dt.Rows[0]["Customer_name"]', '@Session["suid"]',  '@Session["suname"]', '', '@ViewBag.t', '@ViewBag.c','@dt.Rows[0]["Invoice_pdf"]','Invoice or Bill of Supply')">Generate and Send</button>
+
+                    </div>
+                </div>
+                }
+
+
+                }
+                <script>
+                    function Generate(txt, horderid, rowid, mobile, name, userid, username, emprid, tbl_name, colnm, filefullPath,Recepttype) {
+                        let htmlContent;
+
+                        if (txt === "gen") {
+                            htmlContent = `
+                                <label for="remark1">Remark:</label>
+                                <textarea id="remark1" rows="4" class="form-control shadow-none"></textarea>
+                            `;
+                        } else {
+                            htmlContent = `
+                                <label for="newQuantity">Customer Name:</label>
+                                <input id="cname" type="text" value="${name}"  class="form-control shadow-none" />
+                                <label for="newQuantity">Contact Number:</label>
+                                <input id="newQuantity" type="number" value="${mobile}" class="form-control shadow-none" />
+                                <label for="remark1">Remark:</label>
+                                <textarea id="remark1" rows="4" class="form-control shadow-none"></textarea>
+                            `;
+                        }
+
+                        Swal.fire({
+                            title: "Generate New Receipt",
+                            html: htmlContent,
+                            focusConfirm: false,
+                            showCancelButton: true,
+                            confirmButtonColor: "#009846",
+                            confirmButtonText: "Ok",
+                            cancelButtonColor: "#00A0E3",
+                            cancelButtonText: "Cancel",
+                            allowOutsideClick: false,
+                            preConfirm: () => {
+                                let cname = document.getElementById('cname') ? document.getElementById('cname').value : name;
+                                let newQuantity = document.getElementById('newQuantity') ? document.getElementById('newQuantity').value : mobile;
+                                let remark1 = document.getElementById('remark1').value;
+                                if (txt !== "gen" && !cname) {
+                                    Swal.showValidationMessage('Please enter customer name');
+                                    return false;
+                                } else if (txt !== "gen" && !newQuantity) {
+                                    Swal.showValidationMessage('Please enter contact number');
+                                    return false;
+                                } else if (!remark1) {
+                                    Swal.showValidationMessage('Please enter Remark');
+                                    return false;
+                                }
+                                return { cname: cname, newQuantity: newQuantity, remark1: remark1 };
+                            }
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                let cname = result.value.cname;
+                                let newQuantity = result.value.newQuantity;
+                                let remark1 = result.value.remark1;
+                                alert("ok")
+                                downloadadvanceslip(horderid, rowid, mobile, name, userid, username, emprid, tbl_name, colnm, filefullPath, txt,Recepttype)
+                            }
+                        });
+                    }
+                </script>
+
+
+                <script>
+                    function downloadadvanceslip(horderid, rowid, mobile, name, userid, username, emprid, tbl_name, colnm, filefullPath, txt, Recepttype) {
+                        //alert(horderid); alert(rowid); alert(mobile); alert(name);
+                        //alert(userid); alert(username);alert(emprid); alert(tbl_name); alert(colnm);
+                        //alert(filefullPath); alert(txt); alert(Recepttype);
+                        Swal.close()
+                        Swal.fire({
+                            title: "<i class='fa fa-spinner fa-spin'></i>",
+                            html: `
+                                    <p>Please wait while we process your request... It takes some time</p>
+                                    <div class="progress-bar">
+                                        <div class="progress-bar-fill" id="progress-bar-fill">70%</div>
+                                    </div>
+                                `,
+                            showConfirmButton: false,
+                            position: 'center',
+                            customClass: {
+                                popup: 'custom-swal-popup-class',
+                            },
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            didOpen: () => {
+                                $('#progress-bar-fill').css('width', '70%').text('70%');
+                            }
+                        });
+                        const element = document.getElementById('invoice1');
+                        element.style.padding = '20px';
+                        //debugger;
+                        html2pdf().from(element).toPdf().get('pdf').then(function (pdf) {
+                            // Convert the PDF blob to a Blob URL
+                            var blobUrl = URL.createObjectURL(pdf.output('blob'));
+                            //alert("ok")
+                            // Send the PDF data to the server
+                            var xhr = new XMLHttpRequest();
+                            xhr.open('POST', '/Regeneratedpdf.ashx?horderid=' + encodeURIComponent(horderid) + '&rowid=' + encodeURIComponent(rowid) + '&mobile=' + encodeURIComponent(mobile) + '&name=' + encodeURIComponent(name) + '&userid=' + encodeURIComponent(userid) + '&username=' + encodeURIComponent(username) + '&emprid=' + encodeURIComponent(emprid) + '&tablename=' + encodeURIComponent(tbl_name) + '&columnname=' + encodeURIComponent(colnm) + '&fullPath=' + encodeURIComponent(filefullPath) + '&txt=' + encodeURIComponent(txt) + '&Recepttype=' + encodeURIComponent(Recepttype), true);
+                            xhr.setRequestHeader('Content-type', 'application/pdf');
+                            xhr.responseType = 'blob';
+
+                            xhr.onload = function () {
+                                if (xhr.status === 200) {
+                                    Swal.close()
+                                    Swal.fire({
+                                        title: "<i class='fa fa-spinner fa-spin'></i>",
+                                        html: `
+                                    <p>Please wait while we process your request... It takes some time</p>
+                                    <div class="progress-bar">
+                                        <div class="progress-bar-fill" id="progress-bar-fill">100%</div>
+                                    </div>
+                                `,
+                                        showConfirmButton: false,
+                                        position: 'center',
+                                        customClass: {
+                                            popup: 'custom-swal-popup-class',
+                                        },
+                                        allowOutsideClick: false,
+                                        allowEscapeKey: false,
+                                        didOpen: () => {
+                                            $('#progress-bar-fill').css('width', '100%').text('100%');
+                                        }
+                                    });
+                                    //location.reload();
+                                    window.location.href ="/Admin/CustomerReceipt"
+                                }
+                            };
+
+                            xhr.send(pdf.output('blob'));
+                        });
+
+                        element.style.padding = '0';
+                    }
+                </script>

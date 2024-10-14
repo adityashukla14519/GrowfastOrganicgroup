@@ -1,0 +1,1013 @@
+﻿@{ ViewBag.Title = "Product Price Circular";
+    Layout = "~/Views/Shared/AdminMaster.cshtml"; }
+
+<script>
+    function validateNumericInput(inputElement, maxDigits, spid) {
+        // Get the current input value as a string
+        const errorMessage = document.getElementById(spid);
+        let inputValue = inputElement.value.toString();
+
+        // Remove any non-digit characters (e.g., commas, periods, except one dot)
+        inputValue = inputValue.replace(/[^0-9.]/g, '');
+
+        // If there is more than one dot, remove all but the first one
+        const dotIndex = inputValue.indexOf('.');
+        if (dotIndex !== -1) {
+            const beforeDot = inputValue.slice(0, dotIndex);
+            const afterDot = inputValue.slice(dotIndex + 1);
+            inputValue = beforeDot + '.' + afterDot.replace(/\./g, '');
+        }
+
+        // Truncate the value to the specified maximum number of digits
+        if (inputValue.length > maxDigits) {
+            inputValue = inputValue.slice(0, maxDigits);
+        }
+
+        // Update the input value with the sanitized and truncated value
+        inputElement.value = inputValue;
+
+        // Check if the sanitized value is different from the original input
+        if (inputValue.length > maxDigits) {
+            errorMessage.textContent = 'Please enter no more than ' + maxDigits + ' digits.';
+        } else {
+            errorMessage.textContent = '';
+        }
+    }
+
+</script>
+
+<!-- toogle button -->
+<link href="~/Content/tooglebutton/bootstrap5-toggle.min.css" rel="stylesheet" />
+<script src="~/Content/tooglebutton/bootstrap5-toggle.ecmas.min.js"></script>
+
+<script>
+    function statuschange(id, status, tdstatus) {
+        tdstatus = "#" + tdstatus;
+        $.ajax({
+            url: "/Admin/Statuschangetive",
+            type: "Post",
+            dataType: "JSON",
+            data: { id: id, status: status, tblnm: 'tbl_pro_price_circlar' },
+            success: function (data) {
+                if (data == "Active") {
+                    $(tdstatus).empty();
+                    $(tdstatus).append('<i class="fa fa-check text-success"></i><span style="display:none">' + data + '</span>');
+                }
+                else {
+                    $(tdstatus).empty();
+                    $(tdstatus).append('<i class="fa fa-ban text-danger"></i><span style="display:none">' + data + '</span>');
+                }
+            },
+        });
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        var table = $('#tblproductcreation').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                }
+            ]
+        });
+    });
+
+</script>
+<script>
+    function Getid(id) {
+        $("#dvbulk").hide();
+        $.ajax({
+            url: '/Admin/UpdateProductPriceCircular',
+            type: "GET",
+            dataType: "JSON",
+            data: { Up: id },
+            success: function (data) {
+                //alert(data)
+
+                $("#productprimg").removeAttr("required");
+                $("#hid").val(data[0]);
+                $("#ptype").val(data[1]);
+                $("#brand").val(data[2]);
+                $("#brandnm").val(data[0]);
+                $("#product").val(data[3]);
+                $("#plantnm").val(data[3]);
+                $("#quantity").val(data[4]);
+                $("#unittype").val(data[5]);
+                $("#points").val(data[6]);
+                $("#category").val(data[7]);
+                $("#offerprice").val(data[9]);
+                $("#sellprice").val(data[10]);
+                $("#productdisc").val(data[11]);
+                $("#status").val("Active");
+                $("#pimage").val(data[13]);
+                $("#oimage").val(data[14]);
+                $("#description").val(data[15]);
+                $("#productid").val(data[18]);
+                $("#productname").val(data[3]);
+                $("#unittype1").val(data[19]);
+                if (data[1] == "Plant") {
+                    $("#dvbulk").show();
+                    // Append 0% GST option
+                    $("#Gst_per").html('<option value="0">0</option>');
+                } else {
+                    // Append other GST options
+                    $("#Gst_per").html('<option value="5">5</option><option value="12">12</option><option value="18">18</option><option value="28">28</option>');
+                }
+                $("#bulkrate").val(data[21])
+                $("#status").removeClass("readonly");
+                $("#status").prop("disabled", false);
+                $("#Gst_per").val(data[22]);
+            }
+        })
+    }
+</script>
+
+@*<script>
+
+        function Getid(id) {
+            $("#dvbulk").hide();
+            $.ajax({
+                url: '/Admin/UpdateProductPriceCircular',
+                type: "GET",
+                dataType: "JSON",
+                data: { Up: id },
+                success: function (data) {
+                    //alert(data)
+
+                    $("#productprimg").removeAttr("required");
+                    $("#hid").val(data[0]);
+                    $("#ptype").val(data[1]);
+                    $("#brand").val(data[2]);
+                    $("#brandnm").val(data[0]);
+                    $("#product").val(data[3]);
+                    $("#plantnm").val(data[3]);
+                    $("#quantity").val(data[4]);
+                    $("#unittype").val(data[5]);
+                    $("#points").val(data[6]);
+                    $("#category").val(data[7]);
+                    $("#offerprice").val(data[9]);
+                    $("#sellprice").val(data[10]);
+                    $("#productdisc").val(data[11]);
+                    $("#status").val("Active");
+                    $("#pimage").val(data[13]);
+                    $("#oimage").val(data[14]);
+                    $("#description").val(data[15]);
+                    $("#productid").val(data[18]);
+                    $("#productname").val(data[3]);
+                    $("#unittype1").val(data[19]);
+                    if (data[1]=="Plant")
+                    {
+                        $("#dvbulk").show();
+                    }
+                    $("#bulkrate").val(data[21])
+
+                    $("#status").removeClass("readonly");
+                    $("#status").prop("disabled", false);
+                    $("#Gst_per").val(data[22]);
+                }
+            })
+        }
+    </script>*@
+<script>
+    $(document).ready(function () {
+        $("#spronm").show();
+        $("#dvpronm").hide();
+        $("#selproductnm").change(function () {
+            var name = $("#selproductnm").val();
+            //alert(name);
+            if (name != "Other") {
+                $("#spronm").show();
+                $("#dvpronm").hide();
+                $("#productnm").val(name);
+            }
+            else {
+                $("#spronm").hide();
+                $("#dvpronm").show();
+                $("#productnm").val("");
+            }
+        })
+    })
+
+
+</script>
+<script>
+    $(document).ready(function () {
+        $("#status").val("Active");
+        $("#status").addClass("readonly");
+        $("#status").prop("disabled", true);
+
+            $("#cancel").click(function () {
+                $("input[type='text'],.form-select,#hid,#status").val("");
+                $("input[type='file']").val("");
+                $("#dvother").hide();
+                $("#dvplant").hide();
+                $("#productprimg").attr("Required", true);
+                $("#spsell").text("");
+                $("#status").val("Active");
+                $("#status").addClass("readonly");
+                $("#status").prop("disabled", true);
+            })
+
+        var msg = '@ViewBag.msg';
+        if (msg) {
+            var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+                msg +
+                '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                '</div>';
+            $(alertElement).insertBefore('#alert-container');
+            setTimeout(function () {
+                $('#alert').alert('close');
+            }, 5000);
+            //$('.alert').on('closed.bs.alert', function () {
+            //    window.location.href = '/Admin/ProductDetails';
+            //});
+            //$('#btnclose').on('click', function () {
+            //    window.location.href = '/Admin/ProductDetails';
+            //});
+        }
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $("#dvbulk").hide();
+        $("#ptype").change(function () {
+            var ptype = $("#ptype").val();
+            if (ptype == "Plant") {
+                $("#dvbulk").show();
+                $("#Gst_per").html('<option value="0">0</option>');
+            }
+            else {
+                $("#dvbulk").hide();
+                $("#Gst_per").html('<option value="5">5</option><option value="12">12</option><option value="18">18</option><option value="28">28</option>');
+            }
+        })
+    })
+    function roundUpIfDecimalGreaterThanFive(number) {
+        // Check if the decimal part is greater than 0.5
+        if (number % 1 >= 0.5) {
+            // Round up to the next integer
+            return Math.ceil(number);
+        } else {
+            // Otherwise, use regular rounding
+            return Math.round(number);
+        }
+    }
+    function calculateprice() {
+        var offerprice = $("#offerprice").val();
+        var sellprice = $("#sellprice").val();
+        var productdisc = $("#productdisc").val();
+        //alert(sellprice);
+        offerprice = (offerprice === null || offerprice === "") ? 0 : parseFloat(offerprice);
+        sellprice = (sellprice === null || sellprice === "") ? 0 : parseFloat(sellprice);
+        //taxpercent = (taxpercent === null || taxpercent === "") ? 0 : parseFloat(taxpercent);
+        if (offerprice >= sellprice) {
+            var discountper = ((offerprice - sellprice) * 100) / offerprice;
+
+            let roundedValue = roundUpIfDecimalGreaterThanFive(discountper);
+            //alert(roundedValue)
+            $("#spsell").text("");
+            $("#productdisc").val(roundedValue);
+        }
+        else {
+            $("#spsell").text("Offer price is lower than MRP");
+            $("#productdisc").val("");
+        }
+
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $("#category").change(function () {
+            var category = $("#category").val();
+            //alert(category)
+            $.ajax({
+                url: "/Admin/GetProductSubCategory",
+                type: "GET",
+                dataType: "JSON",
+                data: { Category: category },
+                success: function (data) {
+                    //alert(data);
+                    $("#subcategory").empty();
+                    $("#subcategory").append(data);
+
+                }
+            })
+        })
+    })
+</script>
+
+<script>
+    function Geprotid() {
+        var id = $("#brandnm").val()
+        $.ajax({
+            url: '/Admin/UpdateProductPriceCircular',
+            type: "GET",
+            dataType: "JSON",
+            data: { Up: id },
+            success: function (data) {
+                //alert(data)
+
+                $("#productprimg").removeAttr("required");
+                $("#hid").val(data[0]);
+                $("#ptype").val(data[1]);
+                $("#brand").val(data[2]);
+                $("#brandnm").val(data[0]);
+                $("#product").val(data[3]);
+                $("#plantnm").val(data[3]);
+                $("#quantity").val(data[4]);
+                $("#unittype").val(data[5]);
+                $("#points").val(data[6]);
+                $("#category").val(data[7]);
+                $("#offerprice").val(data[9]);
+                $("#sellprice").val(data[10]);
+                $("#productdisc").val(data[11]);
+                $("#status").val(data[12]);
+                $("#pimage").val(data[13]);
+                $("#oimage").val(data[14]);
+                $("#description").val(data[15]);
+                $("#productid").val(data[18]);
+                $("#productname").val(data[3]);
+                $("#unittype1").val(data[19]);
+
+                if (data[1] == "Plant") {
+                    $("#dvbulk").show();
+                    // Append 0% GST option
+                    $("#Gst_per").html('<option value="0">0</option>');
+                } else {
+                    // Append other GST options
+                    $("#Gst_per").html('<option value="5">5</option><option value="12">12</option><option value="18">18</option><option value="28">28</option>');
+                }
+                $("#bulkrate").val(data[21])
+
+                $("#status").removeClass("readonly");
+                $("#status").prop("disabled", false);
+                $("#Gst_per").val(data[22]);
+            }
+        })
+    }
+</script>
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i>  Product Details</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+<div class="row mt-2 mb-3 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <button type="button" class="btn btncolor btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#ProductDetails">
+            <i class="fa fa-plus" aria-hidden="true"></i> New
+        </button>
+    </div>
+</div>
+@using System.Data;
+@{ DbManager db = new DbManager();
+    Activitylog activitylog = new Activitylog(); }
+@{ try
+    {
+        string query = "select [Id] ,[Ptype] ,punit,[Brand],[Productname],CAST([Quantity] AS DECIMAL(18, 1)) AS[Quantity],[Unittype],[Unitvalue],[Points],[ProductCategory],[ProductSubCategory],CAST([Bulkprice] AS DECIMAL(18, 2)) AS[Bulkprice],CAST([Offerprice] AS DECIMAL(18, 2)) AS[Offerprice],CAST([Sellprice] AS DECIMAL(18, 2)) AS[Sellprice],[Discountpercent],[Status],[Pimage],[Oimage] ,[Datetime],[logid],[logname],[Description] from tbl_pro_price_circlar where Status in('Active','Inactive') order by Ptype desc";
+        activitylog.Activitylogins("tbl_pro_price_circlar", "", query, "Failed", "", Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        DataTable dt = db.GetAllRecord(query);
+        activitylog.Activitylogupd("Success", "");
+        int count = 1;
+        if (dt.Rows.Count > 0)
+        {
+<div class="row table table-responsive">
+    <table class="table table-responsive table-bordered" id="tblproductcreation">
+        <thead class="text-center theadb text-light">
+            <tr>
+                <th class="text-center">Id</th>
+                <th class="text-center">Product Tyoe</th>
+                <th class="text-center">Product Category</th>
+                <th class="text-center">Brand Name</th>
+                <th class="text-center">Product Name</th>
+                <th class="text-center">Bulk price</th>
+                <th class="text-center">OFFER PRICE</th>
+                <th class="text-center">MRP</th>
+                <th class="text-center">Quantity</th>
+                <th class="text-center">Unit type</th>
+                <th class="text-center">Image</th>
+                <th class="text-center">Status</th>
+                <th class="text-center">Active/Inactive</th>
+                <th class="text-center">Edit</th>
+            </tr>
+        </thead>
+        <tbody class="text-center">
+            @for (int i = 0; i < dt.Rows.Count; i++)
+            {
+<tr>
+    <td>@(count + i)</td>
+    <td>@dt.Rows[i]["Ptype"]</td>
+    <td>@dt.Rows[i]["ProductCategory"]</td>
+    <td>@dt.Rows[i]["Brand"]</td>
+    <td>@dt.Rows[i]["Productname"]</td>
+    <td>@dt.Rows[i]["Bulkprice"]</td>
+    <td>@dt.Rows[i]["Sellprice"]</td>
+    <td>@dt.Rows[i]["Offerprice"]</td>
+    <td>@dt.Rows[i]["Quantity"] @dt.Rows[i]["punit"]</td>
+    <td>@dt.Rows[i]["Unittype"]</td>
+    <td><img src="@URL.ApiURL()@dt.Rows[i]["Pimage"]" style="height:50px;width:50px"></td>
+
+    @if (@dt.Rows[i]["Status"] + "" == "Active")
+    {
+
+<td id="tdi_@dt.Rows[i]["id"]"><i class="fa fa-check text-success"></i><span style="display:none">@dt.Rows[i]["Status"]</span></td>
+                            <td>
+                                <input type="checkbox" checked data-toggle="toggle" data-on="Active" data-off="Inactive" onchange="statuschange('@dt.Rows[i]["id"]','Inactive','tdi_@dt.Rows[i]["id"]')" class="btn btncolorblue">
+                            </td>
+ }
+                        else
+                        {
+
+<td id="tda_@dt.Rows[i]["id"]"><i class="fa fa-ban text-danger"></i><span style="display:none">@dt.Rows[i]["Status"]</span></td>
+                            <td>
+                                <input type="checkbox" data-toggle="toggle" data-on="Active" data-off="Inactive" onchange="statuschange('@dt.Rows[i]["id"]','Active','tda_@dt.Rows[i]["id"]')" class="btn btncolorblue">
+                            </td>
+}
+    <td><button class="btn btncolorblue" onclick="Getid('@dt.Rows[i]["Id"]')" data-bs-toggle="modal" data-bs-target="#ProductDetails"><i class="fa fa-edit"></i></button></td>
+
+</tr>
+}
+        </tbody>
+    </table>
+</div> }
+else
+{
+<div class='row justify-content-center d-flex m-5' id='datanotfdound'>
+    <img src='~/Content/Img/nodata1.png' style="height:50%;width:50%" />
+</div> }
+}
+
+
+catch (Exception ex)
+{
+try
+{
+Error_15_16 error_15_16 = new Error_15_16();
+string pageUrl = "", moduleName = "", errorLine = "", errorMessage = "", errorName = "", errorTrace = "";
+// Get the page URL, if available
+pageUrl = System.Web.HttpContext.Current.Request.Url.AbsoluteUri;
+// Get the module name
+moduleName = ex.TargetSite.Module.Name;
+// Get the error line number, if available
+var stackTrace = ex.StackTrace;
+if (!string.IsNullOrEmpty(stackTrace))
+{
+    var lineNumberIndex = stackTrace.LastIndexOf(":line ");
+    if (lineNumberIndex >= 0)
+    {
+        var lineNumber = stackTrace.Substring(lineNumberIndex + 6);
+        var newLineIndex = lineNumber.IndexOf(Environment.NewLine);
+        if (newLineIndex >= 0)
+        {
+            errorLine = lineNumber.Substring(0, newLineIndex);
+        }
+        else
+        {
+            errorLine = lineNumber;
+        }
+    }
+}
+// Get the error message and name
+if (ex.Message.ToString().Length >= 1000)
+{
+    errorMessage = ex.Message.Substring(1, 500);
+}
+else
+{
+    errorMessage = ex.Message;
+}
+errorName = ex.GetType().FullName;
+// Get the error trace
+errorTrace = ex.StackTrace;
+error_15_16.Error_15_16ins(pageUrl, moduleName, errorLine, errorMessage.Replace("'", ""), errorName.Replace("'", ""), errorTrace.Replace("'", "`"), Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+}
+
+catch
+{
+}
+}
+finally
+{
+db.connectionstate();
+} }
+
+<!-- Modal ProductDetails-->
+<div class="modal fade" id="ProductDetails" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <form action="/Admin/ProductPriceCircular" method="post" class="needs-validation" novalidate enctype="multipart/form-data" onsubmit="return" id="frmform">
+                <div class="modal-header justify-content-center nevigationstrip">
+                    <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Product Price Circular</h5>
+                </div>
+                <div class="modal-body">
+                    <span id="spotherresource"></span>
+                    <div class="row row-cols-1 row-cols-sm-3">
+
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Brand Name</h6>
+                            <select class="form-select shadow-none" id="brandnm" name="brandnm" onchange="Geprotid()" required>
+                                <option selected disabled value="">Select</option>
+                                @{ string pquery = "select Id,proid,CAST(Quantity AS DECIMAL(18, 1)) AS Quantity,Brand,[punit] from tbl_pro_price_circlar order by id desc";
+                                    DataTable pdt = db.GetAllRecord(pquery);
+                                    if (pdt.Rows.Count > 0)
+                                    {
+                                        for (int i = 0; i < pdt.Rows.Count; i++)
+                                        {
+                        <option value="@pdt.Rows[i]["Id"]">@pdt.Rows[i]["Brand"] (@pdt.Rows[i]["Quantity"] @pdt.Rows[i]["punit"])</option>
+ }
+                } }
+                            </select>
+                        </div>
+                        <div class="col mb-2">
+                            <input type="hidden" id="hid" name="hid" />
+
+                            <input type="hidden" id="productid" name="productid" />
+                            <input type="hidden" id="productname" name="productname" />
+                            <input type="hidden" id="brand" name="brand" />
+                            <h6 class="mt-2">Product Type</h6>
+                            <select class="form-select shadow-none" id="ptype" name="ptype" required>
+                                <option selected disabled value="">Select</option>
+                                <option value="Plant">Plant</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">GST(%)</h6>
+                            <select class="form-select shadow-none" id="Gst_per" name="Gst_per" required>
+                                <option selected disabled value="">Select</option>
+                                @*<option value="0">0</option>
+                                    <option value="5">5</option>
+                                    <option value="12">12</option>
+                                    <option value="18">18</option>
+                                    <option value="28">28</option>*@
+                            </select>
+                        </div>
+
+
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Product Category</h6>
+                            <input type="text" class="form-control shadow-none readonly" name="category" id="category" required placeholder="category" readonly />
+
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Product Name</h6>
+                            <input type="text" class="form-control shadow-none readonly" name="product" id="product" required placeholder="Brand Name" readonly />
+
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Unit</h6>
+                            <input type="text" class="form-control shadow-none readonly" name="unittype1" id="unittype1" required placeholder="Unite Type" readonly />
+
+                        </div>
+                        <div class="col mb-2" style="display:none">
+                            <h6 class="mt-2">Product Sub Category</h6>
+                            <select class="form-select shadow-none" id="subcategory" name="subcategory">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row row-cols-1 row-cols-sm-3">
+
+
+                        <div class="col mb-2" id="dvplant" style="display:none">
+                            <h6 class="mt-2">Plant Name</h6>
+                            <input type="text" class="form-control shadow-none" name="plantnm" id="plantnm" placeholder="Enter Plant Name" onkeyup="validateTextbox(this)" pattern="^[-a-zA-Z0-9 ]*$" title="Please enter only letters, and spaces" />
+                            <div class="invalid-feedback">
+                                Please enter only letters, and spaces
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row row-cols-1 row-cols-sm-3">
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Quantity</h6>
+                            <input type="text" class="form-control shadow-none readonly" name="quantity" id="quantity" required placeholder="Enter Quantity" oninput="validateNumericInput(this, 20, 'spnumq')" readonly />
+                            <div class="invalid-feedback" id="spnumq">
+                                Please enter only numbers
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Points</h6>
+                            <input type="text" class="form-control shadow-none" name="points" id="points" required placeholder="Enter Point" oninput="validateNumericInput(this, 20, 'spnumdp')" />
+                            <div class="invalid-feedback" id="spnumdp">
+                                Please enter only numbers
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Unit Type</h6>
+                            <select class="form-select shadow-none" id="unittype" name="unittype" required>
+                                <option selected disabled value="">Select One</option>
+                                <option>Bag</option>
+                                <option>Number</option>
+                                <option>Bottle</option>
+                                <option>Box</option>
+                                <option>Pack</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a valid Status.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row row-cols-1 row-cols-sm-3">
+                        <div class="col mb-2">
+                            <h6 class="mt-2">MRP</h6>
+                            <input type="text" class="form-control shadow-none" name="offerprice" id="offerprice" required placeholder="MRP" oninput="validateNumericInput(this, 20, 'spnum'), calculateprice();" />
+                            <div class="invalid-feedback" id="spnum">
+                                Please enter only numbers
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Offer Price</h6>
+                            <input type="text" class="form-control shadow-none" name="sellprice" id="sellprice" required placeholder="Offer Price" oninput="validateNumericInput(this, 20, 'spnumd'), calculateprice();" />
+                            <div class="invalid-feedback" id="spnumd">
+                                Please enter only numbers
+                            </div>
+                            <span class="text-danger" id="spsell"></span>
+                        </div>
+                        <div class="col mb-2" id="dvbulk">
+                            <h6 class="mt-2">Bulk Price</h6>
+                            <input type="text" class="form-control shadow-none" name="bulkrate" id="bulkrate" required placeholder="Bulk Price" oninput="validateNumericInput(this, 20, 'spnumdb');" />
+                            <div class="invalid-feedback" id="spnumdb">
+                                Please enter only numbers
+                            </div>
+                            <span class="text-danger" id="spsell"></span>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Product Discount(%)</h6>
+                            <input type="text" class="form-control shadow-none readonly" name="productdisc" id="productdisc" required placeholder="Discrount Percent" readonly />
+                            <div class="invalid-feedback">
+                                Please enter only numbers
+                            </div>
+                        </div>
+                    </div>
+                    <h6 class="mt-2">Description</h6>
+                    <div class="row row-cols-1 row-cols-sm-1">
+                        <div class="col">
+                            <textarea rows="5" class="form-control shadow-none" name="description" id="description" placeholder="Description" maxlength="200"></textarea>
+                        </div>
+                    </div>
+                    <div class="row row-cols-1 row-cols-sm-3">
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Product Cover Image</h6>
+                            <input type="file" class="form-control shadow-none" name="productprimg" id="productprimg" @*required *@ />
+                            <input type="hidden" id="pimage" name="pimage" />
+                            <div class="invalid-feedback">
+                                choose the file
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Product Other Image(Multiple)</h6>
+                            <input type="file" multiple class="form-control shadow-none" name="productothimg" id="productothimg" /><input type="hidden" id="oimage" name="oimage" />
+                            <div class="invalid-feedback">
+                                Choose at least one file
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Status</h6>
+                            <select class="form-select shadow-none" id="status" name="status" required>
+                                <option>Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a valid Status.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+                    <button type="button" class="btn btncolor" id="btnsub"><i class="fa fa-check"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#row").change(function () {
+            var up = $("#row").val();
+            $.ajax({
+                url: '/Admin/UpdateRowMeterialStock',
+                type: "GET",
+                dataType: "JSON",
+                data: { Up: up },
+                success: function (data) {
+                    $("#rowmeterial").val(data[2]);
+                    $("#rowmeterialid").val(data[1]);
+                    $("#unittyperaw").val(data[6]);
+                    $("#cr").val("");
+                }
+            })
+        })
+    })
+</script>
+<script>
+
+    $(document).ready(function () {
+        $("#tblotherresource").hide();
+        $("#add-other-res").click(function () {
+            // alert("ok");
+            var totalothersalary = $("#tblotherresource").val();
+            var rowmeterialid = $("#rowmeterialid").val();
+            var rowmeterial = $("#rowmeterial").val();
+            var unittyperaw = $("#unittyperaw").val();
+            var cr = $("#cr").val();
+
+            if (rowmeterial == null || rowmeterial == "") {
+                spotherresourcetable.innerHTML = "Warning : Please Select Row Material Name";
+                spotherresourcetable.style.color = "Red";
+            }
+            else if (unittyperaw == null || unittyperaw == "") {
+                spotherresourcetable.innerHTML = "Warning : Please Enter UnitType Amount";
+                spotherresourcetable.style.color = "Red";
+            }
+            else if (cr == null || cr == "") {
+                spotherresourcetable.innerHTML = "Warning : Please Enter Quantity Amount";
+                spotherresourcetable.style.color = "Red";
+            }
+            else {
+                if (selectedothValues.includes(rowmeterial)) {
+                    // Reset the dropdown value
+                    spotherresourcetable.innerHTML = "Warning : This option has already been selected. Please choose a different option.";
+                    spotherresourcetable.style.color = "Red";
+                }
+                else {
+                    // Add the selected option to the array of selected values
+                    selectedothValues.push(rowmeterial);
+                    spotherresourcetable.innerHTML = "";
+                    $("#tblotherresource").show();
+                    var newRow = "<tr>" +
+                        "<td>" +
+                        "" + rowmeterial +
+                        "</td>" +
+                        "<td>" +
+                        "" + rowmeterialid +
+                        "</td>" +
+                        "<td>" +
+                        "" + unittyperaw +
+                        "</td>" +
+                        "<td>" +
+                        "" + cr +
+                        "</td>" +
+                        "<td><i class='fa fa-trash' style='color:red;cursor:pointer' onclick='removeRowexpense(this)'></i></td> ";
+                    $("#table-other-body").append(newRow);
+
+                }
+            }
+        })
+    })
+</script>
+
+<script>
+
+    function removeRowexpense(element) {
+        //alert("removeRowexpense")
+
+        var row = element.parentNode.parentNode; // Get the row element
+        //alert(element);
+        //var salaryValue = row.querySelector('input[name="salary"]').value; // Get the salary value
+        //alert(salaryValue);
+
+        var selectedOption = row.querySelector('td:nth-child(1)').innerText;
+        //alert(selectedOption);
+        //alert(selectedothValues)
+        var index = selectedothValues.indexOf(selectedOption);
+        //alert(index)
+        selectedothValues.splice(index, 1);
+        //alert(index+"after")
+        row.parentNode.removeChild(row); // Remove the row from the table
+        //alert(index + "after1")
+    }
+</script>
+
+@*Submit Data Datatable and Convert Excel*@
+<script>
+    $(document).ready(function () {
+        $("#btnsub").click(function () {
+            var hid = $("#hid").val();
+            var pron = $("#brandnm").val();
+            var status = $("#status").val();
+            var unittypep = $("#unittype").val();
+            var points = $("#points").val();
+            var ptype = $("#ptype").val();
+            var productdisc = $("#productdisc").val()
+            var offerprice = $("#offerprice").val();
+            var sellprice = $("#sellprice").val();
+            var bulkrate = $("#bulkrate").val();
+            var Gst_per = $("#Gst_per").val();
+            //alert(status)
+            if (pron == null || pron == "") {
+                spotherresource.innerHTML = "Warning : Please Enter Product Name";
+                spotherresource.style.color = "Red";
+            }
+            else if (points == null || points == "") {
+                spotherresource.innerHTML = "Warning : Please Enter Points";
+                spotherresource.style.color = "Red";
+            }
+            else if (ptype == null || ptype == "") {
+                spotherresource.innerHTML = "Warning : Please Select Product Type";
+                spotherresource.style.color = "Red";
+            }
+            else if (unittypep == null || unittypep == "") {
+                spotherresource.innerHTML = "Warning : Please Select Unit Type";
+                spotherresource.style.color = "Red";
+            }
+            else if (offerprice == null || offerprice == "") {
+                spotherresource.innerHTML = "Warning : Please Enter MRP";
+                spotherresource.style.color = "Red";
+            }
+            else if (sellprice == null || sellprice == "") {
+                spotherresource.innerHTML = "Warning : Please Enter offer price";
+                spotherresource.style.color = "Red";
+            }
+            else if (productdisc == null || productdisc == "") {
+                spotherresource.innerHTML = "Warning : Please Enter valid Offer Price";
+                spotherresource.style.color = "Red";
+            } else if (status == null || status == "") {
+
+                spotherresource.innerHTML = "Warning : Please select a valid status";
+                spotherresource.style.color = "Red";
+            } else if (Gst_per == null || Gst_per == "") {
+                spotherresource.innerHTML = "Warning : Please select a valid GST %";
+                spotherresource.style.color = "Red";
+            }
+            else {
+
+                if (ptype == "Plant") {
+                    if (bulkrate == null || bulkrate == "") {
+                        spotherresource.innerHTML = "Warning : Please Enter valid Bulk Price";
+                        spotherresource.style.color = "Red";
+                    }
+                    else {
+                        var formData = new FormData();
+
+                        formData.append("hid", hid);
+                        formData.append("pron", pron);
+                        formData.append("status", status);
+                        formData.append("unittypep", unittypep);
+
+                        formData.append("ptype", $("#ptype").val());
+                        formData.append("productname", $("#productname").val());
+                        formData.append("quantity", $("#quantity").val());
+                        formData.append("brand", $("#brand").val());
+                        formData.append("unittype", $("#unittype").val());
+                        formData.append("points", $("#points").val());
+                        formData.append("category", $("#category").val());
+                        formData.append("offerprice", $("#offerprice").val());
+
+                        formData.append("sellprice", $("#sellprice").val());
+                        formData.append("productdisc", $("#productdisc").val());
+                        formData.append("description", $("#description").val());
+                        formData.append("productid", $("#productid").val());
+                        formData.append("unittype1", $("#unittype1").val());
+                        formData.append("oimage", $("#oimage").val());
+                        formData.append("pimage", $("#pimage").val());
+                        formData.append("bulkrate", $("#bulkrate").val());
+                        formData.append("productprimg", $('#productprimg')[0].files[0]);
+                        formData.append("Gst_per", $("#Gst_per").val());
+                        // Send the table object to the controller using AJAX
+                        $.ajax({
+                            url: '/Admin/ProductPriceCircular',
+                            type: 'POST',
+                            data: formData,
+                            contentType: false, // Set contentType to false for FormData
+                            processData: false, // Set processData to false for FormData
+                            success: function (response) {
+                                //alert(response)
+                                if (response) {
+                                    var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+                                        response +
+                                        '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                                        '</div>';
+                                    $(alertElement).insertBefore('#alert-container');
+                                    setTimeout(function () {
+                                        $('#alert').alert('close');
+                                    }, 1000);
+
+                                    $('.alert').on('closed.bs.alert', function () {
+                                        window.location.href = '/Admin/ProductPriceCircular';
+                                    });
+                                    //$('#btnclose').on('click', function () {
+                                    //    window.location.href = '/Admin/ProductName';
+                                    //});
+                                }
+                                // Handle the response from the controller if needed
+                                //alert(response);
+
+                                $("#ProductDetails").modal("hide");
+
+                            },
+                            error: function (xhr, status, error) {
+                                // Handle any error that occurs during the AJAX request
+                                //alert(error);
+                            }
+                        });
+                    }
+                }
+                else {
+                    var formData = new FormData();
+
+                    formData.append("hid", hid);
+                    formData.append("pron", pron);
+                    formData.append("status", status);
+                    formData.append("unittypep", unittypep);
+                    formData.append("ptype", $("#ptype").val());
+                    formData.append("productname", $("#productname").val());
+                    formData.append("quantity", $("#quantity").val());
+                    formData.append("brand", $("#brand").val());
+                    formData.append("unittype", $("#unittype").val());
+                    formData.append("points", $("#points").val());
+                    formData.append("category", $("#category").val());
+                    formData.append("offerprice", $("#offerprice").val());
+
+                    formData.append("sellprice", $("#sellprice").val());
+                    formData.append("productdisc", $("#productdisc").val());
+                    formData.append("description", $("#description").val());
+                    formData.append("productid", $("#productid").val());
+                    formData.append("unittype1", $("#unittype1").val());
+                    formData.append("oimage", $("#oimage").val());
+                    formData.append("pimage", $("#pimage").val());
+                    formData.append("bulkrate", $("#bulkrate").val());
+                    formData.append("productprimg", $('#productprimg')[0].files[0]);
+                    formData.append("Gst_per", $("#Gst_per").val());
+                    // Send the table object to the controller using AJAX
+                    $.ajax({
+                        url: '/Admin/ProductPriceCircular',
+                        type: 'POST',
+                        data: formData,
+                        contentType: false, // Set contentType to false for FormData
+                        processData: false, // Set processData to false for FormData
+                        success: function (response) {
+                            //alert(response)
+                            if (response) {
+                                var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+                                    response +
+                                    '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                                    '</div>';
+                                $(alertElement).insertBefore('#alert-container');
+                                setTimeout(function () {
+                                    $('#alert').alert('close');
+                                }, 1000);
+
+                                $('.alert').on('closed.bs.alert', function () {
+                                    window.location.href = '/Admin/ProductPriceCircular';
+                                });
+                                //$('#btnclose').on('click', function () {
+                                //    window.location.href = '/Admin/ProductName';
+                                //});
+                            }
+                            // Handle the response from the controller if needed
+                            //alert(response);
+
+                            $("#ProductDetails").modal("hide");
+
+                        },
+                        error: function (xhr, status, error) {
+                            // Handle any error that occurs during the AJAX request
+                            //alert(error);
+                        }
+                    });
+                }
+
+            }
+        });
+    });
+</script>

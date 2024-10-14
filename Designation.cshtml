@@ -1,0 +1,389 @@
+﻿
+@{
+    ViewBag.Title = "Designation";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+<script>
+    function statuschange(id, status, tdstatus) {
+        tdstatus = "#" + tdstatus;
+        $.ajax({
+            url: "/Admin/Statuschangetive",
+            type: "Post",
+            dataType: "JSON",
+            data: { id: id, status: status, tblnm: 'tbl_designation' },
+            success: function (data) {
+                if (data == "Active") {
+                    $(tdstatus).empty();
+                    $(tdstatus).append('<i class="fa fa-check text-success"></i><span style="display:none">' + data + '</span>');
+
+                }
+                else {
+                    $(tdstatus).empty();
+
+                    $(tdstatus).append('<i class="fa fa-ban text-danger"></i><span style="display:none">' + data + '</span>');
+                }
+            },
+        });
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        var table = $('#tbldesignation').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                }
+            ]
+        });
+    });
+
+</script>
+<script>
+    function Getid(id) {
+        var up = id;
+        $.ajax({
+            url: '/Admin/UpdateDesignation',
+            type: "GET",
+            dataType: "JSON",
+            data: { Up: up },
+            success: function (data) {
+                $("#hid").val(data[0]);
+                $("#desig").val(data[1]);
+                $("#status").val(data[2]);
+          
+                $("#status").removeClass("readonly");
+                $("#status").prop("disabled", false);
+                $("#depart").val(data[5]);
+                $("#departid").val(data[5]);
+                $("#department").val(data[6]);
+                $("#designation_order").val(data[7]);
+                $("#designation_short").val(data[8]);
+                
+
+            }
+        })
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $("#status").val("Active");
+        $("#status").addClass("readonly");
+        $("#status").prop("disabled", true);
+
+        $("#cancel").click(function () {
+            $("input[type='text'],.form-select,#hid,#status").val("");
+            $("#status").val("Active");
+            $("#status").addClass("readonly");
+            $("#status").prop("disabled", true);
+        })
+
+    var msg = '@ViewBag.msg';
+        if (msg) {
+            var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+                msg +
+                '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                '</div>';
+            $(alertElement).insertBefore('#alert-container');
+            setTimeout(function () {
+                $('#alert').alert('close');
+            }, 5000);
+        }
+});
+</script>
+<script>
+    $(document).ready(function () {
+        $("#depart").change(function () {
+            var up = $("#depart").val();
+            $.ajax({
+                url: '/Admin/UpdateDepartment',
+                type: "GET",
+                dataType: "JSON",
+                data: { Up: up },
+                success: function (data) {
+                    $("#department").val(data[1]);
+                    $("#departid").val(data[0]);
+
+                }
+            })
+        })
+    })
+</script>
+
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i>  Designation</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+<div class="row mt-2 mb-3 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <button type="button" class="btn btncolor btn-sm" data-bs-toggle="modal" data-bs-target="#Designation">
+            <i class="fa fa-plus" aria-hidden="true"></i> New
+        </button>
+    </div>
+</div>
+
+@using System.Data;
+@{
+    DbManager db = new DbManager();
+    Activitylog activitylog = new Activitylog();
+
+}
+
+@{ try
+    {
+        string query = "select * from tbl_designation order by Designation_order asc";
+        activitylog.Activitylogins("tbl_designation", "", query, "Failed", "", Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        DataTable dt = db.GetAllRecord(query);
+        activitylog.Activitylogupd("Success", "");
+        int count = 1;
+        if (dt.Rows.Count > 0)
+        {
+            <div class="row table table-responsive">
+                <table class="table table-responsive table-bordered" id="tbldesignation">
+                    <thead class="theadb text-l text-center">
+                        <tr>
+                            <th class="text-center">Id</th>
+                            <th class="text-center">Department</th>
+                            <th class="text-center">Designation Name</th>
+                            <th class="text-center">Order Number</th>
+                            <th class="text-center">Short Name</th>
+                            <th class="text-center">Employees</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Active/Inactive</th>
+                            <th class="text-center">Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        @for (int i = 0; i < dt.Rows.Count; i++)
+                        {
+                            DataTable cdt = db.GetAllRecord("SELECT * FROM tbl_registration LEFT JOIN tbl_designation ON tbl_registration.Designation = tbl_designation.Designation WHERE tbl_designation.Id='" + dt.Rows[i]["id"] + "' and tbl_designation.logid='" + Session["suid"] + "'");
+                            int ecount = cdt.Rows.Count;
+                        <tr>
+                            <td>@(count+i)<input type="hidden" id="@dt.Rows[i]["id"]" value="@dt.Rows[i]["id"]" /></td>
+                            <td>@dt.Rows[i]["Department"]</td>
+                            <td>@dt.Rows[i]["Designation"]</td>
+                            <td>@dt.Rows[i]["Designation_order"]</td>
+                            <td>@dt.Rows[i]["Designation_shortname"]</td>
+                            @if (ecount > 0)
+                            {
+                                <td><a href="/Admin/View/@dt.Rows[i]["id"]?name=designation" class="btncolor rounded-4 ps-2 pe-2 pb-1 text-truncate">(@ecount Members)</a></td>
+                            }
+                            else
+                            {
+                                <td><a class="btncolor rounded-4 ps-2 pe-2 pb-1 text-truncate">(@ecount Members)</a></td>
+                            }
+
+
+                            @if (@dt.Rows[i]["Status"] + "" == "Active")
+                            {
+
+                                <td id="tdi_@dt.Rows[i]["id"]"><i class="fa fa-check text-success"></i><span style="display:none">@dt.Rows[i]["Status"]</span></td>
+                                <td>
+                                    <input type="checkbox" checked data-toggle="toggle" data-on="Active" data-off="Inactive" onchange="statuschange('@dt.Rows[i]["id"]','Inactive','tdi_@dt.Rows[i]["id"]')" style="font-size:7px;padding:1px">
+                                </td>
+
+                            }
+                            else
+                            {
+
+                                <td id="tda_@dt.Rows[i]["id"]"><i class="fa fa-ban text-danger"></i><span style="display:none">@dt.Rows[i]["Status"]</span></td>
+                                <td>
+                                    <input type="checkbox" data-toggle="toggle" data-on="Active" data-off="Inactive" onchange="statuschange('@dt.Rows[i]["id"]','Active','tda_@dt.Rows[i]["id"]')" style="font-size:7px;padding:1px">
+                                </td>
+                            }
+                            <td><button class="btn btncolorblue" onclick="Getid($('#@dt.Rows[i]["id"]').val())" data-bs-toggle="modal" data-bs-target="#Designation"><i class="fa fa-edit"></i></button></td>
+
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class='row justify-content-center d-flex m-5' id='datanotdound'>
+                <img src='~/Content/Img/nodata1.png' style="height:50%;width:50%" />
+            </div>
+        }
+    }
+
+    catch (Exception ex)
+    {
+        try
+        {
+            Error_15_16 error_15_16 = new Error_15_16();
+            string pageUrl = "", moduleName = "", errorLine = "", errorMessage = "", errorName = "", errorTrace = "";
+            // Get the page URL, if available
+            pageUrl = System.Web.HttpContext.Current.Request.Url.AbsoluteUri;
+            // Get the module name
+            moduleName = ex.TargetSite.Module.Name;
+            // Get the error line number, if available
+            var stackTrace = ex.StackTrace;
+            if (!string.IsNullOrEmpty(stackTrace))
+            {
+                var lineNumberIndex = stackTrace.LastIndexOf(":line ");
+                if (lineNumberIndex >= 0)
+                {
+                    var lineNumber = stackTrace.Substring(lineNumberIndex + 6);
+                    var newLineIndex = lineNumber.IndexOf(Environment.NewLine);
+                    if (newLineIndex >= 0)
+                    {
+                        errorLine = lineNumber.Substring(0, newLineIndex);
+                    }
+                    else
+                    {
+                        errorLine = lineNumber;
+                    }
+                }
+            }
+            // Get the error message and name
+            if (ex.Message.ToString().Length >= 1000)
+            {
+                errorMessage = ex.Message.Substring(1, 500);
+            }
+            else
+            {
+                errorMessage = ex.Message;
+            }
+            errorName = ex.GetType().FullName;
+            // Get the error trace
+            errorTrace = ex.StackTrace;
+            error_15_16.Error_15_16ins(pageUrl, moduleName, errorLine, errorMessage.Replace("'", "`"), errorName.Replace("'", "`"), errorTrace.Replace("'", "`"), Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        }
+
+        catch
+        {
+
+        }
+    }
+    finally
+    {
+        db.connectionstate();
+    }
+
+}
+
+<!-- Modal Designation-->
+<div class="modal fade" id="Designation" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-5idden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <form action="/Admin/Designation" method="post" class="needs-validation" novalidate>
+
+                <div class="modal-header justify-content-center nevigationstrip">
+                    <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Designation Info</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="col-sm-12">
+                        <div class="col mb-3">
+                            <input type="hidden" id="hid" name="hid" />
+                            <h6 class="mt-2">Department</h6>
+                            <select class="form-select shadow-none" id="depart" name="depart" required>
+                                <option selected disabled value="">Select one</option>
+                                @{
+                                    string query1 = "select * from tbl_department";
+                                    DataTable dt1 = db.GetAllRecord(query1);
+                                    if (dt1.Rows.Count > 0)
+                                    {
+                                        for (int i = 0; i < dt1.Rows.Count; i++)
+                                        {
+                                            if (dt1.Rows[i]["Status"] + "" == "Active")
+                                            {
+                                                <option value="@dt1.Rows[i]["Id"]">@dt1.Rows[i]["Departmant"]</option>
+                                            }
+
+
+                                        }
+                                    }
+                                }
+                            </select>
+                            <input type="hidden" name="department" id="department" />
+                            <input type="hidden" name="departid" id="departid" />
+                            <div class="invalid-feedback">
+                                Please select a valid option.
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">Designation</h6>
+                            <input type="text" class="form-control shadow-none" name="desig" maxlength="50" id="desig" required onkeyup="validateTextbox(this)" pattern="^[a-zA-Z ]*$" title="Please enter only letters, and spaces" />
+                            <div class="invalid-feedback">
+                                Please enter only letters, and spaces
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">Designation Short Name</h6>
+                            <input type="text" class="form-control shadow-none" name="designation_short" maxlength="50" id="designation_short" required onkeyup="validateTextbox(this)" pattern="^[.a-zA-Z ]*$" title="Please enter only letters, and spaces" />
+                            <div class="invalid-feedback">
+                                Please enter only letters, and spaces
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <h6 class="mt-2">Designation Order</h6>
+                            <input type="text" class="form-control shadow-none" id="designation_order" name="designation_order" required placeholder="Enter Order number" oninput="validateNumericInput(this,2,'spnum')" />
+                            <div class="invalid-feedback" id="spnum">
+                                Please enter only numbers
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">Status</h6>
+                            <select class="form-select shadow-none" id="status" name="status" required>
+                                @*<option selected disabled value="">Select one</option>*@
+                                <option>Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a valid status.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+                    <button type="submit" class="btn btncolor"><i class="fa fa-check"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+

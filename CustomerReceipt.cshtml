@@ -1,0 +1,271 @@
+﻿
+@{
+    ViewBag.Title = "CustomerReceipt";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+@using System.Data;
+@{
+    DbManager db = new DbManager();
+    Activitylog activitylog = new Activitylog();
+
+}
+
+<script>
+    $(document).ready(function () {
+        var table = $('#tblattendance').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                }
+            ]
+        });
+    });
+
+</script>
+
+<script>
+    $(document).ready(function () {
+
+        $("#search").click(function () {
+            //alert(count);
+            var searchby = $("#searchby").val();
+            if (searchby != "" && searchby != null) {
+                $.ajax({
+                    url: '/Admin/GetReceipt',
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { searchby: searchby },
+                    success: function (response) {
+                        var table = $('#tblattendance').DataTable();
+                        var jsonArray = JSON.parse(response);
+                        table.clear().draw();
+                        $.each(jsonArray, function (index, item) {
+                            table.row.add([
+                                index + 1,
+                                item.Name,
+                                item.Contact,
+                                item.Address,
+                                item.Order_id,
+                              /*  "<button class='btn btncolorblue' onclick='ViewReceipt(\"" + item.Receipt + "\")'>View</button>",*/
+                                item.Receipt_type,
+                                "<button class='btn btncolorblue' onclick='Resend(\"" + item.Receipt + "\",\"" + item.Name + "\",\"" + item.Contact + "\",\"" + item.Order_id + "\",\"" + item.Receipt_type + "\",\"" + item.table + "\",\"" + item.rowid + "\",\"" + item.columnname + "\")' data-bs-toggle='modal' data-bs-target='#attendanceimg'>Resend</button>",
+                                /*"<button class='btn btncolorblue' onclick='ReGenerate(" + item.Sno + ")' data-bs-toggle='modal' data-bs-target='#attendanceimg'>Regenerate</button>"*/
+
+
+
+                            ]).draw(false);
+                        });
+                    }
+
+                })
+            }
+
+
+        });
+        $("#sendreceipt").click(function () {
+
+            var contact_change = $("#contact_change").val();
+            var recpth = $("#recpth").val();
+            var name = $("#name").val();
+            var rectype = $("#rectype").val();
+            if (contact_change != "" && contact_change != null) {
+                $.ajax({
+                    url: '/Admin/SendReceipt',
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { Contact: contact_change, Recpth: recpth, Name: name, Rectype:rectype },
+                    success: function (response) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Receipt Send Successfully",
+                            showConfirmButton: false,
+                            timer: 3000,
+                            position: 'center',
+                            customClass: {
+                                popup: 'custom-swal-popup-class',
+                            },
+                            didClose: () => {
+                                // Redirect to the desired page after the Swal notification is closed
+                                location.reload();
+                            }
+                        });
+                    }
+
+                })
+            }
+
+
+        });
+    });
+</script>
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i>  Customer</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+
+<div class="row mt-3 mb-3 row-cols-1 row-cols-sm-3">
+
+    <div class="col">
+        <label>Name/Mobile No/Order id</label>
+        <input type="text" name="searchby" id="searchby" class="form-control shadow-none mt-1" />
+    </div>
+    <div class="col mt-1">
+        <br />
+        <button class="btn btncolor mt-2" id="search">Search</button>
+    </div>
+</div>
+
+<div class="row table table-responsive" id="tblattendance1">
+    <table class="table table-responsive table-bordered" id="tblattendance">
+        <thead class="theadb text-center">
+            <tr>
+                <th class="text-center">Id</th>
+                <th class="text-center">Customer Name</th>
+                <th class="text-center">Contact</th>
+                <th class="text-center">Address</th>
+                <th class="text-center">Order id</th>
+                @*<th class="text-center">Receipt</th>*@
+                <th class="text-center">Receipt Type</th>
+                <th class="text-center">Resend</th>
+                @*<th class="text-center">Regenerate</th>*@
+            </tr>
+        </thead>
+        <tbody class="text-center">
+        </tbody>
+    </table>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+        // When the user clicks on <span> (x), close the modal
+        $('#cancel').on('click', function () {
+            $('#pdfModal').modal('hide');
+            $('#pdfIframe').attr('src', '');  // Clear the src attribute to stop loading the PDF
+        });
+    })
+    function ViewReceipt(pth) {
+
+        $('#pdfModal').modal('show');
+        $('#pdfIframe').attr('src', '@URL.ApiURL()' + pth);
+        //alert(pth);
+    }
+
+    function Resend(pth, name, contact, orderid, Receipt_type, table, rowid, columnname) {
+        $('#Resend').modal('show');
+        $('#pdfIframe1').attr('src', '@URL.ApiURL()' + pth);
+        $("#name").val(name);
+        $("#recpth").val(pth);
+        $("#contact").val(contact);
+        $("#contact_change").val(contact);
+        $("#orderid").val(orderid);
+        $("#rectype").val(Receipt_type);
+        $("#regenid").attr("href", "/Admin/Regenerate?rt=" + Receipt_type + "&t=" + table + "&i=" + rowid + "&c=" + columnname+"")
+    }
+</script>
+
+
+<!-- Modal Department-->
+<div class="modal fade" id="pdfModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header justify-content-center nevigationstrip">
+                <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Receipt Info</h5>
+            </div>
+            <div class="modal-body" style="height:500px!important">
+                <iframe id="pdfIframe" src="" frameborder="0" width="100%" height="100%"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- Modal Department-->
+<div class="modal fade" id="Resend" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header justify-content-center nevigationstrip">
+                <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Customer Receipt Info</h5>
+            </div>
+            <div class="modal-body">
+                <div class="row" style="height:400px!important">
+                    <iframe id="pdfIframe1" src="" frameborder="0" width="100%" height="100%"></iframe>
+                </div>
+
+                <div class="row row-cols-1 row-cols-sm-2 mt-3">
+                    <div class="col">
+                        <h6>Customer name</h6>
+                        <input type="text" class=" form-control shadow-none readonly" id="name" name="name" readonly />
+                        <input type="hidden" class=" form-control shadow-none" id="orderid" name="orderid" />
+                        <input type="hidden" class=" form-control shadow-none" id="recpth" name="recpth" />
+                        <input type="hidden" class=" form-control shadow-none" id="rectype" name="rectype" />
+
+                    </div>
+                    <div class="col">
+                        <h6>Contact</h6>
+                        <input type="text" class=" form-control shadow-none readonly" id="contact" name="contact" readonly />
+
+                    </div>
+                    <div class="col">
+                        <h6>Contact new</h6>
+                        <input type="text" class=" form-control shadow-none" id="contact_change" name="contact_change" />
+                    </div>
+                    <div class="col justify-content-end d-flex mt-2">
+                        <button type="button" class="btn btncolorblue me-2" style="height:30px;width:100px" id="sendreceipt">Send</button> <a id="regenid" href="#" target="_blank"><button class='btn btncolorblue' style="height:30px;width:100px">Regenerate</button></a>
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+            </div>
+
+        </div>
+    </div>
+</div>

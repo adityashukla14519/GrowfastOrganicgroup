@@ -1,0 +1,140 @@
+﻿
+@{
+    ViewBag.Title = "Dtransport";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+
+@using System.Data;
+@{ DbManager db = new DbManager();}
+<style>
+    h1 {
+        color: black;
+    }
+
+    a label {
+        color: black;
+    }
+</style>
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i> Transport  Dashboard</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+        // create a new Date object
+        const currentDate = new Date();
+
+        // get the day, month, and year from the date object
+        const day = currentDate.getDate();
+        const month = currentDate.toLocaleString('default', { month: 'short' });
+        const year = currentDate.getFullYear();
+
+        // format the date string
+        const formattedDate = `${day} ${month} ${year}`;
+        $(".curdt").text("Summary as on " + formattedDate);
+    })
+</script>
+
+
+@{
+    string totalquery = "select * from tbl_order where Order_status='Active'";
+    DataTable totaldt = db.GetAllRecord(totalquery);
+    int totalcount = totaldt.Rows.Count;
+
+    string Confirmed = "select * from tbl_order where Order_status='Confirmed'";
+    DataTable Confirmeddt = db.GetAllRecord(Confirmed);
+    int Confirmedcount = Confirmeddt.Rows.Count;
+
+    string Dispatchquery = "select * from tbl_order where Order_status='Dispatch'";
+    DataTable Dispatchdt = db.GetAllRecord(Dispatchquery);
+    int Dispatchcount = Dispatchdt.Rows.Count;
+
+    string Deliveredquery = "select * from tbl_order where Order_status='Delivered'";
+    DataTable Delivereddt = db.GetAllRecord(Deliveredquery);
+    int Deliveredcount = Delivereddt.Rows.Count;
+
+    string Canclequery = "select * from tbl_order where Order_status='Cancelled'";
+    DataTable Cancledt = db.GetAllRecord(Canclequery);
+    int Canclecount = Cancledt.Rows.Count;
+
+}
+
+<div class="row mt-3 mb-3">
+    <h5>Transport Info</h5>
+    <span class="curdt"></span>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="col-sm-12 border border-dotted-1 border-dark-subtle"></div>
+    </div>
+</div>
+
+
+
+<div class="row">
+    <div class="col-sm-3 mt-3">
+        <div class="card dashcard info border rounded-4 border-info-subtle">
+
+            <div class="card-body approdashstat">
+                <div class="row align-items-center">
+                    <div class="col">
+
+                        <a href='/Admin/OrderInfo?type=all'>
+                            <h1>@totalcount</h1>
+                            <label class="mt-1">Total Order</label>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-9 mt-3">
+        <div class="card dashcard danger border rounded-4 border-danger-subtle">
+
+            <div class="card-body approdashstat">
+                <div class="row align-items-center row-cols-2 row-cols-sm-4">
+
+
+                    <div class="col">
+                        <a href='/Admin/OrderInfo?type=Confirm'>
+                            <h1>@Confirmedcount</h1>
+                            <label class="mt-1">Total Confirm Order</label>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href='/Admin/OrderInfo?type=Dispatch'>
+                            <h1>@Dispatchcount</h1>
+                            <label class="mt-1">Total Dispatch Order</label>
+                        </a>
+                    </div>
+
+                    <div class="col">
+                        <a href='/Admin/OrderInfo?type=Delivered'>
+                            <h1>@Deliveredcount</h1>
+                            <label class="mt-1">Total Delivered Order</label>
+                        </a>
+                    </div>
+
+                    <div class="col">
+                        <a href='/Admin/OrderInfo?type=Cancelled'>
+                            <h1>@Canclecount</h1>
+                            <label class="mt-1">Total Cancelled Order</label>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

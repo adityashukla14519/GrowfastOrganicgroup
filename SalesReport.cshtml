@@ -1,0 +1,737 @@
+﻿
+@{
+    ViewBag.Title = "Sales Performance Report";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+@using System.Data;
+@{ DbManager db = new DbManager();}
+
+
+<script>
+    $(document).ready(function () {
+        var year = $("#year");
+        var currentYear = (new Date()).getFullYear();
+        for (var i = 2023; i <= currentYear; i++) {
+            var option = $("<option />");
+            option.html(i);
+            option.val(i);
+            if (i === currentYear) {
+                option.prop("selected", true);
+            }
+            year.append(option);
+        }
+
+        var monthSelect = $('#month');
+        var currentMonth = new Date().getMonth() + 1; // JavaScript months are zero-based
+
+        // Loop through options to find and select the current month
+        monthSelect.find('option').each(function () {
+            if (parseInt($(this).val()) === currentMonth) {
+                $(this).prop('selected', true);
+                return false; // exit loop
+            }
+        });
+    });
+</script>
+<style>
+    .activess {
+        /*  background-color: darkcyan !important;*/
+        box-shadow: 0 0 10px yellow; /* Add box-shadow properties */
+    }
+</style>
+<script>
+    function ExportToExcel(type, fn, dl) {
+        const now = new Date();
+        var elt = document.getElementById('tblattendance');
+        // Add top row data
+        var monthn = $("#month").val();
+        var year = $("#year").val();
+        const monthName = new Date(2000, monthn - 1).toLocaleString('en-US', { month: 'short' });
+        var toprowtext = "Sales Report " + monthName + "_" + year;
+        //alert(monthName)
+        const topRow = ['Sales Report'];
+        var tbody = elt.getElementsByTagName('tbody')[0];
+        var tr = document.createElement('tr');
+        topRow.forEach(function (cellData) {
+            var td = document.createElement('td');
+            td.appendChild(document.createTextNode(cellData));
+            td.setAttribute('colspan', '30');
+            td.classList.add('text-center');
+            td.classList.add('fs-5');
+            td.classList.add('fw-bold');
+            tr.appendChild(td);
+        });
+        tbody.insertBefore(tr, tbody.firstChild);
+        // Convert table to workbook
+        var wb = XLSX.utils.table_to_book(elt, { sheet: "sheet1" });
+        return dl ?
+            XLSX.write(wb, { bookType: type, bookSST: true, type: 'base64' }) :
+            XLSX.writeFile(wb, fn || (toprowtext + '_' + now + '.' + (type || 'xlsx')));
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $("#employee").change(function () {
+            const selectemp = document.querySelector('#employee');
+            const selectedemp = [];
+
+            for (let i = 0; i < selectemp.options.length; i++) {
+                const option = selectemp.options[i];
+                if (option.selected) {
+                    selectedemp.push(option.value);
+                }
+            }
+            $("#empid").val(selectedemp);
+        })
+        $("#designation").change(function () {
+            const selectdesig = document.querySelector('#designation');
+            const selecteddesig = [];
+
+            for (let i = 0; i < selectdesig.options.length; i++) {
+                const option = selectdesig.options[i];
+                if (option.selected) {
+                    selecteddesig.push(option.value);
+                }
+            }
+            $("#desig").val(selecteddesig);
+        })
+        $("#department").change(function () {
+            const selectdepart = document.querySelector('#department');
+            const selecteddepart = [];
+
+            for (let i = 0; i < selectdepart.options.length; i++) {
+                const option = selectdepart.options[i];
+                if (option.selected) {
+                    selecteddepart.push(option.value);
+                }
+            }
+            $("#depart").val(selecteddepart);
+        })
+        $("#manager").change(function () {
+            const selectteam = document.querySelector('#manager');
+            const selectedteam = [];
+
+            for (let i = 0; i < selectteam.options.length; i++) {
+                const option = selectteam.options[i];
+                if (option.selected) {
+                    selectedteam.push(option.value);
+                }
+            }
+            $("#managernm").val(selectedteam);
+        })
+    })
+</script>
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i> Sales Performance Report </label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+<div class="row mt-3 mb-3">
+
+    <div class="col" style="display:none">
+        <label for="exampleDataList" class="form-label">Start date</label><br />
+        <select class="form-control shadow-none mt-1" id="startdate" name="startdate">
+            @for (int i = 1; i <= 31; i++)
+            {
+                <option value="@i">@i</option>
+            }
+        </select>
+    </div>
+    <div class="col" style="display:none">
+        <label for="exampleDataList" class="form-label">End Date</label><br />
+        <select class="form-control shadow-none mt-1" id="enddate" name="enddate">
+            @for (int i = 1; i <= 31; i++)
+            {
+                <option value="@i">@i</option>
+            }
+        </select>
+    </div>
+    <div class="col" style="width:150px">
+        <label>Company</label><br />
+        <select class="form-control shadow-none mt-1" id="company" name="company" style="width:150px">
+            @{
+                string query6 = "select Distinct Companyid,Company from tbl_company where Status='Active'";
+                DataTable dt6 = db.GetAllRecord(query6);
+                if (dt6.Rows.Count > 0)
+                {
+                    <option selected value="">Select One</option>
+                    for (int i = 0; i < dt6.Rows.Count; i++)
+                    {
+                        <option value="@dt6.Rows[i]["Companyid"]">@dt6.Rows[i]["Company"]</option>
+                    }
+
+                }
+
+            }
+
+        </select>
+    </div>
+    <div class="col" style="width:150px">
+        <label for="exampleDataList" class="form-label">Report for</label><br />
+        <select class="form-control shadow-none mt-1" id="reportfor" name="reportfor" style="width:150px">
+            <option selected value="GPS">GPS</option>
+            <option value="CPS">CPS</option>
+            <option value="ZPS">ZPS</option>
+            <option value="RPS">RPS</option>
+            <option value="DPS">DPS</option>
+            <option value="BPS">BPS</option>
+            <option value="TPS">TPS</option>
+        </select>
+    </div>
+
+
+    <div class="col" style="width:150px">
+        <label for="exampleDataList" class="form-label">Month</label><br />
+        <select class="form-control shadow-none mt-1" id="month" name="month" style="width:150px">
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+        </select>
+        <input type="hidden" id="empid" name="empid" />
+        <input type="hidden" id="desig" name="desig" />
+        <input type="hidden" id="depart" name="depart" />
+        <input type="hidden" id="managernm" name="managernm" />
+    </div>
+    <div class="col" style="width:150px">
+        <label for="exampleDataList" class="form-label">Year</label><br />
+        <select class="form-control shadow-none mt-1" id="year" name="year" style="width:150px">
+        </select>
+    </div>
+    <div class="col" style="width:150px">
+        <label id="reportlabel">Employee Name</label><br />
+        <select multiple class="form-control shadow-none mt-1" id="employee" name="employee" style="width:150px">
+        </select>
+    </div>
+    <div class="col justify-content-end d-flex pt-3">
+
+    </div>
+</div>
+@*<div class="row">
+        <button class="btn btncolor" id="search" style="height: 30px; width: 100px; padding: 5px;width:100px">Search</button>
+        <button class="btn btncolor" id="advanceslip" style="height: 30px;">Advance  Report</button>
+        <button class="btn btncolor" id="finalslip" style="height: 30px;  margin-left: 10px;">Final Report</button>
+    </div>*@
+<style>
+    .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+        background-color: #009846;
+        color: #FFF383;
+        width: 150px;
+        height: 35px;
+    }
+
+    .nav-pills .nav-link:not(.active) {
+        background-color: #00A0E3;
+        color: white;
+        width: 100px;
+        height: 30px;
+    }
+</style>
+<div class="row">
+    <div class="col">
+        <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+            <li class="nav-item p-1" role="presentation">
+                <button class="nav-link active" id="advanceslip" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true"> Advance  Report </button>
+            </li>
+            <li class="nav-item p-1" role="presentation">
+                <button class="nav-link" id="finalslip" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false"> Final Report </button>
+            </li>
+
+        </ul>
+
+    </div>
+</div>
+
+
+
+
+<div class="row mt-2 mb-3 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <a href="">
+            @*<button class="btn btncolor btn-sm ms-2" onclick="ExportToExcel('xlsx')">Export to excel</button>*@
+        </a>
+
+    </div>
+
+</div>
+
+
+@{
+    string query = "select * from tbl_registration ";
+    DataTable dt = db.GetAllRecord(query);
+
+    if (dt.Rows.Count > 0)
+    {
+        <div class="table table-responsive" id="tblattendance1">
+            <table class="display nowrap table table-responsive" id="tblattendance">
+            </table>
+        </div>
+    }
+}
+
+<script>
+    $(document).ready(function () {
+        // Your document ready function code here
+        $('#month').select2({
+        });
+        $('#year').select2({
+        });
+        $('#reportfor').select2({
+        });
+        $('#employee').select2({
+        });
+        $('#startdate').select2({
+        });
+        $('#enddate').select2({
+        });
+        $('#company').select2({
+        });
+        // Function to hide #opclbtn on mobile devices
+        function hideOpclBtn1() {
+            $('#month').select2({
+            });
+            $('#year').select2({
+            });
+            $('#reportfor').select2({
+            });
+            $('#employee').select2({
+            });
+
+            $('#startdate').select2({
+            });
+            $('#enddate').select2({
+            });
+            $('#company').select2({
+            });
+        }
+
+
+        //// Handle window resize events
+        //$(window).resize(function () {
+        //    hideOpclBtn1();
+        //});
+    });
+</script>
+
+<script>
+    function showLoadingModal() {
+        Swal.fire({
+            title: "<i class='fa fa-spinner fa-spin'></i>",
+            html: `
+                    <p>Please wait while we process your request... It takes some time</p>
+                    <div class="progress-bar">
+                        <span class="progress-bar-fill"></span>
+                    </div>
+                `,
+            showConfirmButton: false,
+            position: 'center',
+            customClass: {
+                popup: 'custom-swal-popup-class',
+            },
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                // Optional: you can perform some actions when the modal is opened
+            }
+        });
+    }
+
+    // Function to update the progress bar
+    function updateProgressBar(percentage) {
+        document.querySelector('.progress-bar-fill').style.width = percentage + '%';
+    }
+
+    $(document).ready(function () {
+        $("#reportlabel").text("Groups");
+        var company = $("#company").val();
+        var month = $("#month").val();
+        var year = $("#year").val();
+        $.ajax({
+            url: "/Admin/GetAllORG",
+            type: "Get",
+            data: { ORGfor: "GPS", company: company, Month: month, Year: year },
+            success: function (response) {
+                // alert(response);
+                if (reportfor == "TPS") {
+                    $("#reportlabel").text("Teams");
+                }
+                else if (reportfor == "BPS") {
+                    $("#reportlabel").text("Branches");
+                }
+                else if (reportfor == "DPS") {
+                    $("#reportlabel").text("Divisions");
+                }
+                else if (reportfor == "RPS") {
+                    $("#reportlabel").text("Regions");
+                }
+                else if (reportfor == "ZPS") {
+                    $("#reportlabel").text("Zones");
+                }
+                else if (reportfor == "CPS") {
+                    $("#reportlabel").text("Companies");
+                }
+                else {
+                    $("#reportlabel").text("Groups");
+                }
+
+                $("#employee").empty();
+                $("#employee").append(response);
+
+            }
+        })
+
+        $("#search").click(function () {
+            var startdate = $("#startdate").val();
+            var enddate = $("#enddate").val();
+            var month = $("#month").val();
+            var year = $("#year").val();
+            var empid = $("#empid").val();
+            var reportfor = $("#reportfor").val();
+            var company = $("#company").val();
+            if (empid != "") {
+                Swal.fire({
+                    title: "<i class='fa fa-spinner fa-spin'></i>",
+                    html: ` <p>Please wait while we process your request... It takes some time</p> `,
+                    showConfirmButton: false,
+                    position: 'center',
+                    customClass: {
+                        popup: 'custom-swal-popup-class',
+                    },
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        
+                    }
+                });
+                $.ajax({
+                    url: "/Admin/GetSalesReport",
+                    type: "Get",
+                    data: { Startdate: startdate, Enddate: enddate, Month: month, Year: year, Uniqueid: empid, Reportfor: reportfor, company: company },
+                    success: function (response) {
+                        // alert(response);
+
+                        Swal.close()
+                        $("#tblattendance1").empty();
+                        $("#tblattendance1").append(response);
+                        var table = $('#tblattendance').DataTable({
+                            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+                            buttons: [
+                                {
+                                    extend: 'copy',
+                                    className: 'btn-custom',
+                                    footer: true // Include footer in copied content
+                                },
+                                {
+                                    extend: 'csv',
+                                    className: 'btn-custom',
+                                    footer: true // Include footer in CSV
+                                },
+                                {
+                                    extend: 'excel',
+                                    className: 'btn-custom',
+                                    footer: true // Include footer in Excel
+                                },
+                                {
+                                    extend: 'pdf',
+                                    className: 'btn-custom',
+                                    footer: true // Include footer in PDF
+                                },
+                                {
+                                    extend: 'print',
+                                    className: 'btn-custom',
+                                    footer: true // Include footer in printed content
+                                }
+                            ]
+                        });
+                    }
+                })
+            }
+            else {
+
+                Swal.close()
+                $("#employee").addClass("border border-danger")
+            }
+
+        });
+        $("#advanceslip").click(function () {
+            var startdate = $("#startdate").val();
+            var enddate = $("#enddate").val();
+            var month = $("#month").val();
+            var year = $("#year").val();
+            var empid = $("#empid").val();
+            var reportfor = $("#reportfor").val();
+            var company = $("#company").val();
+            if (empid != "") {
+                Swal.fire({
+                    title: "<i class='fa fa-spinner fa-spin'></i>",
+                    html: ` <p>Please wait while we process your request... It takes some time</p> `,
+                    showConfirmButton: false,
+                    position: 'center',
+                    customClass: {
+                        popup: 'custom-swal-popup-class',
+                    },
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+
+                    }
+                });
+                $.ajax({
+                    url: "/Admin/GetSalesReportAdvance",
+                    type: "Get",
+                    data: { Startdate: startdate, Enddate: enddate, Month: month, Year: year, Uniqueid: empid, Reportfor: reportfor, company: company },
+                    success: function (response) {
+                        // Remove active class from both buttons
+                        //$("#advanceslip, #finalslip").removeClass("activess");
+
+                        //// Change button color
+                        //$("#advanceslip").addClass("activess");
+
+                        // alert(response);
+                        Swal.close();
+                        $("#tblattendance1").empty();
+                        $("#tblattendance1").append(response);
+                        var table = $('#tblattendance').DataTable({
+                            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+                            buttons: [
+                                {
+                                    extend: 'copy',
+                                    className: 'btn-custom',
+                                    footer: true // Include footer in copied content
+                                },
+                                {
+                                    extend: 'csv',
+                                    className: 'btn-custom',
+                                    footer: true // Include footer in CSV
+                                },
+                                {
+                                    extend: 'excel',
+                                    className: 'btn-custom',
+                                    footer: true // Include footer in Excel
+                                },
+                                {
+                                    extend: 'pdf',
+                                    className: 'btn-custom',
+                                    footer: true // Include footer in PDF
+                                },
+                                {
+                                    extend: 'print',
+                                    className: 'btn-custom',
+                                    footer: true // Include footer in printed content
+                                }
+                            ]
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        // Close the SweetAlert2 modal
+                        Swal.close();
+
+                        // Handle the error
+                        console.error(error);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'An error occurred while processing your request.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                });
+            } else {
+                $("#employee").addClass("border border-danger");
+            }
+        });
+
+        $("#finalslip").click(function () {
+            var startdate = $("#startdate").val();
+            var enddate = $("#enddate").val();
+            var month = $("#month").val();
+            var year = $("#year").val();
+
+            var empid = $("#empid").val();
+            var reportfor = $("#reportfor").val();
+            var company = $("#company").val();
+            if (empid != "") {
+                Swal.fire({
+                    title: "<i class='fa fa-spinner fa-spin'></i>",
+                    html: ` <p>Please wait while we process your request... It takes some time</p> `,
+                    showConfirmButton: false,
+                    position: 'center',
+                    customClass: {
+                        popup: 'custom-swal-popup-class',
+                    },
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+
+                    }
+                });
+                $.ajax({
+                    url: "/Admin/GetSalesReportFinal",
+                    type: "Get",
+                    data: { Startdate: startdate, Enddate: enddate, Month: month, Year: year, Uniqueid: empid, Reportfor: reportfor, company: company },
+                    success: function (response) {
+                        // Remove active class from both buttons
+                        //$("#advanceslip, #finalslip").removeClass("activess");
+
+                        //// Change button color
+                        //$("#finalslip").addClass("activess");
+
+                        // alert(response);
+                        Swal.close();
+                        $("#tblattendance1").empty();
+                        $("#tblattendance1").append(response);
+                        var table = $('#tblattendance').DataTable({
+                            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+                            buttons: [
+                                {
+                                    extend: 'copy',
+                                    className: 'btn-custom',
+                                    footer: true // Include footer in copied content
+                                },
+                                {
+                                    extend: 'csv',
+                                    className: 'btn-custom',
+                                    footer: true // Include footer in CSV
+                                },
+                                {
+                                    extend: 'excel',
+                                    className: 'btn-custom',
+                                    footer: true // Include footer in Excel
+                                },
+                                {
+                                    extend: 'pdf',
+                                    className: 'btn-custom',
+                                    footer: true // Include footer in PDF
+                                },
+                                {
+                                    extend: 'print',
+                                    className: 'btn-custom',
+                                    footer: true // Include footer in printed content
+                                }
+                            ]
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        // Close the SweetAlert2 modal
+                        Swal.close();
+
+                        // Handle the error
+                        console.error(error);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'An error occurred while processing your request.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                });
+            }
+            else {
+                $("#employee").addClass("border border-danger")
+            }
+
+        });
+
+
+
+        $("#reportfor,#company,#month,#year").change(function () {
+            var reportfor = $("#reportfor").val();
+            var company = $("#company").val();
+            var month = $("#month").val();
+            var year = $("#year").val();
+            $.ajax({
+                url: "/Admin/GetAllORG",
+                type: "Get",
+                data: { ORGfor: reportfor, company: company, Month: month, Year: year },
+                success: function (response) {
+                    // alert(response);
+                    if (reportfor == "TPS") {
+                        $("#reportlabel").text("Teams");
+                    }
+                    else if (reportfor == "BPS") {
+                        $("#reportlabel").text("Branches");
+                    }
+                    else if (reportfor == "DPS") {
+                        $("#reportlabel").text("Divisions");
+                    }
+                    else if (reportfor == "RPS") {
+                        $("#reportlabel").text("Regions");
+                    }
+                    else if (reportfor == "ZPS") {
+                        $("#reportlabel").text("Zones");
+                    }
+                    else if (reportfor == "CPS") {
+                        $("#reportlabel").text("Companies");
+                    }
+                    else {
+                        $("#reportlabel").text("Groups");
+                    }
+
+                    $("#employee").empty();
+                    $("#employee").append(response);
+
+                }
+            })
+
+
+        });
+        $("#company,#month,#year").change(function () {
+            var reportfor = $("#reportfor").val();
+            var company = $("#company").val();
+            var month = $("#month").val();
+            var year = $("#year").val();
+            $.ajax({
+                url: "/Admin/GetAllORG",
+                type: "Get",
+                data: { ORGfor: reportfor, company: company, Month: month, Year: year },
+                success: function (response) {
+                    // alert(response);
+                    if (reportfor == "TPS") {
+                        $("#reportlabel").text("Teams");
+                    }
+                    else if (reportfor == "BPS") {
+                        $("#reportlabel").text("Branches");
+                    }
+                    else if (reportfor == "DPS") {
+                        $("#reportlabel").text("Divisions");
+                    }
+                    else if (reportfor == "RPS") {
+                        $("#reportlabel").text("Regions");
+                    }
+                    else if (reportfor == "ZPS") {
+                        $("#reportlabel").text("Zones");
+                    }
+                    else if (reportfor == "CPS") {
+                        $("#reportlabel").text("Companies");
+                    }
+                    else {
+                        $("#reportlabel").text("Groups");
+                    }
+
+                    $("#employee").empty();
+                    $("#employee").append(response);
+
+                }
+            })
+
+
+        });
+    });
+</script>

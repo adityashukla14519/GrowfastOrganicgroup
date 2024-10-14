@@ -1,0 +1,562 @@
+﻿
+@{
+    ViewBag.Title = "Product Details";
+    Layout = "~/Views/Shared/UserMaster.cshtml";
+}
+
+<script>
+    function validateNumericInput(inputElement, maxDigits, spid) {
+        // Get the current input value as a string
+        const errorMessage = document.getElementById(spid);
+        let inputValue = inputElement.value.toString();
+
+        // Remove any non-digit characters (e.g., commas, periods, except one dot)
+        inputValue = inputValue.replace(/[^0-9.]/g, '');
+
+        // If there is more than one dot, remove all but the first one
+        const dotIndex = inputValue.indexOf('.');
+        if (dotIndex !== -1) {
+            const beforeDot = inputValue.slice(0, dotIndex);
+            const afterDot = inputValue.slice(dotIndex + 1);
+            inputValue = beforeDot + '.' + afterDot.replace(/\./g, '');
+        }
+
+        // Truncate the value to the specified maximum number of digits
+        if (inputValue.length > maxDigits) {
+            inputValue = inputValue.slice(0, maxDigits);
+        }
+
+        // Update the input value with the sanitized and truncated value
+        inputElement.value = inputValue;
+
+        // Check if the sanitized value is different from the original input
+        if (inputValue.length > maxDigits) {
+            errorMessage.textContent = 'Please enter no more than ' + maxDigits + ' digits.';
+        } else {
+            errorMessage.textContent = '';
+        }
+    }
+
+</script>
+
+<!-- toogle button -->
+<link href="~/Content/tooglebutton/bootstrap5-toggle.min.css" rel="stylesheet" />
+<script src="~/Content/tooglebutton/bootstrap5-toggle.ecmas.min.js"></script>
+
+<script>
+    function statuschange(id, status, tdstatus) {
+        tdstatus = "#" + tdstatus;
+        $.ajax({
+            url: "/User/Statuschangetive",
+            type: "Post",
+            dataType: "JSON",
+            data: { id: id, status: status, tblnm: 'tbl_product' },
+            success: function (data) {
+                if (data == "Active") {
+                    $(tdstatus).empty();
+                    $(tdstatus).append('<i class="fa fa-check text-success"></i><span style="display:none">' + data + '</span>');
+                }
+                else {
+                    $(tdstatus).empty();
+                    $(tdstatus).append('<i class="fa fa-ban text-danger"></i><span style="display:none">' + data + '</span>');
+                }
+            },
+        });
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        var table = $('#tblproductcreation').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                }
+            ]
+        });
+    });
+
+</script>
+<script>
+    function Getid(id) {
+        $.ajax({
+            url: '/User/UpdateProductDetails',
+            type: "GET",
+            dataType: "JSON",
+            data: { Up: id },
+            success: function (data) {
+                //alert(data)
+                $("#productprimg").removeAttr("required");
+                $("#hid").val(data[0]);
+                $("#selproductnm").val(data[1]);
+                $("#productnm").val(data[1]);
+
+                $("#productprice").val(data[2]);
+                $("#description").val(data[3]);
+                $("#productdisc").val(data[4]);
+                $("#taxpercent").val(data[5]);
+                $("#pimage").val(data[6]);
+                $("#oimage").val(data[7]);
+                $("#status").val(data[8]);
+                $("#baseprice").val(data[10]);
+                $("#category").val(data[11]);
+
+
+                $("#status").removeClass("readonly");
+                $("#status").prop("disabled", false);
+
+                var category = $("#category").val();
+                $.ajax({
+                    url: "/User/GetProductSubCategory",
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { Category: category },
+                    success: function (data1) {
+                        //alert(data);
+                        $("#subcategory").empty();
+                        $("#subcategory").append(data1);
+
+                        $("#subcategory").val(data[12]);
+
+
+                    }
+                })
+
+
+                if (data[8] != "Other") {
+                    $("#selproductnm").val(data[1]);
+                    $("#spronm").show();
+                    $("#dvpronm").hide();
+                }
+                else {
+                    $("#selproductnm").val("Other");
+                    $("#spronm").hide();
+                    $("#dvpronm").show();
+                }
+            }
+        })
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $("#spronm").show();
+        $("#dvpronm").hide();
+        $("#selproductnm").change(function () {
+            var name = $("#selproductnm").val();
+            //alert(name);
+            if (name != "Other") {
+                $("#spronm").show();
+                $("#dvpronm").hide();
+                $("#productnm").val(name);
+            }
+            else {
+                $("#spronm").hide();
+                $("#dvpronm").show();
+                $("#productnm").val("");
+            }
+        })
+    })
+
+
+</script>
+<script>
+    $(document).ready(function () {
+        $("#status").val("Active");
+        $("#status").addClass("readonly");
+        $("#status").prop("disabled", true);
+
+            $("#cancel").click(function () {
+                $("input[type='text'],.form-select,#hid,#status").val("");
+                $("input[type='file']").val("");
+                $("#spronm").show();
+                $("#dvpronm").hide();
+                $("#productprimg").attr("Required", true);
+
+                $("#status").val("Active");
+                $("#status").addClass("readonly");
+                $("#status").prop("disabled", true);
+            })
+
+        var msg = '@ViewBag.msg';
+
+
+        if (msg) {
+            var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+                msg +
+                '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                '</div>';
+            $(alertElement).insertBefore('#alert-container');
+            setTimeout(function () {
+                $('#alert').alert('close');
+            }, 5000);
+            //$('.alert').on('closed.bs.alert', function () {
+            //    window.location.href = '/User/ProductDetails';
+            //});
+            //$('#btnclose').on('click', function () {
+            //    window.location.href = '/User/ProductDetails';
+            //});
+        }
+    });
+</script>
+<script>
+    function calculateprice() {
+        var baseprice = $("#baseprice").val();
+        var productdisc = $("#productdisc").val();
+        var taxpercent = $("#taxpercent").val();
+        //var productprice = parseFloat($("#productprice").val(0));
+        baseprice = (baseprice === null || baseprice === "") ? 0 : parseFloat(baseprice);
+        productdisc = (productdisc === null || productdisc === "") ? 0 : parseFloat(productdisc);
+        taxpercent = (taxpercent === null || taxpercent === "") ? 0 : parseFloat(taxpercent);
+
+        var discountrate = baseprice - ((baseprice * productdisc) / 100);
+        var finalrate = ((discountrate * taxpercent) / 100) + discountrate;
+        $("#productprice").val(finalrate)
+
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $("#category").change(function () {
+            var category = $("#category").val();
+            //alert(category)
+            $.ajax({
+                url: "/User/GetProductSubCategory",
+                type: "GET",
+                dataType: "JSON",
+                data: { Category: category },
+                success: function (data) {
+                    //alert(data);
+                    $("#subcategory").empty();
+                    $("#subcategory").append(data);
+
+                }
+            })
+        })
+    })
+</script>
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">User <i class="fa fa-angle-double-right"></i>  Product Details</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+<div class="row mt-2 mb-3 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+
+        <button type="button" class="btn btncolor btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#ProductDetails">
+            <i class="fa fa-plus" aria-hidden="true"></i> New
+        </button>
+    </div>
+</div>
+@using System.Data;
+@{
+
+    DbManager db = new DbManager();
+    Activitylog activitylog = new Activitylog();
+}
+@{
+    try
+    {
+        string query = "select * from tbl_product where BranchCode='" + Session["ubrcode"] + "'";
+        activitylog.Activitylogins("tbl_product", "", query, "Failed", "", Session["userid"].ToString(), Session["username"].ToString(), Session["usermail"].ToString());
+        DataTable dt = db.GetAllRecord(query);
+        activitylog.Activitylogupd("Success", "");
+        int count = 1;
+        if (dt.Rows.Count > 0)
+        {
+            <div class="row table table-responsive">
+                <table class="table table-responsive table-bordered" id="tblproductcreation">
+                    <thead class="text-center theadb text-light">
+                        <tr>
+                            <th class="text-center">Id</th>
+                            <th class="text-center">Product Name</th>
+                            <th class="text-center">Product Category</th>
+                            <th class="text-center">Price</th>
+                            <th class="text-center">Discount</th>
+                            <th class="text-center">Image</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Active/Inactive</th>
+                            <th class="text-center">Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        @for (int i = 0; i < dt.Rows.Count; i++)
+                        {
+                        <tr>
+                            <td>@(count + i)</td>
+                            <td>@dt.Rows[i]["Name"]</td>
+                            <td>@dt.Rows[i]["ProductCategory"]</td>
+                            <td>@dt.Rows[i]["Price"]</td>
+                            <td>@dt.Rows[i]["Discount"] %</td>
+                            <td><img src="~/@dt.Rows[i]["Pimage"]" style="height:50px;width:50px"></td>
+
+                            @if (@dt.Rows[i]["Status"] + "" == "Active")
+                            {
+
+                                <td id="tdi_@dt.Rows[i]["id"]"><i class="fa fa-check text-success"></i><span style="display:none">@dt.Rows[i]["Status"]</span></td>
+                                <td>
+                                    <input type="checkbox" checked data-toggle="toggle" data-on="Active" data-off="Inactive" onchange="statuschange('@dt.Rows[i]["id"]','Inactive','tdi_@dt.Rows[i]["id"]')" class="btn btncolorblue">
+                                </td>
+
+                            }
+                            else
+                            {
+
+                                <td id="tda_@dt.Rows[i]["id"]"><i class="fa fa-ban text-danger"></i><span style="display:none">@dt.Rows[i]["Status"]</span></td>
+                                <td>
+                                    <input type="checkbox" data-toggle="toggle" data-on="Active" data-off="Inactive" onchange="statuschange('@dt.Rows[i]["id"]','Active','tda_@dt.Rows[i]["id"]')" class="btn btncolorblue">
+                                </td>
+                            }
+                            <td><button class="btn btncolorblue" onclick="Getid('@dt.Rows[i]["Id"]')" data-bs-toggle="modal" data-bs-target="#ProductDetails"><i class="fa fa-edit"></i></button></td>
+
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class='row justify-content-center d-flex m-5' id='datanotfdound'>
+                <img src='~/Content/Img/nodata1.png' style="height:50%;width:50%" />
+            </div>
+        }
+    }
+
+
+    catch (Exception ex)
+    {
+        try
+        {
+            Error_15_16 error_15_16 = new Error_15_16();
+            string pageUrl = "", moduleName = "", errorLine = "", errorMessage = "", errorName = "", errorTrace = "";
+            // Get the page URL, if available
+            pageUrl = System.Web.HttpContext.Current.Request.Url.AbsoluteUri;
+            // Get the module name
+            moduleName = ex.TargetSite.Module.Name;
+            // Get the error line number, if available
+            var stackTrace = ex.StackTrace;
+            if (!string.IsNullOrEmpty(stackTrace))
+            {
+                var lineNumberIndex = stackTrace.LastIndexOf(":line ");
+                if (lineNumberIndex >= 0)
+                {
+                    var lineNumber = stackTrace.Substring(lineNumberIndex + 6);
+                    var newLineIndex = lineNumber.IndexOf(Environment.NewLine);
+                    if (newLineIndex >= 0)
+                    {
+                        errorLine = lineNumber.Substring(0, newLineIndex);
+                    }
+                    else
+                    {
+                        errorLine = lineNumber;
+                    }
+                }
+            }
+            // Get the error message and name
+            if (ex.Message.ToString().Length >= 1000)
+            {
+                errorMessage = ex.Message.Substring(1, 500);
+            }
+            else
+            {
+                errorMessage = ex.Message;
+            }
+            errorName = ex.GetType().FullName;
+            // Get the error trace
+            errorTrace = ex.StackTrace;
+            error_15_16.Error_15_16ins(pageUrl, moduleName, errorLine, errorMessage.Replace("'", "`"), errorName.Replace("'", "`"), errorTrace.Replace("'", "`"), Session["userid"].ToString(), Session["username"].ToString(), Session["usermail"].ToString());
+        }
+
+        catch
+        {
+        }
+    }
+    finally
+    {
+        db.connectionstate();
+    }
+}
+
+<!-- Modal ProductDetails-->
+<div class="modal fade" id="ProductDetails" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <form action="/User/ProductDetails" method="post" class="needs-validation" novalidate enctype="multipart/form-data">
+                <div class="modal-header justify-content-center nevigationstrip">
+                    <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Product Details</h5>
+                </div>
+                <div class="modal-body">
+                    <span id="spotherresource"></span>
+                    <div class="row row-cols-1 row-cols-sm-3">
+                        <div class="col mb-2" id="spronm">
+                            <input type="hidden" id="hid" name="hid" />
+                            <h6 class="mt-2">Select Product</h6>
+                            <select class="form-select shadow-none" id="selproductnm" name="selproductnm" required>
+                                <option selected disabled value="">Select One</option>
+                                @{
+                                    string query1 = "select * from tbl_product_creation where BranchCode='" + Session["ubrcode"] + "'";
+                                    DataTable dt1 = db.GetAllRecord(query1);
+                                    if (dt1.Rows.Count > 0)
+                                    {
+                                        for (int i = 0; i < dt1.Rows.Count; i++)
+                                        {
+                                            <option value="@dt1.Rows[i]["ProductName"]">@dt1.Rows[i]["ProductName"]</option>
+                                        }
+                                    }
+                                }
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col mb-2" id="dvpronm">
+                            <h6 class="mt-2">Product Name</h6>
+                            <input type="text" class="form-control shadow-none" name="productnm" id="productnm" required placeholder="Enter Product Name" onkeyup="validateTextbox(this)" pattern="^[a-zA-Z0-9 ]*$" title="Please enter only letters, and spaces" />
+                            <div class="invalid-feedback">
+                                Please enter only letters, and spaces
+                            </div>
+                        </div>
+                        <div class="col mb-4">
+                            <h6 class="mt-2">Product Category</h6>
+                            <select class="form-select shadow-none" id="category" name="category" required>
+                                <option selected disabled value="">Select</option>
+                                @{
+                                    string query2 = "select * from tbl_product_category where BranchCode='" + Session["ubrcode"] + "'";
+                                    DataTable dt2 = db.GetAllRecord(query2);
+                                    if (dt1.Rows.Count > 0)
+                                    {
+                                        for (int i = 0; i < dt2.Rows.Count; i++)
+                                        {
+                                            <option>@dt2.Rows[i]["ProductCategory"]</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col mb-4">
+                            <h6 class="mt-2">Product Sub Category</h6>
+                            <select class="form-select shadow-none" id="subcategory" name="subcategory" required>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row row-cols-1 row-cols-sm-4">
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Base Price</h6>
+                            <input type="text" class="form-control shadow-none" name="baseprice" id="baseprice" required placeholder="Enter Product Price" oninput="validateNumericInput(this, 20, 'spnum'), calculateprice();" />
+                            <div class="invalid-feedback" id="spnum">
+                                Please enter only numbers
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Product Discount(%)</h6>
+                            <input type="text" class="form-control shadow-none" name="productdisc" id="productdisc" required placeholder="Enter Discrount Rate" oninput="validateNumericInput(this, 10, 'spnumd'), calculateprice();" />
+                            <div class="invalid-feedback" id="spnumd">
+                                Please enter only numbers
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Tax (%)</h6>
+                            <select class="form-select shadow-none" id="taxpercent" name="taxpercent" onchange="calculateprice()">
+                                <option selected value="0">Select One</option>
+                                <option value="5">5 %</option>
+                                <option value="12">12 %</option>
+                                <option value="18">18 %</option>
+                                <option value="28">28 %</option>
+                            </select>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Final Price</h6>
+                            <input type="text" class="form-control shadow-none readonly" name="productprice" id="productprice" required placeholder="Final Price" readonly />
+                            <div class="invalid-feedback">
+                                Please enter only numbers
+                            </div>
+                        </div>
+                    </div>
+                    <h6 class="mt-2">Description</h6>
+                    <div class="row row-cols-1 row-cols-sm-1">
+                        <div class="col">
+                            <textarea rows="5" class="form-control shadow-none" name="description" id="description" placeholder="Description" maxlength="200"></textarea>
+                        </div>
+                    </div>
+                    <div class="row row-cols-1 row-cols-sm-3">
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Product Cover Image</h6>
+                            <input type="file" class="form-control shadow-none" name="productprimg" id="productprimg" required />
+                            <input type="hidden" id="pimage" name="pimage" />
+                            <div class="invalid-feedback">
+                                choose the file
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Product Other Image(Multiple)</h6>
+                            <input type="file" multiple class="form-control shadow-none" name="productothimg" id="productothimg" /><input type="hidden" id="oimage" name="oimage" />
+                            <div class="invalid-feedback">
+                                Choose at least one file
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Status</h6>
+                            <select class="form-select shadow-none" id="status" name="status" required>
+                                <option>Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a valid Status.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+                    <button type="submit" class="btn btncolor" id="btnsub"><i class="fa fa-check"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+

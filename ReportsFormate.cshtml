@@ -1,0 +1,1767 @@
+﻿
+@{
+    ViewBag.Title = "ReportsFormate";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+<button onclick="downloadPlantation()" class="no-print">Plantation Download as PDF</button>
+<button onclick="downloadcounting_replacement()" class="no-print">Counting and Replacement Download as PDF</button>
+<button onclick="downloadinvoice('1234', '1234', '1234', '1234','1234');" class="no-print">Invoice Download as PDF</button>
+
+<script src="https://rawgit.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
+<script>
+    function downloadcounting_replacement() {
+        const element = document.getElementById('counting_replacement');
+
+        // Add padding to the content directly
+        element.style.padding = '20px';
+
+        html2pdf(element, {
+            margin: 0, // Set margin to 20px
+            filename: 'counting_replacement.pdf',
+            image: { type: 'jpeg', quality: .50 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape', margin: { top: 0, right: 0, bottom: 0, left: 0 } }
+        });
+
+        // Reset padding after creating the PDF (optional)
+        element.style.padding = '0';
+    }
+</script>
+<script>
+    function downloadPlantation() {
+        const element = document.getElementById('Plantation');
+
+        // Add padding to the content directly
+        element.style.padding = '20px';
+
+        html2pdf(element, {
+            margin: 0, // Set margin to 20px
+            filename: 'Plantation.pdf',
+            image: { type: 'jpeg', quality: .50 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', margin: { top: 0, right: 0, bottom: 0, left: 0 } }
+        });
+
+        // Reset padding after creating the PDF (optional)
+        element.style.padding = '0';
+    }
+</script>
+
+@*<script>
+          function downloadinvoice() {
+              const element = document.getElementById('invoice1');
+
+              // Add padding to the content directly
+              element.style.padding = '20px';
+
+              html2pdf(element, {
+                  margin: 0, // Set margin to 20px
+                  filename: 'invoice.pdf',
+                  image: { type: 'jpeg', quality: .50 },
+                  html2canvas: { scale: 2 },
+                  jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', margin: { top: 0, right: 0, bottom: 0, left: 0 } }
+              });
+
+              // Reset padding after creating the PDF (optional)
+              element.style.padding = '0';
+          }
+    </script>*@
+
+<script>
+    function downloadinvoice(invoiceId, horderid, horderid2, rowid, mobile) {
+        const element = document.getElementById('invoice1');
+        element.style.padding = '20px';
+
+        html2pdf().from(element).toPdf().get('pdf').then(function (pdf) {
+            // Convert the PDF blob to a Blob URL
+            var blobUrl = URL.createObjectURL(pdf.output('blob'));
+
+            // Send the PDF data to the server
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/SavePdfHandler.ashx?invoiceId=' + encodeURIComponent(invoiceId) + '&horderid=' + encodeURIComponent(horderid) + '&horderid2=' + encodeURIComponent(horderid2) + '&rowid=' + encodeURIComponent(rowid) + '&mobile=' + encodeURIComponent(mobile), true);
+            xhr.setRequestHeader('Content-type', 'application/pdf');
+            xhr.responseType = 'blob';
+
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    // Create a temporary link element
+                    var a = document.createElement('a');
+                    var blob = new Blob([xhr.response], { type: 'application/pdf' });
+                    var url = window.URL.createObjectURL(blob);
+
+                    a.href = url;
+                    a.download = 'invoice.pdf'; // Set the file name
+
+                    // Prompt the user to choose the location and save the file
+                    document.body.appendChild(a);
+                    a.click();
+
+                    // Clean up
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }
+            };
+
+            xhr.send(pdf.output('blob'));
+        });
+
+        element.style.padding = '0';
+    }
+</script>
+
+
+<style>
+    label {
+        font-size: 12px;
+    }
+</style>
+<link href="~/Content/css/Printcssfile.css" rel="stylesheet" />
+
+<h2 class="no-print">Plantation</h2>
+
+<button class=" no-print" onclick="window.print()">Print</button>
+@*<button class=" no-print" onclick="printAndSavePDF()">Print</button>*@
+
+<script>
+    function printDiv() {
+        // Get the HTML content of the specific div
+        var content = document.querySelector('.row.p-3').outerHTML;
+
+        // Create a new window
+        var printWindow = window.open('', '_blank');
+
+        // Write the content to the new window
+        printWindow.document.open();
+        printWindow.document.write('<html><head><title>Print</title></head><body>' + content + '</body></html>');
+        printWindow.document.close();
+
+        // Print the new window
+        printWindow.print();
+    }
+</script>
+<!-- Include jsPDF library -->
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>*@
+
+<!-- Your JavaScript code goes here -->
+<script>
+    function printAndSavePDF() {
+        // Generate and save the PDF
+        generatePDF();
+
+        // Redirect back to /Home/Pdf
+        window.location.href = "/Admin/ReportsFormate";
+    }
+
+    function generatePDF() {
+        // Create a new jsPDF instance
+        var doc = new jsPDF();
+
+        // HTML content for the PDF
+        var htmlContent = "<table class='table-bordered border-2 border-dark print-div' id='invoice' style='border:3px solid black'> <tr> <td colspan='8'> <div class='row'> <div class='col-2 col-sm-2 justify-content-start'> <img src='~/Content/Img/Growfast Logo.png' style='height:50px;' /> <br /><span style='font-size:7px;width:120px'>AN 150 001:2015 Certified Company</span> </div> <div class='col-8 col-sm-8 text-center'> <label><b>Corporate Office  : </b> Plot No. 6 ( Floor), Kalyanpur, Ring Road, Lucknow-226022 Mob.: 9415344987, 0522-3583497  </label> <h5 class='fw-bold'>Toll Free No.: 1800-833-0038</h5> <label>  Email: agriculturegod@gmail.com | Website: www.growfastorganic.com </label> </div>  <div class='col-2 col-sm-2 text-start'> <h6 class='fw-bold'>ORDER NO.: UP:LKO L23K240</h6> </div> </div> </td> </tr> <tr class=' bg-black text-white'> <td class='text-center' colspan='8'>  <h6>Customer's Name & Address : (In Capital Letters)</h6> </td> </tr> <tr> <td colspan='8'> <div class='row row-cols-2 row-cols-sm-2'> <div class='col text-start fs-6'> <label class='fs-6'>Name:-</label><br /> <label class='fs-6'>Address:-</label><br /> <label class='fs-6'>Tahsil-</label><br /> <label class='fs-6'>Block:-</label><br /> <label class='fs-6'>District:-</label><br /> <label class='fs-6'>State:-</label><br /> </div> <div class='col text-start'> <label class='fs-6'>Mobile:-</label><br /> <label class='fs-6'>Plantation Address-</label><br /> </div>  </div> </td> </tr> <tr class='bg-black text-white text-center fs-6'> <td> SR No </td> <td> Description of Goods</td> <td> HSN/SAC</td> <td> Qty.</td> <td> Rate</td> <td> Amount </td> <td colspan='2'> Particulars</td> </tr> <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td> Total Amount </td> <td></td> </tr> <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td>Taxable Amount</td> <td></td> </tr> <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td>IGST/GST Rate</td> <td></td> </tr> <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td>Round Off</td> <td></td> </tr> <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td>Bill Amount</td> <td></td> </tr> <tr> <td colspan='6' rowspan='2' class='ps-4'>Authorised Signatory</td> <td>Less-Advanced Received</td> <td></td> </tr> <tr> <td>Balanced Amount Received</td> <td></td> </tr> <tr> <td colspan='8'> <div class='row mb-2'> <div class='col-2 col-sm-2 justify-content-start'> <img src='~/Content/Img/Growfast Logo.png' style='height:50px;' /> <br /><span style='font-size:7px;width:120px'>AN 150 001:2015 Certified Company</span> </div> <div class='col-6 col-sm-6 text-center'> <label><b>Corporate Office  : </b> Plot No. 6 ( Floor), Kalyanpur, Ring Road, Lucknow-226022 Mob.: 9415344987, 0522-3583497  </label> <h5 class='fw-bold'>Toll Free No.: 1800-833-0038</h5> <label>  Email: agriculturegod@gmail.com | Website: www.growfastorganic.com </label> </div> <div class='col-2 col-sm-2 text-start'> <h6 class='fw-bold'>ORDER NO.: UP:LKO L23K240</h6> </div> <div class='col-2 col-sm-2 text-start'> <h6 class='fw-bold'>Final Receipt</h6> </div> </div> <div class='row'> <div class='col'> <span class='fs-6'> Customer Name:<b>#name</b> Received with thanks the sum of Rs.<b>100</b>(Rs. in words)<b>one hundred</b> in <b>PAyment Mentho</b> Dated<b> 12-02-2024</b> being balance amount in full & final payment for the units refer against delivery. </span> </div>  </div> <div class='row'> <div class='col-8 col-sm-8 justify-content-start'> </div> <div class='col-4 col-sm-4 text-center'> <label> I confirm having received the products as per Invoice in good condition. </label> </div>  </div> <div class='row mb-2'> <div class='col-4 col-sm-4 justify-content-center'> <h6>Authorised Signatory</h6> </div> <div class='col-4 col-sm-4 justify-content-center'> <h6>GSTIN No.: 09AAFCG9739A1ZR</h6> </div> <div class='col-4 col-sm-4 justify-content-center'> <h6>Signatory of the Customer & date</h6> </div> </div> </td> </tr>  <tr> <td colspan='8'> <div class='row mb-2'> <div class='col justify-content-start'> <h6>Terms and Condition</h6> </div> </div> <div class='row'> <div class='col'> <ul> <li>Terms of payment 20% advance total amount and balanced amounts against delivery.</li> <li>In the condition of cheque payment delivery of product shall be Eligible afer clearance of cheque.</li> <li>Company all facility shall be Eligible e full payment of product.</li> <li>Product once sold will not be taken back and amount not refundable.</li> <li> Company is no way responsible for growth and since the growth yield of crop depend on the quality and suitability of soll, water and cultivation practices. </li> <li>100% replacement of damage plants in one time</li> <li>Make a DD/Cheque in favour of Growlast Organic Diamond Pvt Ltd Payable at Lucknow.</li> <li>All disputes one subject to Lucknow jurisdiction.</li> </ul> </div>  </div> <div class='row mb-2'> <div class='col-4 col-sm-4 justify-content-center'> <h6>Authorised Signatory</h6> </div> <div class='col-4 col-sm-4 justify-content-center'> <h6>GSTIN No.: 09AAFCG9739A1ZR</h6> </div> <div class='col-4 col-sm-4 justify-content-center'> <h6>Signatory of the Customer & date</h6> </div> </div> </td> </tr></table>"; // Put your PDF content here";
+
+        // Add HTML content to the PDF
+        doc.html(htmlContent, {
+            callback: function (doc) {
+                // Save the PDF
+                doc.save('document.pdf');
+            }
+        });
+    }
+</script>
+
+
+
+
+<div class="row p-3 no-print" style="background-color: #eeac9b " id="Plantation">
+    <div class="col" style="min-height: 842px; min-width: 575px ">
+        <div class="row row-cols-3 row-cols-sm-3">
+            <div class="col justify-content-start">
+                <img src="~/Content/Img/Growfast Logo.png" style="height:30px;width:150px" />
+            </div>
+            <div class="col text-center  text-capitalize ">
+                <h5>Plantation Acknowledgement</h5>
+            </div>
+            <div class="col text-end">
+                <label class=" text-capitalize ">Plantation Acknowledgement Plantation Acknowledgement</label><br /><label class=" text-capitalize ">  SR No.  :- </label>
+            </div>
+        </div>
+        <div class="row row-cols-1 row-cols-sm-1">
+            <div class="col border-2 border-dark">
+                <div class="row row-cols-2 row-cols-sm-2 border border-1 border-dark border-bottom-0" style="height:30px">
+                    <div class="col border  border-1 border-dark"><label class=" text-capitalize ">Name Of Customer :- </label></div>
+                    <div class="col border border-1 border-dark"><label class=" text-capitalize ">Invoice No,& Document Date :- </label></div>
+                </div>
+                <div class="row row-cols-2 row-cols-sm-2 border border-1 border-dark border-bottom-0 border-top-0" style="height:200px">
+                    <div class="col border border-1 border-dark"><label class=" text-capitalize ">Permanenet Address :- </label></div>
+                    <div class="col border border-1 border-dark"><label class=" text-capitalize ">Plantation Address :- </label></div>
+                </div>
+                <div class="row row-cols-2 row-cols-sm-2 border border-1 border-dark border-bottom-0 border-top-0" style="height:30px">
+                    <div class="col border border-1 border-dark"><label class=" text-capitalize ">Mobile No :- </label></div>
+                    <div class="col border border-1 border-dark"><label class=" text-capitalize ">Email Id :- </label></div>
+                </div>
+                <div class="row row-cols-2 row-cols-sm-2 border border-1 border-dark border-bottom-0 border-top-0" style="height:30px">
+                    <div class="col border border-1 border-dark" colspan="2"><label class=" text-capitalize ">Altername Mobile No :- </label></div>
+                    <div class="col border border-1 border-dark"><label class=" text-capitalize ">DOP :- </label></div>
+                </div>
+                <div class="row row-cols-2 row-cols-sm-2 border border-1 border-dark border-bottom-0 border-top-0" style="height:200px">
+                    <div class="col border border-1 border-dark"><label class=" text-capitalize ">Plantation Result & Remark by AT/BTI :- </label></div>
+                    <div class="col border border-1 border-dark"><label class=" text-capitalize ">Receive Plantation Service with thank by Customer :- </label></div>
+                </div>
+                <div class="row row-cols-1 row-cols-sm-1 border border-1 border-dark border-bottom-0 border-top-0" style="height:250px">
+                    <div class="col border border-1 border-dark text-center" colspan="2" style="padding:94px"><label class=" text-capitalize  bottom-0 top-50">Attatch Plantation Photo in Office :- </label></div>
+                </div>
+                <div class="row row-cols-3 row-cols-sm-3 border border-1 border-dark border-bottom-0 border-top-0" style="height:100px">
+                    <div class="col border border-1 border-dark text-center" style="padding-top:74px"><label class=" text-capitalize ">Signature of Sale Head/Director  :- </label></div>
+                    <div class="col border border-1 border-dark text-center" style="padding-top:74px"><label class=" text-capitalize ">Signature of At/BTI :- </label></div>
+                    <div class="col border border-1 border-dark text-center " style="padding-top:74px"><label class=" text-capitalize "> Signature of Customer :- </label></div>
+                </div>
+                <div class="row row-cols-1 row-cols-sm-1 border border-1 border-dark border-top-0" style="height:50px">
+                    <div class="col border border-1 border-dark" colspan="2"><label class=" text-capitalize "> </label></div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+
+<h2 class="no-print">Plant Counting and Replacement</h2>
+
+<div class="row row-cols-1 row-cols-sm-1 p-3 pb-0 no-print me-2" style="background-color: #eeac9b " id="counting_replacement">
+    <div class="col border border-2 border-dark" style="min-height: 842px; min-width: 595px ">
+
+        <div class="row row-cols-1 row-cols-sm-1 pt-1">
+            <div class="col mb-3">
+                <div class="row">
+                    <div class="col-2 col-sm-2 justify-content-start">
+                        <img src="~/Content/Img/Growfast Logo.png" style="height:30px;width:170px" />
+                    </div>
+                    <div class="col-8 col-sm-8 text-center text-capitalize ">
+                        <h5>PLANT COUNTING & REPLACEMENT ACKNOWLEDGEMENT</h5>
+                    </div>
+                    <div class="col-2 col-sm-2 text-end">
+
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="row row-cols-2 row-cols-sm-2">
+                    <div class="col text-start text-capitalize ">
+                        <label>Name of AT/BTI:-</label><br />
+                        <label>Date of Counting:-</label><br />
+                        <label>Name of Customer:-</label><br />
+                        <label>Village/H.No.:-</label><br />
+                        <label>Order No:-</label><br />
+                        <label>Distt:-</label><br />
+
+                    </div>
+                    <div class="col text-start text-capitalize ">
+                        <label>Branch:-</label><br />
+                        <label>Date of Replacement:-</label><br />
+                        <label>Mobile No.:-</label><br />
+                        <label>Block:-</label><br />
+                        <label>DOC Month:-</label><br />
+                        <label>Occupation:-</label><br />
+                    </div>
+
+                </div>
+            </div>
+            <div class="col text-center">
+                <h6>PLANT COUNTING STATUS:-</h6>
+            </div>
+            <div class="col border-2 border-dark">
+                <table class="table table-bordered border border-1 border-dark">
+                    <thead class="text-center">
+                        <tr>
+                            <th>Name of Product</th>
+                            <th>Plantation Status</th>
+                            <th>Purchase Unit</th>
+                            <th>Recommended Unit</th>
+                            <th>Inter Croping Status</th>
+                            <th>Reasons for Mortality</th>
+                            <th>If Main Cust. Not Meet Relation with Cust.</th>
+                            <th>Name & Sign. Of Customer at the Time of Counting</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td rowspan="5"></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="text-center"><label>Total Cumulative</label></td>
+                            <td></td>
+                            <td></td>
+                            <td colspan="4"><label>Mortality %:-</label></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col text-center">
+                <h6>PLANT REPLACEMENT STATUS:-</h6>
+            </div>
+            <div class="col border-2 border-dark">
+                <table class="table table-bordered border border-1 border-dark">
+                    <thead class="text-center">
+                        <tr>
+                            <th>Name of Product</th>
+                            <th>Plantation Status</th>
+                            <th>Purchase Unit</th>
+                            <th>Replacement Unit</th>
+                            <th>Difference In Counting v/s Replace</th>
+                            <th>Reasons for if Increase Mortality</th>
+                            <th>If Main Cust. Not Meet Relation with Cust.</th>
+                            <th>Name & Sign. Of Customer at the Time of Counting</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td rowspan="5"></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="text-center"><label>Total Cumulative</label></td>
+                            <td></td>
+                            <td></td>
+                            <td colspan="4"><label>Replacement %:-</label></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col text-center">
+
+            </div>
+            <div class="col" style="height:150px">
+                <div class="row row-cols-3 row-cols-sm-3">
+                    <div class="col justify-content-start">
+                        <label>Remark:</label>
+                    </div>
+                    <div class="col text-center text-capitalize ">
+                        <label>Remark:</label>
+                    </div>
+                    <div class="col text-end">
+                        <label>Remark:</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="col" style="height:100px">
+        <div class="row row-cols-3 row-cols-sm-3 mt-5">
+            <div class="col justify-content-start">
+                <h6>Sign. Of Sale Head/Director</h6>
+            </div>
+            <div class="col text-center text-capitalize ">
+                <h6>Sign. Of Service Head</h6>
+            </div>
+            <div class="col text-end">
+                <h6>Sign. Of AT/BTI</h6>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<h2 class="no-print">PLANT TECHNICAL SERVICE ACKNOWLEDGEMENT</h2>
+
+<div class="row row-cols-1 row-cols-sm-1 p-3 pb-0 no-print" style="background-color: #eeac9b " id="counting_replacement">
+    <div class="col border border-2 border-dark" style="min-height: 842px; min-width: 595px ">
+
+        <div class="row row-cols-1 row-cols-sm-1 pt-1">
+            <div class="col mb-3">
+                <div class="row">
+                    <div class="col-2 col-sm-2 justify-content-start">
+                        <img src="~/Content/Img/Growfast Logo.png" style="height:30px;width:170px" />
+                    </div>
+                    <div class="col-8 col-sm-8 text-center text-capitalize ">
+                        <h5>PLANT TECHNICAL SERVICE ACKNOWLEDGEMENT</h5>
+                    </div>
+                    <div class="col-2 col-sm-2 text-end">
+                        <label class=" text-capitalize ">Acknowledgement No.</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="row row-cols-2 row-cols-sm-2">
+                    <div class="col text-start text-capitalize ">
+                        <label>Branch:-</label><br />
+                        <label>Name of Customer.-</label><br />
+                        <label>Village/H.No.:-</label><br />
+                        <label>Order No:-</label><br />
+                        <label>Distt:-</label><br />
+                        <label>Replacement Acknowledgement No:-</label><br />
+
+                    </div>
+                    <div class="col text-start text-capitalize ">
+                        <label>Product Name:-</label><br />
+                        <label>Mobile No.:-</label><br />
+                        <label>Block:-</label><br />
+                        <label>DOC Month:-</label><br />
+                        <label>Occupation:-</label><br />
+                        <label>Month of Replacement:-</label><br />
+                    </div>
+
+                </div>
+            </div>
+            <div class="col text-center">
+                <h6>1st Service Date</h6>
+            </div>
+            <div class="col border-2 border-dark">
+                <table class="table table-bordered border border-2 border-dark">
+                    <thead class="text-center">
+                        <tr>
+                            <th>Servicing</th>
+                            <th>Particular</th>
+                            <th>Height</th>
+                            <th>Girth</th>
+                            <th>No. of Good Plant</th>
+                            <th>Fertilizer</th>
+                            <th>Pest/dise ases</th>
+                            <th>Irrigation</th>
+                            <th>Weeding/ inter Crop</th>
+                            <th>Name & Sign. Of AT</th>
+                            <th>Received Service with Thanks Customer Sign.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td rowspan="2"> <label>1st Service</label></td>
+                            <td><label>Observation</label></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td rowspan="2"></td>
+                            <td rowspan="2"></td>
+                        </tr>
+                        <tr>
+                            <td><label>Treatment</label></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="col text-center">
+                <h6>2nd Service Date</h6>
+            </div>
+            <div class="col border-2 border-dark">
+                <table class="table table-bordered border border-2 border-dark">
+                    <thead class="text-center">
+                        <tr>
+                            <th>Servicing</th>
+                            <th>Particular</th>
+                            <th>Height</th>
+                            <th>Girth</th>
+                            <th>No. of Good Plant</th>
+                            <th>Fertilizer</th>
+                            <th>Pest/dise ases</th>
+                            <th>Irrigation</th>
+                            <th>Weeding/ inter Crop</th>
+                            <th>Name & Sign. Of AT</th>
+                            <th>Received Service with Thanks Customer Sign.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td rowspan="2"> <label>2nd Service</label></td>
+                            <td><label>Observation</label></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td rowspan="2"></td>
+                            <td rowspan="2"></td>
+                        </tr>
+                        <tr>
+                            <td><label>Treatment</label></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="col text-center">
+                <h6>3rd Service Date</h6>
+            </div>
+            <div class="col border-2 border-dark">
+                <table class="table table-bordered border border-2 border-dark">
+                    <thead class="text-center">
+                        <tr>
+                            <th>Servicing</th>
+                            <th>Particular</th>
+                            <th>Height</th>
+                            <th>Girth</th>
+                            <th>No. of Good Plant</th>
+                            <th>Fertilizer</th>
+                            <th>Pest/dise ases</th>
+                            <th>Irrigation</th>
+                            <th>Weeding/ inter Crop</th>
+                            <th>Name & Sign. Of AT</th>
+                            <th>Received Service with Thanks Customer Sign.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td rowspan="2"> <label>3rd Service</label></td>
+                            <td><label>Observation</label></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td rowspan="2"></td>
+                            <td rowspan="2"></td>
+                        </tr>
+                        <tr>
+                            <td><label>Treatment</label></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="col text-center">
+                <h6>4th Service Date</h6>
+            </div>
+            <div class="col border-2 border-dark">
+                <table class="table table-bordered border border-2 border-dark">
+                    <thead class="text-center">
+                        <tr>
+                            <th>Servicing</th>
+                            <th>Particular</th>
+                            <th>Height</th>
+                            <th>Girth</th>
+                            <th>No. of Good Plant</th>
+                            <th>Fertilizer</th>
+                            <th>Pest/dise ases</th>
+                            <th>Irrigation</th>
+                            <th>Weeding/ inter Crop</th>
+                            <th>Name & Sign. Of AT</th>
+                            <th>Received Service with Thanks Customer Sign.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td rowspan="2"> <label>4th Service</label></td>
+                            <td><label>Observation</label></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td rowspan="2"></td>
+                            <td rowspan="2"></td>
+                        </tr>
+                        <tr>
+                            <td><label>Treatment</label></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="col text-center">
+                <h6>5th Service Date</h6>
+            </div>
+            <div class="col border-2 border-dark">
+                <table class="table table-bordered border border-2 border-dark">
+                    <thead class="text-center">
+                        <tr>
+                            <th>Servicing</th>
+                            <th>Particular</th>
+                            <th>Height</th>
+                            <th>Girth</th>
+                            <th>No. of Good Plant</th>
+                            <th>Fertilizer</th>
+                            <th>Pest/dise ases</th>
+                            <th>Irrigation</th>
+                            <th>Weeding/ inter Crop</th>
+                            <th>Name & Sign. Of AT</th>
+                            <th>Received Service with Thanks Customer Sign.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td rowspan="2"> <label>5th Service</label></td>
+                            <td><label>Observation</label></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td rowspan="2"></td>
+                            <td rowspan="2"></td>
+                        </tr>
+                        <tr>
+                            <td><label>Treatment</label></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="col text-center">
+
+            </div>
+        </div>
+    </div>
+    <div class="col" style="height:100px">
+        <div class="row row-cols-3 row-cols-sm-3 mt-5">
+            <div class="col justify-content-start">
+                <h6>Sign. Of Sale Head/Director</h6>
+            </div>
+            <div class="col text-center text-capitalize ">
+                <h6>Sign. Of Service Head</h6>
+            </div>
+            <div class="col text-end">
+                <h6>Sign. Of AT/BTI</h6>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<h2 class="no-print">CUSTOMER COMPLAINT ACKNOWLEDGEMENT</h2>
+
+<div class="row p-3 no-print" style="background-color: #eeac9b " id="complaint">
+    <div class="col" style="min-height: 842px; min-width: 595px ">
+
+        <div class="row row-cols-1 row-cols-sm-1 border border-2 border-dark">
+            <div class="col">
+                <div class="row row-cols-3 row-cols-sm-3">
+                    <div class="col justify-content-start">
+                        <img src="~/Content/Img/Growfast Logo.png" style="height:30px;width:200px" />
+                    </div>
+                    <div class="col text-center  text-capitalize ">
+                        <h5>CUSTOMER COMPLAINT ACKNOWLEDGEMENT</h5>
+                    </div>
+                    <div class="col text-end">
+                        <label class=" text-capitalize ">
+                            COM. ACKNOWLEDGEMENT
+                        </label><br /><label class=" text-capitalize ">  No. :- </label>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="row row-cols-2 row-cols-sm-2 border border-1 border-dark border-bottom-0 border-start-0 border-end-0" style="height:30px">
+                    <div class="col border border-1 border-dark border-start-0"><label class=" text-capitalize ">NAME OF AT/BTI:- </label></div>
+                    <div class="col border border-1 border-dark border-end-0"><label class=" text-capitalize ">DATE:- </label></div>
+                </div>
+                <div class="row row-cols-2 row-cols-sm-2" style="height:30px">
+                    <div class="col border  border-1 border-dark border-start-0"><label class=" text-capitalize ">NAME OF CUSTOMER:- </label></div>
+                    <div class="col border border-1 border-dark border-end-0"><label class=" text-capitalize ">INVOICE NO. & DOC MONTH:- </label></div>
+                </div>
+                <div class="row row-cols-2 row-cols-sm-2" style="height:200px">
+                    <div class="col border border-1 border-dark border-start-0"><label class=" text-capitalize ">Permanenet Address :- </label></div>
+                    <div class="col border border-1 border-dark border-end-0"><label class=" text-capitalize ">Plantation Address :- </label></div>
+                </div>
+
+                <div class="row row-cols-2 row-cols-sm-2" style="height:30px">
+                    <div class="col border  border-1 border-dark border-start-0"><label class=" text-capitalize ">MOBILE NO.:- </label></div>
+                    <div class="col border border-1 border-dark border-end-0"><label class=" text-capitalize ">EMAIL ID:- </label></div>
+                </div>
+                <div class="row row-cols-2 row-cols-sm-2 " style="height:30px">
+                    <div class="col border border-1 border-dark border-start-0"><label class=" text-capitalize ">ALTERNATE MOBILE NO.:- </label></div>
+                    <div class="col border border-1 border-dark border-end-0"><label class=" text-capitalize ">COMPLAINT No & DATE:- </label></div>
+                </div>
+                <div class="row row-cols-2 row-cols-sm-2" style="height:30px">
+                    <div class="col border  border-1 border-dark border-start-0"><label class=" text-capitalize ">NAME OF PRODUCT.:- </label></div>
+                    <div class="col border border-1 border-dark border-end-0"><label class=" text-capitalize ">UNIT:- </label></div>
+                </div>
+                <div class="row row-cols-2 row-cols-sm-2" style="height:30px">
+                    <div class="col border border-1 border-dark border-start-0" colspan="2"><label class=" text-capitalize ">TYPE OF COMPLAINT.:- </label></div>
+                    <div class="col border border-1 border-dark border-end-0"><label class=" text-capitalize ">RESULT (Close/Open):- </label></div>
+                </div>
+                <div class="row row-cols-2 row-cols-sm-2" style="height:200px">
+                    <div class="col border border-1 border-dark border-start-0 border-bottom-0"><label class=" text-capitalize ">COMPLAINT RESULT & REMARK BY AT/BTI:- </label></div>
+                    <div class="col border border-1 border-dark border-end-0 border-bottom-0"><label class=" text-capitalize ">RECEIVE SERVICE WITH THANK BY CUSTOMER:- </label></div>
+                </div>
+
+
+            </div>
+
+        </div>
+        <div class="row row-cols-3 row-cols-sm-3" style="height:100px">
+            <div class="col" style="padding-top:74px"><label class=" text-capitalize ">Sign. of Sale Head/Director </label></div>
+            <div class="col" style="padding-top:74px"><label class=" text-capitalize ">Sign. of AT/BTI </label></div>
+            <div class="col" style="padding-top:74px"><label class=" text-capitalize "> Sign. of Customer </label></div>
+        </div>
+    </div>
+</div>
+
+
+<h2 class="no-print">उपभोक्ता फीडबैक फॉर्म</h2>
+
+<div class="row row-cols-1 row-cols-sm-1 p-3 pb-0 no-print" style="background-color: #eeac9b " id="feedback">
+    <div class="col border border-2 border-dark" style="min-height: 842px; min-width: 595px ">
+
+        <div class="row row-cols-1 row-cols-sm-1 pt-1">
+            <div class="col mb-3">
+                <div class="row">
+                    <div class="col-2 col-sm-2 justify-content-start">
+                        <img src="~/Content/Img/Growfast Logo.png" style="height:30px;width:170px" />
+                    </div>
+                    <div class="col-8 col-sm-8 text-center text-capitalize ">
+                        <h5>उपभोक्ता फीडबैक फॉर्म</h5>
+                    </div>
+                    <div class="col-2 col-sm-2 text-end">
+                        <label class=" text-capitalize "> फॉर्म नंबर </label>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="row row-cols-2 row-cols-sm-2">
+                    <div class="col text-start text-capitalize ">
+                        <label> एग्रीकल्चर टेक्नीशियन का नाम:- </label><br />
+                        <label>शाखा:- </label><br />
+                        <label>उपभोक्ता का नाम:- </label><br />
+                        <label>ग्राम:- </label><br />
+                        <label>जिला:- </label><br />
+                        <label>उत्पाद का नाम:-</label><br />
+                        <label>सेल्स एक्जीक्यूटिव का नाम:-</label><br />
+
+                    </div>
+                    <div class="col text-start text-capitalize ">
+                        <label>दिनांक:- </label><br />
+                        <label>इनवॉइस नंबर:- </label><br />
+                        <label>डिलीवरी माह:- </label><br />
+                        <label>पोस्ट/ब्लॉक:- </label><br />
+                        <label>मोबाइल नंबर:- </label><br />
+                        <label>खरीदी यूनिट:- </label><br />
+                        <label>सर्विस एक्जीक्यूटिव का नाम:- </label><br />
+                    </div>
+
+                </div>
+            </div>
+            <div class="col text-center">
+                <h6 class=" bg-secondary p-2">आपका कीमती अनुभव हमारी गुणवत्ता के लिए महत्वपूर्ण है</h6>
+            </div>
+            <div class="col mb-2">
+                <div class="row row-cols-3 row-cols-sm-3">
+                    <div class="col text-start text-capitalize ">
+                        अच्छा (65-75)
+
+                    </div>
+                    <div class="col text-start text-capitalize">
+                        संतोषजनक (51-64)
+                    </div>
+                    <div class="col text-start text-capitalize">
+                        खराब (00-50)
+                    </div>
+
+                </div>
+            </div>
+            <div class="col border-2 border-dark">
+                <table class="table table-bordered border border-2 border-dark">
+                    <thead class="text-center">
+                        <tr>
+                            <th class="bg-secondary"> प्रश्न </th>
+                            <th class="bg-secondary"> बहुत अच्छा (10)</th>
+                            <th class="bg-secondary"> अच्छा (6)</th>
+                            <th class="bg-secondary"> संतोषजनक (3)</th>
+                            <th class="bg-secondary"> खराब (0)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <tr>
+                            <td> (A) एक्जीक्यूटिव का आचरण </td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td> (B) कमिटमेंट v/s डिलीवरी </td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td> (C) उत्पाद डिलीवरी सिस्टम का अनुभव</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td> (D) पौध रोपण सलाह</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td> (E) रिप्लेसमेंट सिस्टम</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td> (F) खेत पर तकनीकी सलाह</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td> (G) उत्पाद रख - रखाव की जानकारी</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td> (H) कंपनी फोन रिस्पॉन्स</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td> (I) उत्पाद गुणवत्ता</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td> (J) सर्विस अधिकारी का आचरण</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td class="bg-secondary"> कुल योग</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="col text-center">
+
+            </div>
+            <div class="col" style="height:200px">
+                <div class="row row-cols-1 row-cols-sm-1">
+                    <div class="col justify-content-start">
+                        <label>कीमती सुझाव एवं सूचना प्रिय उपभोक्ता:-</label>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col" style="height:100px">
+                <div class="row row-cols-2 row-cols-sm-2 mt-5">
+                    <div class="col justify-content-start">
+                        <h6>
+                            हस्ताक्षर मैनेजर
+                        </h6>
+                    </div>
+                    <div class="col text-end text-capitalize ">
+                        <h6>उपभोक्ता हस्ताक्षर</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<h2 class="no-print">Debit Note</h2>
+
+<div class="row row-cols-1 row-cols-sm-1 p-3 pb-0 no-print" style="background-color: #eeac9b " id="debitnote">
+    <div class="col" style="min-height: 842px; min-width: 595px ">
+        <div class="row row-cols-1 row-cols-sm-1 pt-1">
+            <div class="col mb-3">
+                <div class="row">
+                    <div class="col-2 col-sm-2 justify-content-start">
+                        @*<img src="~/Content/Img/Growfast Logo.png" style="height:30px;width:170px" />*@
+                    </div>
+                    <div class="col-8 col-sm-8 text-center text-capitalize ">
+                        <h5>Debit Note</h5>
+                    </div>
+                    <div class="col-2 col-sm-2 text-end">
+                        @*<label class=" text-capitalize "> फॉर्म नंबर </label>*@
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="row border-top border-1 border-dark border-start border-end">
+                    <div class="col-6 col-sm-6">
+                        <div class="row">
+                            <div class="col-12 col-sm-12 border border-1 border-dark" style="height: 150px;"></div>
+                            <div class="col-12 col-sm-12 border border-1 border-dark" style="height:200px;"></div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-6">
+                        <div class="row">
+                            <div class="col-6 col-sm-6 border border-1 border-dark" style="height:45px">debit no 1</div>
+                            <div class="col-6 col-sm-6 border border-1 border-dark" style="height:45px">debited date</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 col-sm-6 border border-1 border-dark" style="height:45px">debit no 1</div>
+                            <div class="col-6 col-sm-6 border border-1 border-dark" style="height:45px">debited date</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 col-sm-12 border border-1 border-dark" style="height:260px">debit no 1</div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="row border-1 border-dark border-start border-end">
+                    <div class="col-1 col-sm-1 border border-1 border-dark" style="height:45px">Sl No</div>
+                    <div class="col-4 col-sm-4 border border-1 border-dark" style="height:45px">Description of Goods</div>
+                    <div class="col-2 col-sm-2 border border-1 border-dark" style="height:45px">Quantity</div>
+                    <div class="col-2 col-sm-2 border border-1 border-dark" style="height:45px">Rate</div>
+                    <div class="col-1 col-sm-1 border border-1 border-dark" style="height:45px">Per</div>
+                    <div class="col-2 col-sm-2 border border-1 border-dark" style="height:45px">Amount</div>
+                </div>
+                <div class="row border-1 border-dark border-start border-end" style="height:500px;">
+                    <div class="col-1 col-sm-1 border border-1 border-dark">1</div>
+                    <div class="col-4 col-sm-4 border border-1 border-dark">Description of Goods</div>
+                    <div class="col-2 col-sm-2 border border-1 border-dark">Quantity</div>
+                    <div class="col-2 col-sm-2 border border-1 border-dark">Rate</div>
+                    <div class="col-1 col-sm-1 border border-1 border-dark">Per</div>
+                    <div class="col-2 col-sm-2 border border-1 border-dark">Amount</div>
+                </div>
+                <div class="row border-bottom border-1 border-dark border-start border-end">
+                    <div class="col-1 col-sm-1 border border-1 border-dark" style="height:45px"></div>
+                    <div class="col-4 col-sm-4 border border-1 border-dark" style="height:45px">Total</div>
+                    <div class="col-2 col-sm-2 border border-1 border-dark" style="height:45px">12set</div>
+                    <div class="col-2 col-sm-2 border border-1 border-dark" style="height:45px"></div>
+                    <div class="col-1 col-sm-1 border border-1 border-dark" style="height:45px"></div>
+                    <div class="col-2 col-sm-2 border border-1 border-dark" style="height:45px">Rs. 435625</div>
+                </div>
+                <div class="row border-2 border-dark border-start border-end">
+                    <div class="col-6 col-sm-6" style="height:45px">Amount Chargable in words</div>
+                    <div class="col-6 col-sm-6" style="height:45px">Description of Goods</div>
+                </div>
+                <div class="row border-2 border-dark border-start border-end border-bottom">
+                    <div class="col-6 col-sm-6" style="height:45px"></div>
+                    <div class="col-6 col-sm-6 border-start border-top border-2 border-dark" style="height:45px">Total</div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+<h2 class="no-print">DELIVERY CHALLAN</h2>
+
+<div class="row row-cols-1 row-cols-sm-1 p-3 pb-0 no-print" style="background-color: #eeac9b " id="deliverychalan">
+    <div class="col border border-2 border-dark" style="min-height: 842px; min-width: 595px ">
+        <div class="row row-cols-1 row-cols-sm-1 pt-1">
+            <div class="col">
+                <div class="row row-cols-1 row-cols-sm-1 pt-1">
+                    <div class="col-8 col-sm-8">
+                        <h6>DELIVERY CHALLAN</h6>
+                    </div>
+                    <div class="col-4 col-sm-4">
+                        GSTIN
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <table class="table table-responsive table-bordered border-2 border-dark">
+                    <tr>
+                        <td colspan="7">ss</td>
+                        <td colspan="3">ss</td>
+                    </tr>
+                    <tr>
+                        <td colspan="10">Product Details</td>
+
+                    </tr>
+                    <tr>
+                        <th>S.NO.</th>
+                        <th>DESCRIPTION OF GOODS</th>
+                        <th>QTY.</th>
+                        <th>RATE</th>
+                        <th>Tax Rate</th>
+                        <th>Tax AMOUNT</th>
+                        <th>AMOUNT</th>
+                        <th>GOODS RECEIVED AT CAMP FROM</th>
+                        <th>RETURN UNIT</th>
+                        <th>RETURN RECIVED BY</th>
+
+                    </tr>
+
+                    <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td></tr>
+                    <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td></tr>
+                    <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td></tr>
+                    <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td></tr>
+                    <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td></tr>
+                    <tr> <td colspan="2">TOTAL</td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td></tr>
+
+
+
+                    <tr> <td colspan="5">At the time of Dispatch</td> <td colspan="5">At the time of Dispatch</td> </tr>
+
+                    <tr> <td colspan="5">Name & Sign. Of Stock Supervisor</td> <td colspan="5">Returned Stock Received Person At Camp</td> </tr>
+
+                    <tr> <td colspan="5">Name & Signature</td> <td colspan="5">Name & Signature</td> </tr>
+
+                    <tr> <td colspan="5">Stock Verified By Executive-account</td> <td colspan="5">Returned Stock Received By Stock Supervisor At Pu</td> </tr>
+
+                    <tr> <td colspan="5">Name & Signature</td> <td colspan="5">Name & Signature</td> </tr>
+
+                    <tr> <td colspan="5">Stock Received In Unit By Driver/Emp.</td> <td colspan="5">Returned Stock Received By Executive-account At Pu</td> </tr>
+
+                    <tr> <td colspan="5">Name & Signature</td> <td colspan="5">Name & Signature</td> </tr>
+
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+<h2 class="no-print text-uppercase">InVoice</h2>
+
+<div class="row row-cols-1 row-cols-sm-1 p-3 pb-0 no-print me-2" id="invoice1">
+    <div class="col">
+        <div class='row row-cols-1 row-cols-sm-1 p-1 pb-0 no-print me-2' id='invoice1'>
+            <div class='col'>
+                <table class='table-bordered border-1 border-dark print-div' style='border:3px solid black'>
+                    <tr> <td colspan='8'> <div class='row'> <div class='col-2 col-sm-2 justify-content-start'> <img src='https://localhost:44360/Content/Img/Growfast Logo.png' style='height:50px;' /> <br /><span style='font-size:7px;width:120px'>AN 150 001:2015 Certified Company</span> </div> <div class='col-8 col-sm-8 text-center'> <label><b>Corporate Office  : </b> Plot No. 6 ( Floor), Kalyanpur, Ring Road, Lucknow - 226022, Mob.: 9415344987, 0522-3583497  </label> <label class='fw-bold'>Toll Free No.: 1800-833-0038</label> <label>  Email: agriculturegod@gmail.com | Website: www.growfastorganics.com </label> </div> <div class='col-2 col-sm-2 text-start  pe-2'> <label class='fw-bold text-end'>ORDER NO: O1622024CJ1EM </label> </div> </div> </td> </tr>
+                    <tr class=' bg-black text-white'> <td class='text-center' colspan='8'> <label>Customer's Name & Address : (In Capital Letters)</label> </td> </tr>
+                    <tr> <td colspan='8'> <div class='row row-cols-2 row-cols-sm-2'> <div class='col text-start '> <label class='fs-6' style="font-size: 13px;">Name:-</label> Garima<br /> <label class='fs-6' style="font-size: 13px;">Address:-</label>Kashopur,Marihan,Marihan,Mirzapur,Uttar Pradesh,231001<br /> </div> <div class='col text-start'>  <label class='fs-6' style="font-size: 13px;">Mobile:-</label>6306564130<br /> <label class='fs-6' style="font-size: 13px;">Plantation Address-</label>Kashopur,Marihan,Marihan,Mirzapur,Uttar Pradesh,231001<br /> </div> </div>  <div class='row row-cols-1 row-cols-sm-1'>  <div class='col text-start fs-6'>  <label class='fs-6' style="font-size: 13px;">Tahsil-</label>Marihan <label class='fs-6' style="font-size: 13px;">Block:-</label>Marihan  <label class='fs-6' style="font-size: 13px;">District:-</label>Mirzapur  <label class='fs-6' style="font-size: 13px;">State:-</label>Uttar Pradesh <br /> </div>  </div> </td> </tr>
+                    <tr class='bg-black text-white text-center fs-6'> <td> SR No </td> <td> Description of Goods</td> <td> HSN/SAC</td> <td> Qty.</td> <td> Rate</td> <td> Amount </td> <td colspan='2'> Particulars</td> </tr>
+                    <tr> <td>1</td> <td> Magic- 6</td> <td>-</td> <td>1</td> <td>649.00 </td> <td>649.00 </td> <td> Total Amount </td> <td>649.00 </td> </tr>
+                    <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td>Taxable Amount</td> <td>649.00 </td> </tr>
+                    <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td>IGST/GST Rate</td> <td></td> </tr>
+                    <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td>Round Off</td> <td></td> </tr>
+                    <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td>Bill Amount</td> <td>649.00 </td> </tr>
+                    <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td>Less-Advanced Received</td> <td></td> </tr>
+                    <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td class='no-border'>Balanced Amount Received</td> <td> 649.00 </td> </tr>
+                    <tr> <td colspan='8' class='ps-4' style='height:50px'>Authorised Signatory</td> </tr>
+
+                    <tr>
+                        <td colspan='8'>
+                            <div class='row mb-2'> <div class='col-2 col-sm-2 justify-content-start'> <img src='https://localhost:44360/Content/Img/Growfast Logo.png' style='height:50px;' /> <br /><span style='font-size:7px;width:120px'>AN 150 001:2015 Certified Company</span> </div> <div class='col-6 col-sm-6 text-center '> <label><b>Corporate Office  : </b> Plot No. 6 ( Floor), Kalyanpur, Ring Road, Lucknow - 226022, Mob.: 9415344987, 0522-3583497  </label> <label class='fw-bold'>Toll Free No.: 1800-833-0038</label> <label>  Email: agriculturegod@gmail.com | Website: www.growfastorganics.com </label> </div> <div class='col-2 col-sm-2 text-start pe-2'> <label class='fw-bold text-end'>ORDER NO.:O1622024CJ1EM</label> </div> <div class='col-2 col-sm-2 text-start'> <label class='fw-bold'>Advance Receipt</label> </div> </div> <div class='row'> <div class='col' style="font-size: 13px;"> <span> Customer Name <b>Garima</b> Received with thanks the sum of Rs. <b>649.00</b> (Rs. in words) <b>649.00</b> in <b></b> Dated <b>Feb-2024</b> being balance for ...... no of veriety(s) as per the terms and conditions specified herein. </span> <br /><span>Total amount : <b>10000</b>  Balance amount : <b>3000</b></span><br /> <span>Name of SR/Agent : <b>Harimohan</b> Ecode: <b>God123</b> Sign Of SR/Agent : </span></div> </div> <div class='row mb-2'>
+                                <div class='col-8 col-sm-8 justify-content-start'>  </div>
+
+                            </div>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan='8'>
+                            <div class='row mb-2'>
+                                <div class='col justify-content-start'>
+                                    <label>Terms and Condition</label>
+                                </div>
+                            </div>
+                            <div class='row'>
+                                <div class='col'>
+                                    <ul>
+                                        <li>Terms of payment 20% advance total amount and balanced amounts against delivery.</li>
+                                        <li>In the condition of cheque payment delivery of product shall be Eligible afer clearance of cheque.</li>
+                                        <li>Company all facility shall be Eligible e full payment of product.</li>
+                                        <li>Product once sold will not be taken back and amount not refundable.</li>
+                                        <li> Company is no way responsible for growth and since the growth yield of crop depend on the quality and suitability of soll, water and cultivation practices. </li>
+                                        <li>100% replacement of damage plants in one time</li>
+                                        <li>Make a DD/Cheque in favour of Growlast Organic Diamond Pvt Ltd Payable at Lucknow.</li>
+                                        <li>All disputes one subject to Lucknow jurisdiction.</li>
+                                        <li>This receipt digitally generated no need of signature .</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class='row mb-2'>
+                                <div class='col-4 col-sm-4 text-center  justify-content-center'>
+                                    <label>Authorised Signatory</label>
+                                </div>
+                                <div class='col-4 col-sm-4  text-center  justify-content-center'>
+                                    <label>GSTIN No.:09AAFCG9739A1ZR</label>
+                                </div>
+                                <div class='col-4 col-sm-4 text-center justify-content-center'>
+                                    <label>Signatory of the Customer & date</label>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+<style>
+    .no-border {
+        border-bottom: none; /* This removes the bottom border */
+    }
+</style>
+
+
+
+<div class="row row-cols-1 row-cols-sm-1 p-3 pb-0 no-print me-2" id="invoice1">
+    <div class="col">
+        <div class='row row-cols-1 row-cols-sm-1 p-1 pb-0 no-print me-2' id='invoice1'>
+            <div class='col'>
+                <table class='table-bordered border-1 border-dark print-div' style='border:3px solid black'>
+                    <tr> <td colspan='8'> <div class='row'> <div class='col-2 col-sm-2 justify-content-start'> <img src='https://localhost:44360/Content/Img/Growfast Logo.png' style='height:50px;' /> <br /><span style='font-size:7px;width:120px'>AN 150 001:2015 Certified Company</span> </div> <div class='col-8 col-sm-8 text-center'> <label><b>Corporate Office  : </b> Plot No. 6 ( Floor), Kalyanpur, Ring Road, Lucknow - 226022, Mob.: 9415344987, 0522-3583497  </label> <label class='fw-bold'>Toll Free No.: 1800-833-0038</label> <label>  Email: agriculturegod@gmail.com | Website: www.growfastorganics.com </label> </div> <div class='col-2 col-sm-2 text-start'> <label class='fw-bold'>ORDER NO.: O1622024CJ1EM</label> </div> </div> </td> </tr>
+                    <tr class=' bg-black text-white'> <td class='text-center' colspan='8'> <label>Customer's Name & Address : (In Capital Letters)</label> </td> </tr>
+                    <tr> <td colspan='8'> <div class='row row-cols-2 row-cols-sm-2'> <div class='col text-start '> <label class='fs-6' style="font-size: 13px;">Name:-</label> Garima<br /> <label class='fs-6' style="font-size: 13px;">Address:-</label>Kashopur,Marihan,Marihan,Mirzapur,Uttar Pradesh,231001<br /> </div> <div class='col text-start'>  <label class='fs-6' style="font-size: 13px;">Mobile:-</label>6306564130<br /> <label class='fs-6' style="font-size: 13px;">Plantation Address-</label>Kashopur,Marihan,Marihan,Mirzapur,Uttar Pradesh,231001<br /> </div> </div>  <div class='row row-cols-1 row-cols-sm-1'>  <div class='col text-start fs-6'>  <label class='fs-6' style="font-size: 13px;">Tahsil-</label>Marihan <label class='fs-6' style="font-size: 13px;">Block:-</label>Marihan  <label class='fs-6' style="font-size: 13px;">District:-</label>Mirzapur  <label class='fs-6' style="font-size: 13px;">State:-</label>Uttar Pradesh <br /> </div>  </div> </td> </tr>
+                    <tr class='bg-black text-white text-center fs-6'> <td> SR No </td> <td> Description of Goods</td> <td> HSN/SAC</td> <td> Qty.</td> <td> Rate</td> <td> Amount </td> <td colspan='2'> Particulars</td> </tr>
+                    <tr> <td>1</td> <td> Magic- 6</td> <td>-</td> <td>1</td> <td>649.00 </td> <td>649.00 </td> <td> Total Amount </td> <td>649.00 </td> </tr>
+                    <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td>Taxable Amount</td> <td>649.00 </td> </tr>
+                    <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td>IGST/GST Rate</td> <td></td> </tr>
+                    <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td>Round Off</td> <td></td> </tr>
+                    <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td>Bill Amount</td> <td>649.00 </td> </tr>
+                    <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td>Less-Advanced Received</td> <td></td> </tr>
+                    <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td class='no-border'>Balanced Amount Received</td> <td> 649.00 </td> </tr>
+                    <tr> <td colspan='8' class='ps-4' style='height:50px'>Authorised Signatory</td> </tr>
+                    <tr>
+                        <td colspan='8'>
+                            <div class='row mb-2'> <div class='col-2 col-sm-2 justify-content-start'> <img src='https://localhost:44360/Content/Img/Growfast Logo.png' style='height:50px;' /> <br /><span style='font-size:7px;width:120px'>AN 150 001:2015 Certified Company</span> </div> <div class='col-6 col-sm-6 text-center '> <label><b>Corporate Office  : </b> Plot No. 6 ( Floor), Kalyanpur, Ring Road, Lucknow - 226022, Mob.: 9415344987, 0522-3583497  </label> <label class='fw-bold'>Toll Free No.: 1800-833-0038</label> <label>  Email: agriculturegod@gmail.com | Website: www.growfastorganics.com </label> </div> <div class='col-2 col-sm-2 text-start'> <label class='fw-bold'>ORDER NO.:O1622024CJ1EM</label> </div> <div class='col-2 col-sm-2 text-start'> <label class='fw-bold'>Final Receipt</label> </div> </div> <div class='row'> <div class='col' style="font-size: 13px;"> <span> Customer Name <b>Garima</b> Received with thanks the sum of Rs. <b>649.00</b> (Rs. in words) <b>649.00</b> in <b></b> Dated <b>Feb-2024</b> being balance amount in full & final payment for the units refer against delivery. </span> </div> </div> <div class='row'>
+                                <div class='col-8 col-sm-8 justify-content-start'>  </div>
+                                <div class='col-4 col-sm-4 text-center'>
+                                    <label> I confirm having received the products as per Invoice in good condition. </label>
+                                </div>
+                            </div>
+                            <div class='row mb-2'>
+                                <div class='col-4 col-sm-4 text-center  justify-content-center'>
+                                    <label>Authorised Signatory</label>
+                                </div>
+                                <div class='col-4 col-sm-4 text-center  justify-content-center'>
+                                    <label>GSTIN No.:09AAFCG9739A1ZR</label>
+                                </div>
+                                <div class='col-4 col-sm-4 text-center  justify-content-center'>
+                                    <label>Signatory of the Customer & date</label>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan='8'>
+                            <div class='row mb-2'> <div class='col-2 col-sm-2 justify-content-start'> <img src='https://localhost:44360/Content/Img/Growfast Logo.png' style='height:50px;' /> <br /><span style='font-size:7px;width:120px'>AN 150 001:2015 Certified Company</span> </div> <div class='col-6 col-sm-6 text-center '> <label><b>Corporate Office  : </b> Plot No. 6 ( Floor), Kalyanpur, Ring Road, Lucknow - 226022, Mob.: 9415344987, 0522-3583497  </label> <label class='fw-bold'>Toll Free No.: 1800-833-0038</label> <label>  Email: agriculturegod@gmail.com | Website: www.growfastorganics.com </label> </div> <div class='col-2 col-sm-2 text-start'> <label class='fw-bold'>ORDER NO.:O1622024CJ1EM</label> </div> <div class='col-2 col-sm-2 text-start'> <label class='fw-bold'>Advance Receipt</label> </div> </div> <div class='row'> <div class='col' style="font-size: 13px;"> <span> Customer Name <b>Garima</b> Received with thanks the sum of Rs. <b>649.00</b> (Rs. in words) <b>649.00</b> in <b></b> Dated <b>Feb-2024</b> being balance for ...... no of veriety(s) as per the terms and conditions specified herein. </span> <br /><span>Total amount : 10000  Balance amount : 3000</span><br /> <span>Name of SR/Agent : Harimohan Ecode: God123 Sign Of SR/Agent : </span></div> </div> <div class='row'>
+                                <div class='col-8 col-sm-8 justify-content-start'>  </div>
+                                <div class='col-4 col-sm-4 text-center'>
+                                    <label> I confirm having received the products as per Invoice in good condition. </label>
+                                </div>
+                            </div>
+                            <div class='row mb-2'>
+                                <div class='col-4 col-sm-4 text-center  justify-content-center'>
+                                    <label>Authorised Signatory</label>
+                                </div>
+                                <div class='col-4 col-sm-4 text-center  justify-content-center'>
+                                    <label>GSTIN No.: 09AAFCG9739A1ZR</label>
+                                </div>
+                                <div class='col-4 col-sm-4 text-center  justify-content-center'>
+                                    <label>Signatory of the Customer & date</label>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan='8'>
+                            <div class='row mb-2'>
+                                <div class='col justify-content-start'>
+                                    <label>Terms and Condition</label>
+                                </div>
+                            </div>
+                            <div class='row'>
+                                <div class='col'>
+                                    <ul>
+                                        <li>Terms of payment 20% advance total amount and balanced amounts against delivery.</li>
+                                        <li>In the condition of cheque payment delivery of product shall be Eligible afer clearance of cheque.</li>
+                                        <li>Company all facility shall be Eligible e full payment of product.</li>
+                                        <li>Product once sold will not be taken back and amount not refundable.</li>
+                                        <li> Company is no way responsible for growth and since the growth yield of crop depend on the quality and suitability of soll, water and cultivation practices. </li>
+                                        <li>100% replacement of damage plants in one time</li>
+                                        <li>Make a DD/Cheque in favour of Growlast Organic Diamond Pvt Ltd Payable at Lucknow.</li>
+                                        <li>All disputes one subject to Lucknow jurisdiction.</li>
+                                        <li>This receipt digitally generated no need of signature .</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class='row mb-2'>
+                                <div class='col-4 col-sm-4 text-center  justify-content-center'>
+                                    <label>Authorised Signatory</label>
+                                </div>
+                                <div class='col-4 col-sm-4  text-center  justify-content-center'>
+                                    <label>GSTIN No.:09AAFCG9739A1ZR</label>
+                                </div>
+                                <div class='col-4 col-sm-4 text-center justify-content-center'>
+                                    <label>Signatory of the Customer & date</label>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+<br />
+<br />
+<br />
+<br />
+<br />
+
+
+
+
+<div class='row row-cols-1 row-cols-sm-1 p-3 pb-0 no-print me-2' id='invoice1'><div class='col'><div class='row row-cols-1 row-cols-sm-1 p-1 pb-0 no-print me-2' id='invoice1'><div class='col'><table class='table-bordered border-1 border-dark print-div' style='border:3px solid black'><tr> <td colspan='8'> <div class='row'> <div class='col-2 col-sm-2 justify-content-start'> <img src='https://localhost:44360/Content/Img/Growfast Logo.png' style='height:50px;' /> <br /><span style='font-size:7px;width:120px'>AN 150 001:2015 Certified Company</span> </div> <div class='col-8 col-sm-8 text-center'> <label><b>Corporate Office  : </b> Plot No. 6 ( Floor), Kalyanpur, Ring Road, Lucknow - 226022, Mob.: 9415344987, 0522-3583497  </label> <label class='fw-bold'>Toll Free No.: 1800-833-0038</label> <label>  Email: agriculturegod@gmail.com | Website: www.growfastgroups.com </label> </div> <div class='col-2 col-sm-2 text-start'> <label class='fw-bold'>ORDER NO.:  O142024UOTDX</label> </div> </div> </td> </tr><tr class=' bg-black text-white'> <td class='text-center' colspan='8'> <label>Customer's Name & Address : (In Capital Letters)</label> </td> </tr><tr> <td colspan='8'> <div class='row row-cols-2 row-cols-sm-2'> <div class='col text-start '> <label class='fs-6' style='font-size: 13px;'>Name:-</label>  Test Customer<br /> <label class='fs-6' style='font-size: 13px;'>Address:-</label>level 2,RS plaza, khurram Nagar, ring road, lucknow-226022,Lucknow,Lucknow,Lucknow,Uttar Pradesh,226022<br /> </div> <div class='col text-start'>  <label class='fs-6' style='font-size: 13px;'>Mobile:-</label>9519838425<br /> <label class='fs-6' style='font-size: 13px;'>Plantation Address-</label>level 2,RS plaza, khurram Nagar, ring road, lucknow-226022,Lucknow,Lucknow,Lucknow,Uttar Pradesh,226022<br /> </div> </div>  <div class='row row-cols-1 row-cols-sm-1'>  <div class='col text-start fs-6'>  <label class='fs-6' style='font-size: 13px;'>Tahsil-</label>Lucknow <label class='fs-6' style='font-size: 13px;'>Block:-</label>Lucknow  <label class='fs-6' style='font-size: 13px;'>District:-</label>Lucknow   <label class='fs-6' style='font-size: 13px;'>State:-</label>Uttar Pradesh <br /> </div>  </div> </td> </tr><tr class='bg-black text-white text-center fs-6'> <td> SR No </td> <td> Description of Goods</td> <td> HSN/SAC</td> <td> Qty.</td> <td> Rate</td> <td> Amount </td> <td colspan='2'> Particulars</td> </tr><tr><td>1</td> <td> Growwin-7</td> <td>-</td> <td>1</td> <td>2499.000000 </td> <td>2499.000000 </td><td> Total Amount </td> <td>6597.00 </td> </tr><tr><td>2</td> <td> Magic- 6</td> <td>-</td> <td>1</td> <td>599.000000 </td> <td>599.000000 </td><td> Taxable Amount</td> <td>6597.00 </td> </tr><tr><td>3</td> <td> Mangifera Indica</td> <td>-</td> <td>10</td> <td>3499.000000 </td> <td>3499.000000 </td><td> IGST/GST Rate </td> <td> </td> </tr><tr><td></td> <td></td> <td>-</td> <td></td> <td></td> <td></td><td> Round Off </td> <td></td> </tr><tr><td></td> <td></td> <td>-</td> <td></td> <td></td> <td></td><td> Bill Amount </td> <td>6597.00 </td> </tr><tr><td></td> <td></td> <td>-</td> <td></td> <td></td> <td></td><td> Less-Advanced Received </td> <td> </td> </tr><tr><td></td> <td></td> <td>-</td> <td></td> <td></td> <td></td><td>Balanced Amount Received </td> <td>6597.00 </td> </tr><tr> <td colspan='8' class='ps-4' style='height:50px'>Authorised Signatory</td> </tr><tr><td colspan='8'><div class='row mb-2'> <div class='col-2 col-sm-2 justify-content-start'> <img src='https://localhost:44360/Content/Img/Growfast Logo.png' style='height:50px;' /> <br /><span style='font-size:7px;width:120px'>AN 150 001:2015 Certified Company</span> </div> <div class='col-6 col-sm-6 text-center '> <label><b>Corporate Office  : </b> Plot No. 6 ( Floor), Kalyanpur, Ring Road, Lucknow - 226022, Mob.: 9415344987, 0522-3583497  </label> <label class='fw-bold'>Toll Free No.: 1800-833-0038</label> <label>  Email: agriculturegod@gmail.com | Website: www.growfastgroups.com </label> </div> <div class='col-2 col-sm-2 text-start'> <label class='fw-bold'>ORDER NO.:O1622024CJ1EM</label> </div> <div class='col-2 col-sm-2 text-start'> <label class='fw-bold'>Advance Receipt</label> </div> </div> <div class='row'> <div class='col' style='font-size: 13px;'> <span> Customer Name <b>Test Customer</b> Received with thanks the sum of Rs. <b>2499.00</b> (Rs. in words) <b>2499.00</b> in <b></b> Dated <b>Apr-2024</b> being balance for ...... no of veriety(s) as per the terms and conditions specified herein. </span> <br /><span>Total amount : <b>6597.00</b>  Balance amount : <b>0.00</b></span><br /> <span>Name of SR/Agent : <b>Test GL</b> Ecode: <b>testgl123</b> Sign Of SR/Agent : </span></div> </div> <div class='row mb-2'><div class='col-8 col-sm-8 justify-content-start'>  </div></div></td></tr><tr><td colspan='8'> <div class='row mb-2'><div class='col justify-content-start'> <label>Terms and Condition</label></div></div><div class='row'><div class='col'><ul><li>Terms of payment 20% advance total amount and balanced amounts against delivery.</li><li>In the condition of cheque payment delivery of product shall be Eligible afer clearance of cheque.</li><li>Company all facility shall be Eligible e full payment of product.</li><li>Product once sold will not be taken back and amount not refundable.</li><li> Company is no way responsible for growth and since the growth yield of crop depend on the quality and suitability of soll, water and cultivation practices. </li><li>100% replacement of damage plants in one time</li><li>Make a DD/Cheque in favour of Growlast Organic Diamond Pvt Ltd Payable at Lucknow.</li><li>All disputes one subject to Lucknow jurisdiction.</li><li>This receipt digitally generated no need of signature .</li></ul></div></div><div class='row mb-2'><div class='col-4 col-sm-4 text-center  justify-content-center'><label>Authorised Signatory</label></div> <div class='col-4 col-sm-4  text-center  justify-content-center'> <label>GSTIN No.:09AAFCG9739A1ZR</label></div><div class='col-4 col-sm-4 text-center justify-content-center'><label>Signatory of the Customer & date</label></div></div></td></tr></table></div></div> </div></div>
+
+
+
+
+
+
+
+<div class='row row-cols-1 row-cols-sm-1 p-2 pb-0 no-print' id='invoice1'><div class='col'><div class='row row-cols-1 row-cols-sm-1 p-1 pb-0 no-print me-2'><div class='col'><table class='table-bordered border-1 border-dark print-div' style='border:3px solid black'><tr> <td colspan='8'> <div class='row'> <div class='col-2 col-sm-2 justify-content-start'> <img src='https://localhost:44360/Content/Img/Growfast Logo.png' style='height:40px;' /> <br /><span style='font-size:7px;width:150px'>AN 150 001:2015 Certified Company</span> </div> <div class='col-8 col-sm-8 text-center'> <label><b>Corporate Office  : </b> Plot No. 6 ( Floor), Kalyanpur, Ring Road, Lucknow - 226022, Mob.: 9415344987, 0522-3583497  </label> <label class='fw-bold'>Toll Free No.: 1800-833-0038</label> <label>  Email: agriculturegod@gmail.com | Website: www.growfastgroups.com </label> </div> <div class='col-2 col-sm-2 text-start pe-3'> <label class='fw-bold pe-3'>ORDER NO.:  O242024QAP2N</label> </div> </div> </td> </tr><tr class=' bg-black text-white'> <td class='text-center' colspan='8'> <label>Customer's Name & Address : (In Capital Letters)</label> </td> </tr><tr> <td colspan='8'> <div class='row row-cols-2 row-cols-sm-2'> <div class='col text-start '> <label style='font-size: 12px;'>Name:-</label>  Test Customer<br /> <label style='font-size: 12px;'>Address:-</label>level 2,RS plaza, khurram Nagar, ring road, lucknow-226022,Lucknow,Lucknow,Lucknow,Uttar Pradesh,226022<br /> </div> <div class='col text-start'>  <label style='font-size: 12px;'>Mobile:-</label>9519838425<br /> <label style='font-size: 12px;'>Plantation Address-</label>level 2,RS plaza, khurram Nagar, ring road, lucknow-226022,Lucknow,Lucknow,Lucknow,Uttar Pradesh,226022<br /> </div> </div>  <div class='row row-cols-1 row-cols-sm-1'>  <div class='col text-start'>  <label style='font-size: 12px;'>Tahsil-</label>Lucknow <label style='font-size: 12px;'>Block:-</label>Lucknow  <label style='font-size: 12px;'>District:-</label>Lucknow   <label style='font-size: 12px;'>State:-</label>Uttar Pradesh <br /> </div>  </div> </td> </tr><tr class='bg-black text-white text-center fs-6'> <td> SR No </td> <td> Description of Goods</td> <td> HSN/SAC</td> <td> Qty.</td> <td> Rate</td> <td> Amount </td> <td colspan='2'> Particulars</td> </tr><tr><td>1</td> <td> Growzyme-L</td> <td>-</td> <td>1</td> <td>1499.000000 </td> <td>1499.000000 </td><td> Total Amount </td> <td>2798.00 </td> </tr><tr><td>2</td> <td> Swietenia- D</td> <td>-</td> <td>10</td> <td>1299.000000 </td> <td>1299.000000 </td><td> Taxable Amount</td> <td>2798.00 </td> </tr><tr><td></td> <td></td> <td></td> <td></td> <td></td> <td></td><td> IGST/GST Rate </td> <td> </td> </tr><tr><td></td> <td></td> <td></td> <td></td> <td></td> <td></td><td> Round Off </td> <td></td> </tr><tr><td></td> <td></td> <td></td> <td></td> <td></td> <td></td><td> Bill Amount </td> <td>2798.00 </td> </tr><tr><td></td> <td></td> <td></td> <td></td> <td></td> <td></td><td> Less-Advanced Received </td> <td> </td> </tr><tr><td></td> <td></td> <td></td> <td></td> <td></td> <td></td><td>Balanced Amount Received </td> <td>2798.00 </td> </tr><tr> <td colspan='8' class='ps-4' style='height:40px'>Authorised Signatory</td> </tr><tr><td colspan='8'><div class='row mb-2'> <div class='col-2 col-sm-2 justify-content-start'> <img src='https://localhost:44360/Content/Img/Growfast Logo.png' style='height:40px;' /> <br /><span style='font-size:7px;width:150px'>AN 150 001:2015 Certified Company</span> </div> <div class='col-6 col-sm-6 text-center '> <label><b>Corporate Office  : </b> Plot No. 6 ( Floor), Kalyanpur, Ring Road, Lucknow - 226022, Mob.: 9415344987, 0522-3583497  </label> <label class='fw-bold'>Toll Free No.: 1800-833-0038</label> <label>  Email: agriculturegod@gmail.com | Website: www.growfastgroups.com </label> </div> <div class='col-2 col-sm-2 text-start pe-2'> <label class='fw-bold pe-2'>ORDER NO.:O1622024CJ1EM </label> </div> <div class='col-2 col-sm-2 text-start'> <label class='fw-bold'>Advance Receipt</label> </div> </div> <div class='row'> <div class='col' style='font-size: 12px;'> <span> Customer Name <b>Test Customer</b> Received with thanks the sum of Rs. <b>1499.00</b> (Rs. in words) <b>1499.00</b> in <b></b> Dated <b>Apr-2024</b> being balance for ...... no of veriety(s) as per the terms and conditions specified herein. </span> <br /><span>Total amount : <b>2798.00</b>  Balance amount : <b>0.00</b></span><br /> <span>Name of SR/Agent : <b>Test GL</b> Ecode: <b>testgl123</b> Sign Of SR/Agent : </span></div> </div> <div class='row mb-1'><div class='col-8 col-sm-8 justify-content-start'>  </div></div></td></tr><tr><td colspan='8'> <div class='row'><div class='col justify-content-start'> <label>Terms and Condition</label></div></div><div class='row'><div class='col'><ul><li>Terms of payment 20% advance total amount and balanced amounts against delivery.</li><li>In the condition of cheque payment delivery of product shall be Eligible afer clearance of cheque.</li><li>Company all facility shall be Eligible e full payment of product.</li><li>Product once sold will not be taken back and amount not refundable.</li><li> Company is no way responsible for growth and since the growth yield of crop depend on the quality and suitability of soll, water and cultivation practices. </li><li>100% replacement of damage plants in one time</li><li>Make a DD/Cheque in favour of Growlast Organic Diamond Pvt Ltd Payable at Lucknow.</li><li>All disputes one subject to Lucknow jurisdiction.</li><li>This receipt digitally generated no need of signature .</li></ul></div></div><div class='row mb-1'><div class='col-4 col-sm-4 text-center  justify-content-center'><label>Authorised Signatory</label></div> <div class='col-4 col-sm-4  text-center  justify-content-center'> <label>GSTIN No.:09AAFCG9739A1ZR</label></div><div class='col-4 col-sm-4 text-center justify-content-center'><label>Signatory of the Customer & date</label></div></div></td></tr></table></div></div> </div></div>
+
+
+
+
+<div class='row row-cols-1 row-cols-sm-1 p-2 pb-0 no-print' id='invoice1'>
+    <div class='col'>
+        <div class='row row-cols-1 row-cols-sm-1 p-1 pb-0 no-print me-2'>
+            <div class='col'>
+                <table class='table-bordered border-1 border-dark print-div' style='border:3px solid black'>
+                    <tr><td colspan='8'> <div class="row mb-2"><div class="col text-center"><label class='fw-bold' style="font-size:10px">Advance Receipt</label> </div></div><div class='row mb-2'> <div class='col-3 col-sm-3 justify-content-start'> <img src='https://localhost:44360/Content/Img/Growfast Logo.png' style='height:40px;' /> <br /><span style='font-size:7px;width:150px'>AN 150 001:2015 Certified Company</span> </div> <div class='col-7 col-sm-7 text-center '> <label><b>Corporate Office  : </b> Plot No. 6 ( Floor), Kalyanpur, Ring Road, Lucknow - 226022, Mob.: 9415344987, 0522-3583497  </label> <label class='fw-bold'>Toll Free No.: 1800-833-0038</label> <label>  Email: agriculturegod@gmail.com | Website: www.growfastgroups.com </label><br /><label class='fw-bold pe-2'>ORDER NO.:O1622024CJ1EM </label> </div> <div class='col-2 col-sm-2 text-start pe-1'> </div>  </div> <div class='row'> <div class='col' style='font-size: 12px;'> <span> Customer Name <b>Test Customer</b> Received with thanks the sum of Rs. <b>1499.00</b> (Rs. in words) <b>1499.00</b> in <b></b> Dated <b>Apr-2024</b> being balance for ...... no of veriety(s) as per the terms and conditions specified herein. </span> <br /><span>Total amount : <b>2798.00</b>  Balance amount : <b>0.00</b></span><br /> <span>Name of SR/Agent : <b>Test GL</b> Mobile: <b>65374538724</b> Sign Of SR/Agent : </span></div> </div> <div class='row mb-1'><div class='col-8 col-sm-8 justify-content-start'>  </div></div></td></tr>
+                    <tr><td colspan='8'> <div class='row'><div class='col justify-content-start'> <label>Terms and Condition</label></div></div><div class='row'><div class='col'><ul><li>Terms of payment 20% advance total amount and balanced amounts against delivery.</li><li>In the condition of cheque payment delivery of product shall be Eligible afer clearance of cheque.</li><li>Company all facility shall be Eligible e full payment of product.</li><li>Product once sold will not be taken back and amount not refundable.</li><li> Company is no way responsible for growth and since the growth yield of crop depend on the quality and suitability of soll, water and cultivation practices. </li><li>100% replacement of damage plants in one time</li><li>Make a DD/Cheque in favour of Growlast Organic Diamond Pvt Ltd Payable at Lucknow.</li><li>All disputes one subject to Lucknow jurisdiction.</li><li>This receipt digitally generated no need of signature .</li></ul></div></div><div class='row mb-1'><div class='col-4 col-sm-4 text-center  justify-content-center'><label>Authorised Signatory</label></div> <div class='col-4 col-sm-4  text-center  justify-content-center'> <label>GSTIN No.:09AAFCG9739A1ZR</label></div><div class='col-4 col-sm-4 text-center justify-content-center'><label>Signatory of the Customer & date</label></div></div></td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+<div class='row row-cols-1 row-cols-sm-1 p-2 pb-0 no-print' id='invoice1'>
+    <div class='col'>
+        <div class='row row-cols-1 row-cols-sm-1 p-1 pb-0 no-print me-2'>
+            <div class='col'>
+                <table class='table-bordered border-1 border-dark print-div' style='border:3px solid black;width:100%'>
+                    <tr> <td colspan='8'> <div class='row mb-2'></div><div class='row mb-2'> <div class='col-3 col-sm-3 justify-content-start'> <img src='" + URL.MainUrl() + "Content/Img/Growfast Logo.png' style='height:40px;' /> <br /> </div> <div class='col-7 col-sm-7 text-center '> <label>Corporate office - RS Plaza 3rd floor Ring Road Kalyanpur near Jagrani Hospital Lucknow (U.P)-226022<br /> Regional office - Plot no.12, karamveer Nagar, Nizamuddin Chouraha A&P International School, Bhopal </label><br /> <label class='fw-bold'>PHONE NO- 9415344987</label><br /> <label>  Email: agriculturegod@gmail.com</label><br /><label class='fw-bold pe-2'>Website: www.growfastgroups.com </label> </div> <div class='col-2 col-sm-2 text-start pe-1'> </div></div> <div class='row mb-1'><div class='col-8 col-sm-8 justify-content-start'>  </div></div> </td> </tr>
+                    <tr class='text-black'> <td class='text-center' colspan='8'> <label><b>ADVANCE RECEIPT (CUSTOMER COPY)</b></label> </td> </tr>
+                    <tr class='text-black'><td class='text-left' style='width: 50%;'> <label><b>ORDER NO : " + dt.Rows[0]["Order_id"] + "</b></label></td><td class='text-left' style='width: 50%;'><label><b>DATE : "+ DateTime.Now.ToString("dd-MM-yyyy") + "</b></label></td> </tr>
+                    <tr class='text-black'><td class='text-left' style='width: 50%;'><label><b>RECEIVED WITH THANKS FROM  </b><br>" + dt.Rows[0]["Customer_name"] + "<br>" + dt.Rows[0]["Customer_address"] + "<br>MOB - " + dt.Rows[0]["Customer_mobile"] + "</label> </td><td class='text-left' style='width: 50%;'><label><label><img src='" + URL.MainUrl() + "Content/Img/verified.png' style='height: 35px; ' />verified</label></label></td></tr>
+                    <tr class='text-black'> <td class='text-left' colspan='8'> <label><b>ADVANCE AMOUNT  OF  RS. " + Convert.ToDecimal(Paidamount).ToString("0.00") + "/-  by " + paymentmethod + "</b></label></td> </tr>
+                    <tr class='text-black'> <td class='text-left' colspan='8'> <label><b>PRODUCT- " + productname + " </b></label> </td> </tr>
+                    <tr><td><label>By Growfast</label></td><td><label><b>PAYMENT DATE : " + DateTime.Now.ToString("dd-MM-yyyy") + "</b></label></td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    tr:first-child th[rowspan="2"] {
+        border-bottom: none; /* Remove bottom border */
+    }
+</style>
+
+
+
+<div class='row row-cols-1 row-cols-sm-1 p-2 pb-0 no-print' id='invoice1'>
+    <div class='col'>
+        <table class='table-bordered border-1 border-dark print-div' style='border:3px solid black;width:100%'>
+            <tr> <td colspan='6'><br /><br /><div class='row mb-2'></div><div class='row mb-2'>  <div class='col-12 col-sm-12 text-center '><br /><h4>BILL OF SUPPLY</h4><br /><h6>“Composition Exempted Product. Not eligible to collect tax on supplies”</h6><br /></div></div> <div class='row mb-1'><div class='col-8 col-sm-8 justify-content-start'>  </div></div> </td> </tr>
+            <tr class='text-black'>
+                <td class='text-start ps-2' colspan="3">
+                    <h6 class='text-center'>SELLER (BILL FROM)</h6><br />
+                    
+                                                                   <div style='text-align: left;'>
+                                                                       <label><b>Company name</b></label><br>
+                                                                       <label><b>company address</b></label><br>
+                                                                       <label><b>State</b></label><br>
+                                                                       <label><b>MOBILE NO- </b></label><br>
+                                                                       <label><b>GSTIN:- </b></label><br>
+                                                                   </div>
+                </td>
+                <td class='text-start ps-2' colspan="3">
+                    <h6 class='text-center'>BUYER (BILL TO)</h6><br />
+                    <div style='text-align: left;'>
+                        <label><b>CUSTOMER NAME:</b></label><br />
+                        <label><b>PIN CODE:</b></label><br />
+                        <label><b>STATE:</b></label><br />
+                        <label><b>MOBILE NO:</b></label><br />
+                        <label><b>GSTIN:</b></label>
+                    </div>
+                </td>
+            </tr>
+
+            <tr class='text-black'>
+                <td class='text-left ps-2' colspan="4">
+                    <label><b>BILL NO:- </b></label>
+                </td>
+                <td class='text-left ps-2' colspan="2">
+                    <label><b>BILL Date:- </b></label>
+                </td>
+            </tr>
+           
+            <tr>
+                <th class="text-center">S.NO</th>
+                <th class="text-center">DESCRIPTION OF GOODS</th>
+                <th class="text-center">HSC</th>
+                <th class="text-center">QTY</th>
+                <th class="text-center">RATE</th>
+                <th class="text-center">AMOUNT</th>
+            </tr>
+            <tr style="height:200px">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr style="height:30px">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan='6'>
+                    <div class='row'><div class='col justify-content-start'> <label>Terms and Condition</label></div></div><div class='row'>
+                        <div class='col'>
+                            <ul>
+                                <li> This receipt is digitally generated no need of signature.</li>
+                                <li> Product once sold will not be taken back and amount not refundable. </li>
+                                <li> Company provide high quality genetically improved  plants and fertilizer since the growth and yield of crop depend on climatic condition, agri-management, care and other factors.</li>
+                                <li> 100 % replacement of damaged and dead plant once in a service time of 2 years after inspection.</li>
+                                <li> All disputes one subject to Lucknow jurisdiction.</li>
+                            </ul>
+                        </div>
+                    </div><br /><br /><div class='row mb-1'><div class='col-6 col-sm-6 text-center  justify-content-center'><h6>ACCEPTED BY CUSTOMER</h6><label style='width: 50%;'><img src='" + URL.MainUrl() + "Content/Img/verified.png' style='height: 35px; ' /> Digitally signed </label></div> <div class='col-6 col-sm-6 text-center justify-content-end'><h6>FOR Company name</h6></div></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+jhghjhg
+<div class='row row-cols-1 row-cols-sm-1 p-2 pb-0 no-print' id='invoice1'>
+    <div class='col'>
+        <div class='row row-cols-1 row-cols-sm-1 p-1 pb-0 no-print me-2'>
+            <div class='col'>
+                <table class='table-bordered border-1 border-dark print-div' style='border:3px solid black;width:100%'>
+                    <tr> <td colspan='14'><br /><br /> <div class='row mb-2'></div><div class='row mb-2'>  <div class='col-6 col-sm-6 text-end '> <label><h4>TAX INVOICE</h4></label><br /></div><div class='col-1'></div><div class='col-3 col-sm-3 justify-content-center'> <img src='https://localhost:44360/Content/Img/Growfast Logo.png' style='height:40px;' /> <br /><span style='font-size:7px;width:150px'>AN 150 001:2015 Certified Company</span> </div> <div class='col-2 col-sm-2 text-start pe-1'> </div></div> <div class='row mb-1'><div class='col-8 col-sm-8 justify-content-start'>  </div></div> </td> </tr>
+
+                    <tr class='text-black'>
+                        <td class='text-center' colspan='5'>
+                            <label><h6>SELLER (BILL FROM)</h6></label><br />
+                            <label><b>GROWFAST ORGANIC DIAMOND PVT.LTD</b></label><br>
+                            <label>RS PLAZA 3RD FLOOR RING ROAD KALYANPUR LUCKNOW-226022</label><br>
+                            <label><b>UTTAR PRADESH</b></label><br>
+                            <div style='text-align: left;'>
+                                <label><b>MOBILE NO:- </b></label><br>
+                                <label><b>GSTIN:- </b></label><br>
+                            </div>
+                        </td>
+                        <td class="text-center" colspan='9'>
+                            <div style='text-align: center;'>
+                                <label><h6>BUYER (BILL TO)</h6></label><br />
+                            </div>
+                            <div style='text-align: left;'>
+                                <label><b>CUSTOMER NAME:</b></label><br />
+                                <label><b>PIN CODE:</b></label><br />
+                                <label><b>STATE:</b></label><br />
+                                <label><b>MOBILE NO:</b></label><br />
+                                <label><b>GSTIN:</b></label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr style="height: 20px;" colspan="14"> </tr>
+                    <tr class='text-black'>
+
+                        <td class='text-left' colspan="5">
+                            <label><b>BILL NO:- </b></label>
+                        </td>
+                        <td class='text-left' colspan="9">
+                            <label><b>BILL Date:- </b></label>
+                        </td>
+                    </tr>
+                    <tr colspan="14" style="height: 20px;"> </tr>
+                    <tr>
+                        <th colspan="1" class="text-center" rowspan="2">S.NO.</th>
+                        <th colspan="1" class="text-center" rowspan="2">DESCRIPTION OF GOODS</th>
+                        <th colspan="1" class="text-center" rowspan="2">HSN/SAC</th>
+                        <th colspan="1" class="text-center" rowspan="2">QTY</th>
+                        <th colspan="1" class="text-center" rowspan="2">RATE</th>
+                        <th colspan="1" class="text-center" rowspan="2">TAXABLE VALUE</th>
+                        <th colspan="1" class="text-center" rowspan="2">TOTAL</th>
+                        <th colspan="2" class="text-center">IGST</th>
+                        <th colspan="2" class="text-center">CGST</th>
+                        <th colspan="2" class="text-center">SGST</th>
+                        <th colspan="1" class="text-center">TOTAL AMT</th>
+                    </tr>
+                    <tr>
+                        <th colspan="1" class="text-center">TAX</th>
+                        <th colspan="1" class="text-center">AMT</th>
+                        <th colspan="1" class="text-center">TAX</th>
+                        <th colspan="1" class="text-center">ATM</th>
+                        <th colspan="1" class="text-center">TAX</th>
+                        <th colspan="1" class="text-center">ATM</th>
+                        <th colspan="1" class="text-center"></th>
+                    </tr>
+                    <tr style="height:30px">
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"> </th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                    </tr>
+                    <tr style="height:30px">
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"> </th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                        <th colspan="1" class="text-center"></th>
+                    </tr>
+                    <tr style="height:40px">
+                        <th colspan="1"></th>
+                        <th colspan="1" class="text-center">GRAND TOTAL</th>
+                        <th colspan="1"></th>
+                        <th colspan="1"></th>
+                        <th colspan="1"></th>
+                        <th colspan="1"></th>
+                        <th colspan="1"></th>
+                        <th colspan="2"></th>
+                        <th colspan="2"></th>
+                        <th colspan="2"></th>
+                        <th colspan="1"></th>
+                    </tr>
+                    <tr>
+                        <td colspan='14'>
+                            <div class='row'><div class='col justify-content-start'> <label>Terms and Condition</label></div></div><div class='row'>
+                                <div class='col'>
+                                    <ul>
+                                        <li>	This receipt is digitally generated no need of signature.</li>
+                                        <li>
+                                            In the condition of cheque payment delivery of product shall be Eligible after clearance
+                                            of cheque.
+                                        </li>
+                                        <li>Company all facility shall be Eligible after full payment of product.</li>
+                                        <li>	Product once sold will not be taken back and amount not refundable.</li>
+                                        <li> 	Company provide high quality genetically improved  plants and fertilizer since the growth and yield of<br /> crop depend on climatic condition, agri-management, care and other factors. </li>
+                                        <li>100 % replacement of damaged and dead plant once in a service time of 2 years after inspection.</li>
+                                        <li>	All disputes one subject to Lucknow jurisdiction.</li>
+                                        <li>All disputes one subject to Lucknow jurisdiction.</li>
+                                        <li>This receipt digitally generated no need of signature .</li>
+                                    </ul>
+                                </div>
+                            </div><br /><br /><div class='row mb-1'><div class='col-6 col-sm-6 text-center  justify-content-center'><h6>ACCEPTED BY CUSTOMER</h6><label style='width: 50%;'><img src='" + URL.MainUrl() + "Content/Img/verified.png' style='height: 35px; ' />OTP verified</label></div> <div class='col-6 col-sm-6 text-center justify-content-end'><h6>FOR GROWFAST ORGANIC DIAMOND PVT.LTD</h6> </div></div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class='row row-cols-1 row-cols-sm-1 p-2 pb-0 no-print' id='invoice1'>
+    <div class='col'>
+        <table class='table-bordered border-1 border-dark print-div' style='border:3px solid black;width:100%'>
+            <tr> <td colspan='8'><br /><br /> <div class='row mb-2'></div><div class='row mb-2'> <div class='col-3 col-sm-3 justify-content-start'>  <br /> </div> <div class='col-7 col-sm-7 text-center '> <label><h4>FINAL PAYMENT RECEIPT (CUSTOMER COPY)</h4></label><br /></div> <div class='col-2 col-sm-2 text-start pe-1'> </div></div> <div class='row mb-1'><div class='col-8 col-sm-8 justify-content-start'>  </div></div> </td> </tr>
+
+            <tr class='text-black'>
+                <td class='text-center' style='width: 50%;'>
+                    <label><h6>SELLER (BILL FROM)</h6></label><br />
+                    <label><b>GROWFAST ORGANIC DIAMOND PVT.LTD</b></label><br>
+                    <label>RS PLAZA 3RD FLOOR RING ROAD KALYANPUR LUCKNOW-226022</label><br>
+                    <label>UTTAR PRADESH</label><br>
+                    <div style='text-align: left;'>
+                        <label><b>MOBILE NO: </b></label><br>
+                        <label><b>GSTIN: </b></label><br>
+                    </div>
+                </td>
+                <td class='text-center' style='width: 50%;'>
+                    <div style='text-align: center;'>
+                        <label><h6>BUYER (BILL TO)</h6></label><br />
+                    </div>
+                    <div style='text-align: left;'>
+                        <label><b>CUSTOMER NAME:</b></label><br />
+                        <label><b>PIN CODE:</b></label><br />
+                        <label><b>STATE:</b></label><br />
+                        <label><b>MOBILE NO:</b></label><br />
+                        <label><b>GSTIN:</b></label>
+                    </div>
+                </td>
+            </tr>
+
+            <tr class='text-black'>
+                <td class='text-left' style='width: 50%;'>
+                    <label><b>INVOICE NO: </b></label>
+                </td>
+                <td class='text-left' style='width: 50%;'>
+                    <label><b>Date: </b></label>
+                </td>
+            </tr>
+            <tr class='text-black'>
+                <td class='text-left' style='width: 50%;' colspan='8'>
+                    <label><b>RECEIVED WITH THANKS </b></label><br /><label><b> AMOUNT  OF  RS. " + Convert.ToDecimal(Paidamount).ToString("0.00") + "/- <br /><label><b>RECEIVED WITH THANKS </b></label><br /><b><label>AGAINST</label></b><br /><b><label><b>PRODUCT-</b><b>ON Date-</b></label></b>  </b></label><br /><br /><br /><h6>FOR GROWFAST ORGANIC DIAMOND PVT.LTD</h6>
+                    <label style='width: 50%; text-align:center'><img src='" + URL.MainUrl() + "Content/Img/verified.png' style='height: 35px;' /> verified</label>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table class='table-bordered border-1 border-dark print-div' style='border:3px solid black'> <tr> <td colspan='8'> <div class='row'> <div class='col-2 col-sm-2 justify-content-start'> <img src='" + URL.MainUrl() + "Content/Img/Growfast Logo.png' style='height:50px;' /> <br /><span style='font-size:7px;width:120px'>AN 150 001:2015 Certified Company</span> </div> <div class='col-8 col-sm-8 text-center text-capitalize '> <label><b>Corporate Office  : </b> Plot No. 6 ( Floor), Kalyanpur, Ring Road, Lucknow - 226022, Mob.: 9415344987, 0522-3583497  </label> <label class='fw-bold'>Toll Free No.: 1800-833-0038</label> <label>  Email: agriculturegod@gmail.com | Website: www.growfastgroups.com </label> </div> <div class='col-2 col-sm-2 text-start'> <label class='fw-bold'>ORDER NO.: " + dt.Rows[0]["Order_id"] + "</label> </div> </div> </td> </tr> <tr class=' bg-black text-white'> <td class='text-center' colspan='8'> <label>Customer's Name & Address : (In Capital Letters)</label> </td> </tr> <tr> <td colspan='8'> <div class='row row-cols-2 row-cols-sm-2'> <div class='col text-start text-capitalize'> <label class='fs-6'>Name:-</label> " + dt.Rows[0]["Customer_name"] + "<br /> <label class='fs-6'>Address:-</label>" + dt.Rows[0]["Permanent_address"] + "<br /> </div> <div class='col text-start text-capitalize '>  <label class='fs-6'>Mobile:-</label>" + dt.Rows[0]["Customer_mobile"] + "<br /> <label class='fs-6'>Plantation Address-</label>" + dt.Rows[0]["Customer_address"] + "<br /> </div> </div>  <div class='row row-cols-1 row-cols-sm-1'>  <div class='col text-start text-capitalize'>  <label class='fs-6'>Tahsil-</label>" + dt.Rows[0]["Tahsil"] + " <label class='fs-6'>Block:-</label>" + dt.Rows[0]["Block"] + "  <label class='fs-6'>District:-</label>" + dt.Rows[0]["District"] + "  <label class='fs-6'>State:-</label>" + dt.Rows[0]["State"] + " <br /> </div>  </div> </td> </tr> <tr class='bg-black text-white text-center fs-6'> <td> SR No </td> <td> Description of Goods</td> <td> HSN/SAC</td> <td> Qty.</td> <td> Rate</td> <td> Amount </td> <td colspan='2'> Particulars</td> </tr> <tr> <td>1</td> <td> " + dt.Rows[0]["Product_name"] + "</td> <td>-</td> <td>" + dt.Rows[0]["Product_quantity"] + "</td> <td>" + Convert.ToDecimal(dt.Rows[0]["Product_price"]).ToString("0.00")+ " </td> <td>" + Convert.ToDecimal(dt.Rows[0]["Total_proamount"]).ToString("0.00") + " </td> <td> Total Amount </td> <td>" + Convert.ToDecimal(dt.Rows[0]["Total_proamount"]).ToString("0.00") + " </td> </tr> <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td>Taxable Amount</td> <td>" + Convert.ToDecimal(dt.Rows[0]["Total_proamount"]).ToString("0.00") + " </td> </tr> <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td>IGST/GST Rate</td> <td></td> </tr> <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td>Round Off</td> <td></td> </tr> <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td>Bill Amount</td> <td>" + Convert.ToDecimal(dt.Rows[0]["Total_proamount"]).ToString("0.00") + " </td> </tr> <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td>Less-Advanced Received</td> <td></td> </tr> <tr> <td></td> <td></td> <td></td> <td></td> <td></td> <td></td> <td class='no-border'>Balanced Amount Received</td> <td> " + Convert.ToDecimal(dt.Rows[0]["Total_proamount"]).ToString("0.00") + " </td> </tr> <tr> <td colspan='8' class='ps-4' style='height:50px'>Authorised Signatory</td> </tr> <tr> <td colspan='8'> <div class='row mb-2'> <div class='col-2 col-sm-2 justify-content-start'> <img src='" + URL.MainUrl() + "Content/Img/Growfast Logo.png' style='height:50px;' /> <br /><span style='font-size:7px;width:120px'>AN 150 001:2015 Certified Company</span> </div> <div class='col-6 col-sm-6 text-center text-capitalize '> <label><b>Corporate Office  : </b> Plot No. 6 ( Floor), Kalyanpur, Ring Road, Lucknow - 226022, Mob.: 9415344987, 0522-3583497  </label> <label class='fw-bold'>Toll Free No.: 1800-833-0038</label> <label>  Email: agriculturegod@gmail.com | Website: www.growfastgroups.com </label> </div> <div class='col-2 col-sm-2 text-start'> <label class='fw-bold'>ORDER NO.:" + dt.Rows[0]["Order_id"] + "</label> </div> <div class='col-2 col-sm-2 text-start'> <label class='fw-bold'>Final Receipt</label> </div> </div> <div class='row'> <div class='col'> <span class='fs-6'> Customer Name <b>" + dt.Rows[0]["Customer_name"] + "</b> Received with thanks the sum of Rs. <b>" + Convert.ToDecimal(dt.Rows[0]["Total_proamount"]).ToString("0.00") + "</b> (Rs. in words) <b>" + Convert.ToDecimal(dt.Rows[0]["Total_proamount"]).ToString("0.00") + "</b> in <b>" + dt.Rows[0]["Payment_method"] + "</b> Dated <b>" + DateTime.Now.ToString("MMM-yyyy") + "</b> being balance amount in full & final payment for the units refer against delivery. </span> </div> </div> <div class='row'> <div class='col-8 col-sm-8 justify-content-start'> </div> <div class='col-4 col-sm-4 text-center'> <label> I confirm having received the products as per Invoice in good condition. </label> </div> </div> <div class='row mb-2'> <div class='col-4 col-sm-4 text-center  justify-content-center'> <label>Authorised Signatory</label> </div> <div class='col-4 col-sm-4 text-center  justify-content-center'> <label>GSTIN No.:" + dt.Rows[0]["Invoiceid"] + "</label> </div> <div class='col-4 col-sm-4 text-center  justify-content-center'> <label>Signatory of the Customer & date</label> </div> </div> </td> </tr> <tr> <td colspan='8'> <div class='row mb-2'> <div class='col justify-content-start'> <label>Terms and Condition</label> </div> </div> <div class='row'> <div class='col'> <ul> <li>Terms of payment 20% advance total amount and balanced amounts against delivery.</li> <li>In the condition of cheque payment delivery of product shall be Eligible afer clearance of cheque.</li> <li>Company all facility shall be Eligible e full payment of product.</li> <li>Product once sold will not be taken back and amount not refundable.</li> <li> Company is no way responsible for growth and since the growth yield of crop depend on the quality and suitability of soll, water and cultivation practices. </li> <li>100% replacement of damage plants in one time</li> <li>Make a DD/Cheque in favour of Growlast Organic Diamond Pvt Ltd Payable at Lucknow.</li> <li>All disputes one subject to Lucknow jurisdiction.</li> </ul> </div> </div> <div class='row mb-2'> <div class='col-4 col-sm-4 text-center  justify-content-center'> <label>Authorised Signatory</label> </div> <div class='col-4 col-sm-4  text-center  justify-content-center'> <label>GSTIN No.:" + dt.Rows[0]["Invoiceid"] + "</label> </div> <div class='col-4 col-sm-4 text-center justify-content-center'> <label>Signatory of the Customer & date</label> </div> </div> </td> </tr> </table>
+
+
+
+
+<div class='row row-cols-1 row-cols-sm-1 p-2 pb-0 no-print' id='invoice1'>
+    <div class='col'>
+        <div class='row row-cols-1 row-cols-sm-1 p-1 pb-0 no-print me-2' id='invoice1'> <div class='col'> <table class='table-bordered border-1 border-dark print-div' style='border:3px solid black;width:100%'> <tr> <td colspan='12'><br /><br /><div class='row mb-2'></div><div class='row mb-2'> <div class='col-3 col-sm-3 justify-content-start'>  <br /> </div> <div class='col-7 col-sm-7 text-center '><label><h4>DELIVERY ACKNOWLEDGEMENT</h4></label></div> <div class='col-2 col-sm-2 text-start pe-1'> </div></div> <div class='row mb-1'><div class='col-8 col-sm-8 justify-content-start'>  </div></div> </td> </tr>  <tr class='text-black'> <td colspan='5'> <h6 class='text-center'>SELLER</h6><br /> <label><b>GROWFAST ORGANIC DIAMOND PVT.LTD</b></label><br> <label>RS PLAZA 3RD FLOOR RING ROAD KALYANPUR LUCKNOW-226022</label><br> <label><b>UTTAR PRADESH</b></label><br> <div style='text-align: left;'>  <label><b>MOBILE NO- 9415344987</b></label><br> <label></div>  </td> <td class='text-center' colspan='7'> <label><h6>BUYER</h6></label><br /> <div style='text-align: left;'> <label><b>CUSTOMER NAME:</b> Sandhya </label><br /> <label><b>Address:</b> 226016 </label><br /> <label><b>PIN CODE:</b> 226016 </label><br /> <label><b>STATE:</b> Uttar Pradesh </label><br /> <label><b>MOBILE NO:</b> 9519838425 </label><br /> <label><b>Date:</b> 23-05-2024 </label><br /> </div>  </td>  </tr> <tr style='height: 20px;' colspan='12'> </tr> <tr style='height: 20px;' colspan='12'> </tr>  <tr> <th class='text-center' colspan='2'>S.NO</th> <th class='text-center' colspan='2'>DESCRIPTION OF GOODS</th> <th class='text-center' colspan='2'>HSC</th> <th class='text-center' colspan='2'>QTY</th> <th class='text-center' colspan='2'>RATE</th> <th class='text-center' colspan='2'>AMOUNT</th> </tr> <tr> <td colspan='2'>1<br></td> <td colspan='2'> Sharbati- G<br></td> <td colspan='2'></td> <td colspan='2'>10<br></td> <td colspan='2'> 1999.00<br></td> <td> TOTAL AMOUNT <br /> PAID AMOUNT <br />DUE AMOUNT</td><td> 1999.00 <br /> 1999.00 <br />0.00</td> </tr>  <tr style='height:30px'> <td colspan='2'></td> <td colspan='2'>Sharbati- G : Received</td> <td colspan='2'></td> <td colspan='2'></td> <td colspan='2'></td> <td colspan='2'></td> </tr> <tr> <td colspan='12'> <div class='row'><div class='col justify-content-start'> <label>Terms and Condition</label></div></div><div class='row'> <div class='col'> <ul> <li>This receipt is digitally generated no need of signature.</li> <li> Company all facility shall be Eligible after full payment of product. </li> <li>Product once sold will not be taken back and amount not refundable.</li> <li>Company provide high quality genetically improved plants and fertilizer since the growth and yield of crop depend on climatic condition, agri-management, care and other factors.</li> <li> 100 % replacement of damaged and dead plant once in a service time of 2 years after inspection.</li> <li>Product received in good condition and maintenance of product is as per company norms and guideline.</li><li>After delivery maintenance of product as per company guidline.</li> </ul>  </div> </div><br /><br /><div class='row mb-1'><div class='col-6 col-sm-6 text-center  justify-content-center'><h6>ACCEPTED BY CUSTOMER</h6><label style='width: 50%;'><img src='https://localhost:44360/Content/Img/verified.png' style='height: 35px; ' />OTP verified</label></div> <div class='col-6 col-sm-6 text-center justify-content-end'><h6>FOR GROWFAST ORGANIC DIAMOND PVT.LTD</h6></div></div> </td> </tr>  </table></div></div>
+    </div>
+</div>
+
+
+
+<div class='row row-cols-1 row-cols-sm-1 p-2 pb-0 no-print' id='invoice1'>
+    <div class='col'>
+        <div class='row row-cols-1 row-cols-sm-1 p-1 pb-0 no-print me-2' id='invoice1'> <div class='col'> <table class='table-bordered border-1 border-dark print-div' style='border:3px solid black;width:100%'><tr> <td colspan='2' class='ps-2'> <div class='row'> <div class='col-3 col-sm-3 justify-content-start'> <img src='https://localhost:44360/Content/Img/Growfast Logo.png' style='height:50px;' />  </div> <div class='col-8 col-sm-8 text-center text-capitalize '> </div> </div> </td> </tr> <tr> <td colspan='2'><br /><div class='row mb-2'> <div class='col-12 col-sm-12 justify-content-center'>  <h5 class='text-center'>DELIVERY ACKNOWLEDGEMENT</h5> </div> </div>  </td> </tr>  <tr class='text-black'> <td class='ps-2'> <h6 class='text-start'>Order No : O2252024O78A8</h6></td> <td class='ps-2'>  <h6 class='text-start'>Date : 23-05-2024</h6></td>  </tr>  <tr> <td colspan='2' class='ps-2'><h6 class='text-start'>Customer Name : Sandhya</h6> <h6 class='text-start'>Address : Nehru vihar kalyanpur,Lucknow,Lucknow,Lucknow,Uttar Pradesh,226016</h6><h6 class='text-start'>Mobile No : 9519838425</h6></tr><tr> <td colspan='2'><br /><div class='row mb-2'> <div class='col-12 col-sm-12 justify-content-center'>  <h5 class='text-center'>Thanks For Purchasing With Growfast; Your Product Has Been Delivered Successfully.</h5><br /><h5 class='ps-2 text-start'>You Purchased </h5> </div> </div>  </td> </tr> <tr class='text-black'> <td> <h6 class='text-center'>Sharbati- G 10plants </h6><br /> </td> <td class='text-center'>  <h6 class='text-center'>Total Amount:- Rs.1999.00/- </h6><hr /><h6 class='text-center'>Advance Amount:- Rs.1999.00/- </h6><hr /> <h6 class='text-center'>Due Amount:- Rs.0.00/- </h6></td>  </tr><tr> <td colspan='2'> <div class='row'><div class='col justify-content-start'> <label>Terms and Condition</label></div></div><div class='row'> <div class='col'> <ul> <li>This receipt is digitally generated no need of signature.</li> <li> Company all services shall be Eligible after full payment of product. </li> <li>Product once sold will not be taken back and amount not refundable.</li> <li>Company provide high quality genetically improved plants and fertilizer since the growth and yield of crop depend on climatic condition, agri-management, care and other factors.</li> <li> 100 % replacement of damaged and dead plant once in a service time of 2 years after inspection.</li> <li>Product received in good condition and as mentioned in delivery acknowledgement receipt quantity.</li><li>After delivery maintenance of product as per company guidline.</li> </ul>  </div> </div><br /><br /><div class='row mb-1'><div class='col-6 col-sm-6 text-center  justify-content-center'><h6>ACCEPTED BY CUSTOMER</h6><label style='width: 50%;'><img src='https://localhost:44360/Content/Img/verified.png' style='height: 35px; ' />OTP verified</label></div> <div class='col-6 col-sm-6 text-center justify-content-end'><h6>FOR GROWFAST ORGANIC DIAMOND PVT.LTD</h6></div></div> </td> </tr>  </table></div></div>
+    </div>
+</div>
+<div class='row row-cols-1 row-cols-sm-1 p-2 pb-0 no-print' id='invoice1'>
+    <div class='col'>
+        <table class='table-bordered border-1 border-dark print-div' style='border:3px solid black;width:100%'> <tr> <td colspan='2'><div class='row'> <div class='col-3 col-sm-3 justify-content-start'> <img src='https://localhost:44360/Content/Img/Growfast Logo.png' style='height:50px;' />  </div> <div class='col-8 col-sm-8 text-center text-capitalize '> </div> </div><br /><div class='row mb-2'> <div class='col-12 col-sm-12 justify-content-center'>  <h5 class='text-center'>DELIVERY ACKNOWLEDGEMENT</h5> </div> </div>  </td> </tr>  <tr class='text-black'> <td class='ps-2'> <h6 class='text-start'>Order No : O2252024O78A8</h6></td> <td class='ps-2'>  <h6 class='text-start'>Date : 23-05-2024</h6></td>  </tr>  <tr> <td colspan='2' class='ps-2'><h6 class='text-start'>Customer Name : Sandhya</h6> <h6 class='text-start'>Address : Nehru vihar kalyanpur,Lucknow,Lucknow,Lucknow,Uttar Pradesh,226016</h6><h6 class='text-start'>Mobile No : 9519838425</h6></tr><tr> <td colspan='2'><br /><div class='row mb-2'> <div class='col-12 col-sm-12 justify-content-center'>  <h5 class='text-center'>Thanks For Purchasing With Growfast; Your Product Has Been Delivered Successfully.</h5><br /><h5 class='ps-2 text-start'>You Purchased </h5> </div> </div>  </td> </tr> <tr class='text-black'> <td> <h6 class='text-center'>Sharbati- G 10plants </h6><br /> </td> <td class='text-center'>  <h6 class='text-center'>Total Amount:- Rs.1999.00/- </h6><hr /><h6 class='text-center'>Advance Amount:- Rs.1999.00/- </h6><hr /> <h6 class='text-center'>Due Amount:- Rs.0.00/- </h6></td>  </tr><tr> <td colspan='2'> <div class='row'><div class='col justify-content-start'> <label>Terms and Condition</label></div></div><div class='row'> <div class='col'> <ul> <li>This receipt is digitally generated no need of signature.</li> <li> Company all services shall be Eligible after full payment of product. </li> <li>Product once sold will not be taken back and amount not refundable.</li> <li>Company provide high quality genetically improved plants and fertilizer since the growth and yield of crop depend on climatic condition, agri-management, care and other factors.</li> <li> 100 % replacement of damaged and dead plant once in a service time of 2 years after inspection.</li> <li>Product received in good condition and as mentioned in delivery acknowledgement receipt quantity.</li><li>After delivery maintenance of product as per company guidline.</li> </ul>  </div> </div><br /><br /><div class='row mb-1'><div class='col-6 col-sm-6 text-center  justify-content-center'><h6>ACCEPTED BY CUSTOMER</h6><label style='width: 50%;'><img src='https://localhost:44360/Content/Img/verified.png' style='height: 35px; ' />OTP verified</label></div> <div class='col-6 col-sm-6 text-center justify-content-end'><h6>FOR GROWFAST ORGANIC DIAMOND PVT.LTD</h6></div></div> </td> </tr>  </table>
+    </div>
+</div>
+
+
+
+<div class='row row-cols-1 row-cols-sm-1 p-1 pb-0 no-print me-2' id='invoice1'>
+    <div class='col'>
+        <table class='table-bordered border-1 border-dark print-div' style='border:3px solid black;width:100%'>
+            <tr> <td colspan='14'><br /><br /> <div class='row mb-2'></div><div class='row mb-2'><div class='col-6 col-sm-6 text-end '> <label><h4>TAX INVOICE</h4></label><br /></div><div class='col-1'></div><div class='col-3 col-sm-3 justify-content-center'> <img src='https://localhost:44360/Content/Img/Growfast Logo.png' style='height:40px;' /> <br /><span style='font-size:7px;width:150px'></span> </div> <div class='col-2 col-sm-2 text-start pe-1'> </div></div> <div class='row mb-1'><div class='col-8 col-sm-8 justify-content-start'></div></div> </td> </tr>
+            <tr class='text-black'>
+                <td class='text-center' colspan='7'> <div style='text-align: center;'><label><h6>SELLER (BILL FROM)</h6></label></div><div style='text-align: left;'><label>Growfast Organic Diamond Pvt. Ltd.</label><br><label></label><br><label> MADHYA PRADESH</label><br><label>MOBILE NO:- </label><br><label>GSTIN:- </label><br></div></td>
+                <td class='text-center' colspan='7'>
+                    <div style='text-align: center;'><label><h6>BUYER (BILL TO)</h6></label></div><div style='text-align: left;'>
+                        <label>CUSTOMER NAME:KALASH DANGI</label><br /><label>PIN CODE:326001</label><br /><label>
+                            Address:RAJSTHAN,RAJSTHAN,RAJSTHAN,RAJSTHAN,Rajasthan,Raja
+                            sthan,Jhalawar,Rajasthan,326001
+                        </label><br /><label>State:Rajasthan</label><br /><label>MOBILE NO:9425628166</label>
+                    </div>
+                </td>
+            </tr>
+            <tr style='height: 20px;' colspan='14'> </tr>
+            <tr class='text-black'><td class='text-left' colspan='5'>    <label>BILL NO:- 1</label></td><td class='text-left' colspan='9'><label>BILL Date:- 25-06-2024</label></td></tr>
+            <tr colspan='14' style='height: 20px;'> </tr>
+            <tr><th colspan='1' class='text-center' rowspan='2'>S.NO.</th><th colspan='1' class='text-center' rowspan='2'>DESCRIPTION OF GOODS</th><th colspan='1' class='text-center' rowspan='2'>HSN/SAC</th><th colspan='1' class='text-center' rowspan='2'>QTY</th><th colspan='1' class='text-center' rowspan='2'>RATE</th><th colspan='1' class='text-center' rowspan='2'>TAXABLE VALUE</th><th colspan='1' class='text-center' rowspan='2'>TOTAL</th><th colspan='2' class='text-center'>IGST</th><th colspan='2' class='text-center'>CGST</th><th colspan='2' class='text-center'>SGST</th><th colspan='1' class='text-center'>TOTAL AMT</th></tr>
+            <tr><th colspan='1' class='text-center'>TAX</th><th colspan='1' class='text-center'>AMT</th><th colspan='1' class='text-center'>TAX</th><th colspan='1' class='text-center'>AMT</th><th colspan='1' class='text-center'>TAX</th><th colspan='1' class='text-center'>AMT</th><th colspan='1' class='text-center'></th></tr>
+            <tr style='height:30px'><td colspan='1' class='text-center'>1</td><td colspan='1' class='text-center'>Growitta- L</td><td colspan='1' class='text-center'></td><td colspan='1' class='text-center'>1</td><td colspan='1' class='text-center'>899.00</td><td colspan='1' class='text-center'>899.00</td><td colspan='1' class='text-center'>943.95</td><td colspan='1' class='text-center'>943.95</td><td colspan='1' class='text-center'>943.95</td><td colspan='1' class='text-center'> </td><td colspan='1' class='text-center'></td><td colspan='1' class='text-center'></td><td colspan='1' class='text-center'></td><td colspan='1' class='text-center'>943.95</td></tr>
+            <tr style='height:30px'><th colspan='1' class='text-center'></th><th colspan='1' class='text-center'>Grand Total</th><th colspan='1' class='text-center'></th><th colspan='1' class='text-center'>1</th><th colspan='1' class='text-center'>899.00</th><th colspan='1' class='text-center'>899.00</th><th colspan='1' class='text-center'>943.95</th><th colspan='1' class='text-center'>943.95</th><th colspan='1' class='text-center'>943.95</th><th colspan='1' class='text-center'> </th><th colspan='1' class='text-center'></th><th colspan='1' class='text-center'></th><th colspan='1' class='text-center'></th><th colspan='1' class='text-center'>943.95</th></tr>
+            <tr style='height:30px'><th colspan='1' class='text-center'></th><th colspan='1' class='text-center'></th><th colspan='1' class='text-center'></th><th colspan='1' class='text-center'></th><th colspan='1' class='text-center'></th><th colspan='1' class='text-center'></th><th colspan='1' class='text-center'></th><th colspan='1' class='text-center'></th><th colspan='1' class='text-center'></th><th colspan='1' class='text-center'> </th><th colspan='1' class='text-center'></th><th colspan='1' class='text-center'></th><th colspan='1' class='text-center'></th><th colspan='1' class='text-center'></th></tr>
+            <td colspan='14'><div class='row'><div class='col justify-content-start'> <label>Terms and Condition</label></div></div><div class='row'><div class='col'><ul><li>	This receipt is digitally generated no need of signature.</li><li>In the condition of cheque payment delivery of product shall be Eligible after clearanceof cheque.</li><li>Company all facility shall be Eligible after full payment of product.</li><li>Product once sold will not be taken back and amount not refundable.</li><li>Company provide high quality genetically improved  plants and fertilizer since the growth and yield of<br /> crop depend on climatic condition, agri-management, care and other factors. </li><li>100 % replacement of damaged and dead plant once in a service time of 2 years after inspection.</li><li>	All disputes one subject to Lucknow jurisdiction.</li><li>All disputes one subject to Lucknow jurisdiction.</li><li>This receipt digitally generated no need of signature .</li></ul></div></div><br /><br /><div class='row mb-1'><div class='col-6 col-sm-6 text-center  justify-content-center'><h6>ACCEPTED BY CUSTOMER</h6><label style='width: 50%;'><img src='https://localhost:44360/Content/Img/verified.png' style='height: 35px; ' />OTP verified</label></div> <div class='col-6 col-sm-6 text-center justify-content-end'><h6>FOR GROWFAST ORGANIC DIAMOND PVT.LTD</h6> </div></div></td></tr>
+        </table>
+    </div>
+</div>
+
+

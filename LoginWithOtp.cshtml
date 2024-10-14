@@ -1,0 +1,142 @@
+﻿
+@{
+    ViewBag.Title = "LoginWithOtp";
+    Layout = "~/Views/Shared/GeneralMaster.cshtml";
+}
+
+
+<script>
+    
+    $(document).ready(function () {
+        var pattern = /^[0-9]{10}$/; // Use a regular expression object instead of a string
+
+        $("#btnlog").hide();
+        $("#otp").hide();
+        $("#alreadyotp").click(function () {
+            var mob = $("#loginid").val(); if (mob !== "" && mob !== null) {
+                if (!pattern.test(mob)) { // Use the "mob" variable instead of "textbox.value"
+                    $("#h6").text("Please enter a valid 10-digit mobile number");
+                } else {
+                    $("#btnotp").show();
+                    $("#otp").show();
+                    $("#btnlog").show();
+                    $('#btnotp').text("Resend OTP");
+                }
+            }
+            else {
+                $("#h6").text("Please enter a valid mobile number");
+
+            }
+        })
+        $("#btnotp").click(function () {
+            var mob = $("#loginid").val();
+
+            if (mob !== "" && mob !== null) {
+                if (!pattern.test(mob)) { // Use the "mob" variable instead of "textbox.value"
+                    $("#h6").text("Please enter a valid 10-digit mobile number");
+                } else {
+                    $("#btnotp").show();
+                    $("#otp").show();
+                    $("#btnlog").show();
+                    $("#loginid").attr('readonly', true);
+                    $.ajax({
+                        url: '/Home/OTPSend',
+                        type: "POST",
+                        dataType: "JSON",
+                        data: { Mob: mob },
+                        success: function (data) {
+                            $("#h6").text("");
+                            $("#h6").text(data);
+                            $('#timer').text("");
+                            if (data == "OTP Sent on Your Number") {
+                                let otpTimer; // Variable to store the timer
+                                $("#alreadyotp").hide();
+                                function startOtpTimer() {
+                                    const otpResendButton = $('#btnotp');
+                                    otpResendButton.attr('disabled', true);// Disable the resend button initially
+                                    $('#btnotp').text("Resend OTP");
+                                    let timeLeft = 120; // 2 minutes in seconds
+
+                                    function updateTimer() {
+                                        const minutes = Math.floor(timeLeft / 60);
+                                        const seconds = timeLeft % 60;
+
+                                        // Display the time remaining
+                                        $('#timer').text("Otp Expires after " + `${minutes}:${seconds.toString().padStart(2, '0')}` + "Minuts");
+
+                                        if (timeLeft > 0) {
+                                            timeLeft--;
+                                            otpTimer = setTimeout(updateTimer, 1000); // Update timer every second
+                                        } else {
+                                            otpResendButton.attr('disabled', false);
+                                            $('#timer').text("");// Enable the resend button when time is up
+                                        }
+                                    }
+
+                                    updateTimer();
+                                }
+
+                                function resendOtp() {
+                                    // Logic to resend OTP
+                                    clearTimeout(otpTimer); // Reset the timer
+                                    startOtpTimer(); // Start the timer again
+                                }
+
+                                // Example usage
+                                startOtpTimer();
+                            }
+                            
+                        }
+                    });
+                }
+            } else {
+                $("#h6").text("Please enter a valid mobile number");
+
+            }
+        });
+    });
+
+</script>
+
+
+
+
+
+<div class="justify-content-center mt-5 row-cols-1 row-cols-sm-3 d-flex pt-5">
+    <div class="col p-2 pt-5">
+        <div class="card card-body border-0 shadow-sm">
+            <img src="~/Content/Img/Growfast Logo.png" class="img mx-auto d-block" style="height:100px;width:200px" />
+            <form class="needs-validation" novalidate action="/Home/LoginWithOtp" method="post" onsubmit="return">
+                @*<div class="mb-4 text-center">
+            <button type="button" class="btn btncolor" id="btnmail">Login Via OTP</button>
+        </div>*@
+                <div class="mb-4 text-warning"><h6 id="h6">@ViewBag.msg</h6></div>
+                <div class="mb-3">
+                    <input type="number" class="form-control shadow-none" name="loginid" id="loginid" required placeholder="Enter Mobile Number" oninput="validateNumericInput(this,10,'spnum')">
+                    <div class="invalid-feedback" id="spnum">
+                        Please Enter Mobile Number.
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <input type="number" class="form-control shadow-none" name="otp" id="otp" required placeholder="Enter OTP">
+                    <div class="invalid-feedback">
+                    </div>
+                </div>
+                <div class="justify-content-center d-flex">
+                    <button type="button" class="btn btncolor me-1" id="btnotp">Get Otp</button>
+                    <button type="submit" class="btn btncolor loaderbtn ms-1" id="btnlog">Login</button>
+                </div>
+                <div class="d-grid col-4 mx-auto">
+
+                </div>
+                <div class="row row-cols-1 row-cols-sm-2">
+                    <div class="col mb-3 mt-3 text-danger" style="cursor: pointer;"><h6 id="alreadyotp"> Already Have an Otp </h6></div>
+                    <div class="col mb-3 mt-3 text-danger text-end" style="cursor: pointer;"><a href="/Home/Login" class="text-decoration-none text-dark text-truncate"><h6> Back to Login </h6></a></div>
+                </div>
+                <div class="mb-3 mt-3 text-warning"><h6 id="timer"></h6></div>
+
+            </form>
+        </div>
+    </div>
+
+</div>

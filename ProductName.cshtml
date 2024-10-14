@@ -1,0 +1,718 @@
+﻿
+@{
+    ViewBag.Title = "Product Name";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+<!-- toogle button -->
+<link href="~/Content/tooglebutton/bootstrap5-toggle.min.css" rel="stylesheet" />
+<script src="~/Content/tooglebutton/bootstrap5-toggle.ecmas.min.js"></script>
+
+<script>
+    function statuschange(id, status, tdstatus) {
+        tdstatus = "#" + tdstatus;
+        $.ajax({
+            url: "/Admin/Statuschangetive",
+            type: "Post",
+            dataType: "JSON",
+            data: { id: id, status: status, tblnm: 'tbl_Product_name' },
+            success: function (data) {
+                if (data == "Active") {
+                    $(tdstatus).empty();
+                    $(tdstatus).append('<i class="fa fa-check text-success"></i><span style="display:none">' + data + '</span>');
+                }
+                else {
+                    $(tdstatus).empty();
+                    $(tdstatus).append('<i class="fa fa-ban text-danger"></i><span style="display:none">' + data + '</span>');
+                }
+            },
+        });
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        var table = $('#tblproductcreation').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                }
+            ]
+        });
+    });
+
+</script>
+<script>
+    var selectedothValues = [];
+    function Getid(id) {
+        var up = id;
+        //alert(up);
+        $.ajax({
+            url: '/Admin/UpdateProductName',
+            type: "GET",
+            dataType: "JSON",
+            data: { Up: up },
+            success: function (data) {
+                //alert(data);
+
+                $("#tblotherresource").show();
+                //alert(data[0])
+                $("#hid").val(data[0]);
+                $("#pron").val(data[1]);
+                $("#unittypep").val(data[6]);
+                $("#xml").val(data[2]);
+
+                $("#brandname").val(data[7]);
+                $("#procategory").val(data[8]);
+
+                $("#status").val(data[3]);
+
+
+                $("#status").removeClass("readonly");
+                $("#status").prop("disabled", false);
+                //alert(data[2])
+
+                // Parse the XML data
+                var parser = new DOMParser();
+                var xmlDoc = parser.parseFromString(data[2], "text/xml");
+
+                // Extract table headings
+                var headings = xmlDoc.querySelectorAll('heading');
+
+                // Extract table data
+                var rows = xmlDoc.querySelectorAll('row');
+
+                // Get the existing table element
+                var table = document.getElementById("tblotherresource");
+
+               
+
+                //// Create an HTML table
+                //var thead = table.createTHead();
+                //var row = thead.insertRow();
+                //headings.forEach(function (heading) {
+                //    var th = document.createElement("th");
+                //    th.textContent = heading.textContent;
+                //    row.appendChild(th);
+                //});
+
+                // Get the tbody with the ID "table-other-body"
+                var tbody = document.getElementById("table-other-body");
+
+                // Populate the table with data and add the "Delete" icon in each row
+                rows.forEach(function (rowData) {
+                    var columns = rowData.querySelectorAll('column');
+
+                    // Create a new row in the "table-other-body" tbody
+                    var newRow = tbody.insertRow();
+
+                    // Add columns from the XML
+                    columns.forEach(function (columnData) {
+                        var cell = newRow.insertCell();
+                        cell.textContent = columnData.textContent;
+                        // Push the value of the first column into the array
+                        var firstColumnValue = columns[0].textContent;
+                        if (selectedothValues.includes(firstColumnValue)) {
+
+                        }
+                        else {
+                            selectedothValues.push(firstColumnValue);
+                        }
+                    });
+
+                    // Add the "Delete" icon as the last cell
+                    var deleteCell = newRow.insertCell();
+                    var deleteIcon = document.createElement("i");
+                    deleteIcon.innerHTML = "<i class='fa fa-trash' style='color:red;cursor:pointer'></i>"; // Remove the onclick attribute
+                    deleteCell.appendChild(deleteIcon);
+                    // Add an event listener to the "Delete" icon in each row
+                    deleteIcon.addEventListener("click", function () {
+                        removeRowexpense(this);
+                    });
+                });
+
+
+            }
+        })
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $("#status").val("Active");
+        $("#status").addClass("readonly");
+        $("#status").prop("disabled", true);
+            $("#cancel").click(function () {
+                $("input[type='text'],.form-select,#hid").val("");
+                $("#status").val("Active");
+                var tbody = document.getElementById("table-other-body");
+                tbody.innerHTML = "";
+                $("#tblotherresource").hide();
+                selectedothValues = [];
+                $("#status").val("Active");
+                $("#status").addClass("readonly");
+                $("#status").prop("disabled", true);
+            })
+
+        var msg = '@ViewBag.msg';
+
+
+        if (msg) {
+            var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+                msg +
+                '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                '</div>';
+            $(alertElement).insertBefore('#alert-container');
+            setTimeout(function () {
+                $('#alert').alert('close');
+            }, 2000);
+            //$('.alert').on('closed.bs.alert', function () {
+            //    window.location.href = '/Admin/ProductName';
+            //});
+            //$('#btnclose').on('click', function () {
+            //    window.location.href = '/Admin/ProductName';
+            //});
+        }
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $("#row").change(function () {
+            var up = $("#row").val();
+            $.ajax({
+                url: '/Admin/UpdateRowMeterialStock',
+                type: "GET",
+                dataType: "JSON",
+                data: { Up: up },
+                success: function (data) {
+                    $("#rowmeterial").val(data[2]);
+                    $("#unittype").val(data[6]);
+                    $("#cr").val("");
+                }
+            })
+        })
+    })
+</script>
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin<i class="fa fa-angle-double-right"></i>  Product Name</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+<div class="row mt-2 mb-3 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+
+        <button type="button" class="btn btncolor btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#ProductName">
+            <i class="fa fa-plus" aria-hidden="true"></i> New
+        </button>
+    </div>
+</div>
+@using System.Data;
+@{
+
+    DbManager db = new DbManager();
+    Activitylog activitylog = new Activitylog();
+}
+@{
+    try
+    {
+        string query = "select * from tbl_Product_name";
+        activitylog.Activitylogins("tbl_Product_name", "", query, "Failed", "", Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        DataTable dt = db.GetAllRecord(query);
+        activitylog.Activitylogupd("Success", "");
+        int count = 1;
+        if (dt.Rows.Count > 0)
+        {
+            <div class="row table table-responsive">
+                <table class="table table-responsive table-bordered" id="tblproductcreation">
+                    <thead class="text-center theadb text-light">
+                        <tr>
+                            <th class="text-center">Id</th>
+                            <th class="text-center">Brand Name</th>
+                            <th class="text-center">Category Name</th>
+                            <th class="text-center">Product Name</th>
+                            <th class="text-center">Unit type</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Active/Inactive</th>
+                            <th class="text-center">Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        @for (int i = 0; i < dt.Rows.Count; i++)
+                        {
+                        <tr>
+                            <td>@(count + i)<input type="hidden" id="@dt.Rows[i]["id"]" value="@dt.Rows[i]["id"]" /></td>
+                            <td>@dt.Rows[i]["Brandname"]</td>
+                            <td>@dt.Rows[i]["Category"]</td>
+                            <td>@dt.Rows[i]["ProductName"]</td>
+                            <td>@dt.Rows[i]["UnitType"]</td>
+
+                            @if (@dt.Rows[i]["Status"] + "" == "Active")
+                            {
+
+                                <td id="tdi_@dt.Rows[i]["id"]"><i class="fa fa-check text-success"></i><span style="display:none">@dt.Rows[i]["Status"]</span></td>
+                                <td>
+                                    <input type="checkbox" checked data-toggle="toggle" data-on="Active" data-off="Inactive" onchange="statuschange('@dt.Rows[i]["id"]','Inactive','tdi_@dt.Rows[i]["id"]')" class="btn btncolorblue">
+                                </td>
+
+                            }
+                            else
+                            {
+
+                                <td id="tda_@dt.Rows[i]["id"]"><i class="fa fa-ban text-danger"></i><span style="display:none">@dt.Rows[i]["Status"]</span></td>
+                                <td>
+                                    <input type="checkbox" data-toggle="toggle" data-on="Active" data-off="Inactive" onchange="statuschange('@dt.Rows[i]["id"]','Active','tda_@dt.Rows[i]["id"]')" class="btn btncolorblue">
+                                </td>
+                            }
+                            <td><button class="btn btncolorblue" onclick="Getid($('#@dt.Rows[i]["id"]').val())" data-bs-toggle="modal" data-bs-target="#ProductName"><i class="fa fa-edit"></i></button></td>
+
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class='row justify-content-center d-flex m-5' id='datanotfdound'>
+                <img src='~/Content/Img/nodata1.png' style="height:50%;width:50%" />
+            </div>
+        }
+    }
+
+
+    catch (Exception ex)
+    {
+        try
+        {
+            Error_15_16 error_15_16 = new Error_15_16();
+            string pageUrl = "", moduleName = "", errorLine = "", errorMessage = "", errorName = "", errorTrace = "";
+            // Get the page URL, if available
+            pageUrl = System.Web.HttpContext.Current.Request.Url.AbsoluteUri;
+            // Get the module name
+            moduleName = ex.TargetSite.Module.Name;
+            // Get the error line number, if available
+            var stackTrace = ex.StackTrace;
+            if (!string.IsNullOrEmpty(stackTrace))
+            {
+                var lineNumberIndex = stackTrace.LastIndexOf(":line ");
+                if (lineNumberIndex >= 0)
+                {
+                    var lineNumber = stackTrace.Substring(lineNumberIndex + 6);
+                    var newLineIndex = lineNumber.IndexOf(Environment.NewLine);
+                    if (newLineIndex >= 0)
+                    {
+                        errorLine = lineNumber.Substring(0, newLineIndex);
+                    }
+                    else
+                    {
+                        errorLine = lineNumber;
+                    }
+                }
+            }
+            // Get the error message and name
+            if (ex.Message.ToString().Length >= 1000)
+            {
+                errorMessage = ex.Message.Substring(1, 500);
+            }
+            else
+            {
+                errorMessage = ex.Message;
+            }
+            errorName = ex.GetType().FullName;
+            // Get the error trace
+            errorTrace = ex.StackTrace;
+            error_15_16.Error_15_16ins(pageUrl, moduleName, errorLine, errorMessage.Replace("'", "`"), errorName.Replace("'", "`"), errorTrace.Replace("'", "`"), Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        }
+
+        catch
+        {
+        }
+    }
+    finally
+    {
+        db.connectionstate();
+    }
+}
+
+<!-- Modal ProductName-->
+<div class="modal fade" id="ProductName" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <form action="/Admin/ProductName" method="post" class="needs-validation" novalidate>
+                <div class="modal-header justify-content-center nevigationstrip">
+                    <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Product Name</h5>
+                </div>
+                <div class="modal-body">
+                    <span id="spotherresource"></span>
+                    <div class="row">
+                        <div class="col-4 mb-2">
+                            <input type="hidden" id="hid" name="hid" />
+                            <h6 class="mt-2">Brand Name</h6>
+                            <input type="text" class="form-control shadow-none" name="brandname" id="brandname" required placeholder="Enter Brand Name" onkeyup="validateTextbox(this)" pattern="^[-a-zA-Z0-9 ]*$" title="Please enter only letters, and spaces" />
+                            <div class="invalid-feedback">
+                                Please enter only letters, and spaces
+                            </div>
+                        </div>
+                        <div class="col-4 mb-2">
+                            <h6 class="mt-2">Product Category</h6>
+                            <input type="text" class="form-control shadow-none" name="procategory" id="procategory" required placeholder="Enter Product Category" onkeyup="validateTextbox(this)" pattern="^[-a-zA-Z0-9 ]*$" title="Please enter only letters, and spaces" />
+                            <div class="invalid-feedback">
+                                Please enter only letters, and spaces
+                            </div>
+                        </div>
+                        <div class="col-4 mb-2">
+                            <h6 class="mt-2">Product Name</h6>
+                            <input type="text" class="form-control shadow-none" name="pron" id="pron" required placeholder="Enter Product Name" onkeyup="validateTextbox(this)" pattern="^[-a-zA-Z0-9 ]*$" title="Please enter only letters, and spaces" />
+                            <div class="invalid-feedback">
+                                Please enter only letters, and spaces
+                            </div>
+                        </div>
+
+                        <div class="col-4 mb-3">
+                            <h6 class="mt-2">Unit Type</h6>
+                            <select class="form-select shadow-none" id="unittypep" name="unittypep" required>
+                                <option selected disabled value="">Select One</option>
+                                <option>Piece</option>
+                                <option>Kg</option>
+                                <option>Leter</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a valid option.
+                            </div>
+                        </div>
+                        <div class="col-4 mb-3">
+                            <h6 class="mt-2">Status</h6>
+                            <select class="form-select shadow-none" id="status" name="status" required>
+                                <option>Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a valid Status.
+                            </div>
+                        </div>
+                    </div>
+                    @*<div class="row row-cols-1 row-cols-sm-4">
+                        <div class="col mb-4">
+                            <h6 class="mt-2">Row Material</h6>
+                            <select class="form-select shadow-none" id="row" name="row" required>
+                                <option selected disabled value="">Select</option>
+                                @{
+                                    string query1 = "select * from tbl_rowmeterialstock";
+                                    DataTable dt1 = db.GetAllRecord(query1);
+                                    if (dt1.Rows.Count > 0)
+                                    {
+                                        for (int i = 0; i < dt1.Rows.Count; i++)
+                                        {
+                                            <option value="@dt1.Rows[i]["Id"]">@dt1.Rows[i]["RowMeterial"]</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                            <input type="hidden" name="rowmeterial" id="rowmeterial" />
+                            <input type="hidden" name="rowmeterialid" id="rowmeterialid" />
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Unit Type</h6>
+                            <input type="text" class="form-control shadow-none readonly" id="unittype" name="unittype" required onkeyup="validateTextbox(this)" pattern="^[0-9,./ ]*$" title="Please enter only letters, and spaces" readonly />
+                        </div>
+                        <div class="col mb-4">
+                            <h6 class="mt-2">Quantity</h6>
+                            <input type="text" class="form-control shadow-none" id="cr" name="cr" required oninput="validateNumericInput(this,20,'spnum')" />
+                        </div>
+                        <div class="col mb-2 text-end">
+                            <button type="button" class="btn btn-primary" style="margin-top:38px"><i class="fa fa-plus" id="add-other-res"></i></button>
+                        </div>
+                    </div>*@
+                    @*<div class="row row-cols-1 row-cols-sm-1">
+                        <div class="col">
+                            <div class="col-sm-12">
+                                <table class="table table-responsive" id="tblotherresource">
+                                    <thead class="thead">
+                                        <tr>
+                                            <th>Row Meterial</th>
+                                            <th>Unit Type</th>
+                                            <th>Quantity</th>
+                                            <th>Delete</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-other-body">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>*@
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+                    <button type="submit" class="btn btncolor"><i class="fa fa-check"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    $(document).ready(function () {
+        $("#tblotherresource").hide();
+        $("#add-other-res").click(function () {
+            // alert("ok");
+            var totalothersalary = $("#totalothersalary").val();
+            var rowmeterial = $("#rowmeterial").val();
+            var unittype = $("#unittype").val();
+            var cr = $("#cr").val();
+
+            if (rowmeterial == null || rowmeterial == "") {
+                spotherresource.innerHTML = "Warning : Please Select Row Material Name";
+                spotherresource.style.color = "Red";
+            }
+            else if (unittype == null || unittype == "") {
+                spotherresource.innerHTML = "Warning : Please Enter UnitType Amount";
+                spotherresource.style.color = "Red";
+            }
+            else if (cr == null || cr == "") {
+                spotherresource.innerHTML = "Warning : Please Enter Quantity Amount";
+                spotherresource.style.color = "Red";
+            }
+            else {
+                if (selectedothValues.includes(rowmeterial)) {
+                    // Reset the dropdown value
+                    spotherresource.innerHTML = "Warning : This option has already been selected. Please choose a different option.";
+                    spotherresource.style.color = "Red";
+                }
+                else {
+                    // Add the selected option to the array of selected values
+                    selectedothValues.push(rowmeterial);
+                    spotherresource.innerHTML = "";
+                    $("#tblotherresource").show();
+                    var newRow = "<tr>" +
+                        "<td>" +
+                        "" + rowmeterial +
+                        "</td>" +
+                        "<td>" +
+                        "" + unittype +
+                        "</td>" +
+                        "<td>" +
+                        "" + cr +
+                        "</td>" +
+                        "<td><i class='fa fa-trash' style='color:red;cursor:pointer' onclick='removeRowexpense(this)'></i></td> ";
+                    $("#table-other-body").append(newRow);
+                   
+                }
+            }
+        })
+    })
+</script>
+
+<script>
+    
+    function removeRowexpense(element) {
+        //alert("removeRowexpense")
+        
+        var row = element.parentNode.parentNode; // Get the row element
+        //alert(element);
+        //var salaryValue = row.querySelector('input[name="salary"]').value; // Get the salary value
+        //alert(salaryValue);
+
+        var selectedOption = row.querySelector('td:nth-child(1)').innerText;
+        //alert(selectedOption);
+        //alert(selectedothValues)
+        var index = selectedothValues.indexOf(selectedOption);
+        //alert(index)
+        selectedothValues.splice(index, 1);
+        //alert(index+"after")
+        row.parentNode.removeChild(row); // Remove the row from the table
+        //alert(index + "after1")
+    }
+</script>
+
+
+@*Submit Data Datatable and Convert Excel*@
+<script>
+    $(document).ready(function () {
+        $("#btnsub").click(function () {
+            var hid = $("#hid").val();
+            var pron = $("#pron").val();
+            var status = $("#status").val();
+            var unittypep = $("#unittypep").val();
+            //alert(pron);
+            var rowCount = $("#tblotherresource tr").length;
+            //alert(rowCount);
+            if (pron == null || pron == "") {
+                spotherresource.innerHTML = "Warning : Please Enter Product Name";
+                spotherresource.style.color = "Red";
+            } else if (unittypep == null || unittypep == "") {
+                    spotherresource.innerHTML = "Warning : Please Select Unit Type";
+                    spotherresource.style.color = "Red";
+            } else if (rowCount > 1) {
+                // Hide the last two columns
+                var restable = $("#tblotherresource").DataTable();
+                var rowCount = restable.rows().count();
+                //alert(rowCount);
+                //remove last two rows start
+
+                //var resLastColumnIndex = restable.columns().count() - 1;
+                //var resSecondLastColumnIndex = restable.columns().count() - 2;
+                //restable.columns([resLastColumnIndex]).visible(false);
+                ////restable.columns([resLastColumnIndex, resSecondLastColumnIndex]).visible(false);
+
+                //// Get the table data as an array of objects
+                //var restableData = restable.rows().data().toArray();
+                //// Iterate over each row and remove the last two columns
+                //restableData.forEach(function (row) {
+                //    row.pop(); // Remove the last column
+                //    row.pop(); // Remove the second-last column
+                //});
+                //remove last one row end
+                //remove last one row start
+                var resLastColumnIndex = restable.columns().count() - 1;
+
+                restable.columns([resLastColumnIndex]).visible(false);
+
+                var restableData = restable.rows().data().toArray();
+                //alert("ok")
+                // Iterate over each row and remove the last column
+                restableData.forEach(function (row) {
+                    row.pop(); // Remove the last column
+                });
+                //remove last one row end
+                // Get the table headings as an array of strings, excluding the last two columns
+                var restableHeadings = restable.columns().header().toArray().map(function (heading) {
+                    return heading.textContent;
+                }).slice(0, -1); // This slices the array to exclude the last two elements
+
+
+                // Create an object to hold the table data and headings
+                var restableObject = {
+                    tableHeadings: restableHeadings,
+                    tableData: restableData
+                };
+                //alert(restableHeadings)
+                //alert(restableData)
+                //alert(restableObject)
+                // Other resource table end
+                var formData = new FormData();
+                formData.append("restableObject", JSON.stringify(restableObject));
+                formData.append("hid", hid);
+                formData.append("pron", pron);
+                formData.append("status", status);
+                formData.append("unittypep", unittypep);
+
+                // Send the table object to the controller using AJAX
+                $.ajax({
+                    url: '/Admin/ProductName',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false, // Set contentType to false for FormData
+                    processData: false, // Set processData to false for FormData
+                    success: function (response) {
+                        if (response) {
+                            var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+                                response +
+                                '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                                '</div>';
+                            $(alertElement).insertBefore('#alert-container');
+                            setTimeout(function () {
+                                $('#alert').alert('close');
+                            }, 1000);
+
+                            $('.alert').on('closed.bs.alert', function () {
+                                window.location.href = '/Admin/ProductName';
+                            });
+                            //$('#btnclose').on('click', function () {
+                            //    window.location.href = '/Admin/ProductName';
+                            //});
+                        }
+                        // Handle the response from the controller if needed
+                        //alert(response);
+                        
+                        $("#ProductName").modal("hide");
+
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle any error that occurs during the AJAX request
+                        alert(error);
+                    }
+                });
+            } else {
+                spotherresource.innerHTML = "Warning : Please Select At Least One Row Material Name";
+                spotherresource.style.color = "Red";
+            } 
+        });
+    });
+</script>
+<script>
+    function validateNumericInput(inputElement, maxDigits, spid) {
+        // Get the current input value as a string
+        const errorMessage = document.getElementById(spid);
+        let inputValue = inputElement.value.toString();
+
+        // Remove any non-digit characters (e.g., commas, periods, except one dot)
+        inputValue = inputValue.replace(/[^0-9.]/g, '');
+
+        // If there is more than one dot, remove all but the first one
+        const dotIndex = inputValue.indexOf('.');
+        if (dotIndex !== -1) {
+            const beforeDot = inputValue.slice(0, dotIndex);
+            const afterDot = inputValue.slice(dotIndex + 1);
+            inputValue = beforeDot + '.' + afterDot.replace(/\./g, '');
+        }
+
+        // Truncate the value to the specified maximum number of digits
+        if (inputValue.length > maxDigits) {
+            inputValue = inputValue.slice(0, maxDigits);
+        }
+
+        // Update the input value with the sanitized and truncated value
+        inputElement.value = inputValue;
+
+        // Check if the sanitized value is different from the original input
+        if (inputValue.length > maxDigits) {
+            errorMessage.textContent = 'Please enter no more than ' + maxDigits + ' digits.';
+        } else {
+            errorMessage.textContent = '';
+        }
+    }
+
+</script>
+
+

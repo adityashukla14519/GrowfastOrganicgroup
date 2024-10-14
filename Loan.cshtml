@@ -1,0 +1,384 @@
+﻿
+@{
+    ViewBag.Title = "Loan";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+
+<script>
+    $(document).ready(function () {
+        $('#tblsublocation').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom'
+                }
+            ]
+        });
+
+
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $("#cancel").click(function () {
+            $("input[type='text'],.hidden,#hid,#company,#headerid,#peid").val("");
+        })
+    var msg = '@ViewBag.msg';
+
+        if (msg) {
+            var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+                msg +
+                '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                '</div>';
+            $(alertElement).insertBefore('#alert-container');
+            setTimeout(function () {
+                $('#alert').alert('close');
+            }, 5000);
+            //$('.alert').on('closed.bs.alert', function () {
+            //    window.location.href = '/Admin/Department';
+            //});
+            //$('#btnclose').on('click', function () {
+            //    window.location.href = '/Admin/Department';
+            //});
+        }
+});
+</script>
+<script>
+    function validatePasswordbox(textbox) {
+        var pattern = /^[^\\']+$/g;
+        if (!pattern.test(textbox.value)) {
+            textbox.setCustomValidity("Please enter a valid string");
+        } else {
+            textbox.setCustomValidity("");
+        }
+    }
+    function validateEmailHost(textbox) {
+        var pattern = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i;
+        if (!pattern.test(textbox.value)) {
+            textbox.setCustomValidity("Please enter a valid email host name");
+        } else {
+            textbox.setCustomValidity("");
+        }
+    }
+</script>
+<script>
+    function Getid(id,status) {
+        $.ajax({
+            url: '/Admin/GetLoanDetail',
+            type: "GET",
+            dataType: "JSON",
+            data: { Reqid: id, Status: status },
+            success: function (data) {
+                //alert(data);
+                $("#reqid").val(data[1]);
+                $("#name").val(data[2]);
+                $("#department").val(data[3]);
+                $("#designation").val(data[4]);
+                $("#amount").val(data[5]);
+                $("#reason").val(data[6]);
+                $("#empid").val(data[7]);
+                $("#branchname").val(data[8]);
+                $("#branchcode").val(data[9]);
+                $("#uploaddocument").val(data[10]);
+                $("#amount").removeAttr("Readonly")
+                $("#status option[value='Verified']").hide();
+                $("#status option[value='Re Check']").hide();
+
+            }
+        })
+    }
+</script>
+<script>
+    function Getvid(id, status) {
+        $.ajax({
+            url: '/Admin/GetLoanDetail',
+            type: "GET",
+            dataType: "JSON",
+            data: { Reqid: id, Status: status },
+            success: function (data) {
+                //alert(data);
+                $("#reqid").val(data[1]);
+                $("#name").val(data[2]);
+                $("#department").val(data[3]);
+                $("#designation").val(data[4]);
+                $("#amount").val(data[5]);
+                $("#reason").val(data[6]);
+                $("#empid").val(data[7]);
+                $("#branchname").val(data[8]);
+                $("#branchcode").val(data[9]);
+                $("#uploaddocument").val(data[10]);
+                $("#amount").attr("Readonly", true);
+                $("#status option[value='Approved']").hide();
+                $("#status option[value='Rejected']").hide();
+
+            }
+        })
+    }
+</script>
+
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i>  Loan</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+<div class="row mt-2 mb-2 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        @*<button type="button" class="btn btncolor btn-sm" data-bs-toggle="modal" data-bs-target="#loan">
+            <i class="fa fa-plus" aria-hidden="true"></i> Apply
+        </button>*@
+    </div>
+</div>
+<script>
+    function downloadPDF(pdfid) {
+        // Get a reference to the download link element
+        var downloadLink = document.getElementById(pdfid);
+
+        // Trigger a click event on the link
+        downloadLink.click();
+    }
+</script>
+@using System.Data;
+@{ DbManager db = new DbManager();
+    Activitylog activitylog = new Activitylog();
+    Error_15_16 error_15_16 = new Error_15_16();}
+
+@{
+    try
+    {
+        string query = "select * from tbl_loan where Status!='Inactive'";
+        activitylog.Activitylogins("tbl_loan", "", query, "Failed", "", Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        DataTable dt = db.GetAllRecord(query);
+        activitylog.Activitylogupd("Success", "");
+        int count = 1;
+        if (dt.Rows.Count > 0)
+        {
+            <div class="row table table-responsive" id="tbl">
+                <table class="table table-responsive table-bordered" id="tblsublocation">
+                    <thead class="theadb text-center">
+                        <tr>
+                            <th class="text-center">ID</th>
+                            <th class="text-center">Request Id</th>
+                            <th class="text-center">Name</th>
+                            <th class="text-center">Department</th>
+                            <th class="text-center">Loan Amount</th>
+                            <th class="text-center">Reason</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">View Application</th>
+                            <th class="text-center">Action</th>
+                            @*<th class="text-center">Date & Time</th>*@
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        @for (int i = 0; i < dt.Rows.Count; i++)
+                        {
+                        <tr>
+                            <td>@(count+i)</td>
+                            <td>@dt.Rows[i]["Reqid"]</td>
+                            <td>@dt.Rows[i]["Name"]</td>
+                            <td>@dt.Rows[i]["Department"]</td>
+                            <td>@dt.Rows[i]["Loanamount"]</td>
+                            <td>@dt.Rows[i]["Reason"]</td>
+                            <td>@dt.Rows[i]["Status"]</td>
+                            @if (dt.Rows[i]["Status"] + "" == "Pending")
+                            {
+                                <td> - </td>
+                                <td><button type="button" class="btn btncolor btn-sm" onclick="Getid('@dt.Rows[i]["Reqid"]','@dt.Rows[i]["Status"]')" data-bs-toggle="modal" data-bs-target="#loan"> Approve/Reject </button></td>
+                            }
+                            else if (dt.Rows[i]["Status"] + "" == "In Process")
+                            {
+                                <td><a href="@URL.MainUrl()@dt.Rows[i]["Uploaddocument"]" onclick="downloadPDF()(this)" download="document.pdf">Download PDF</a></td>
+                                <td><button type="button" class="btn btncolor btn-sm" onclick="Getvid('@dt.Rows[i]["Reqid"]','@dt.Rows[i]["Status"]')" data-bs-toggle="modal" data-bs-target="#loan"> Verify/Rejact </button></td>
+                            }
+                            else
+                            {
+                                <td><a href="@URL.MainUrl()@dt.Rows[i]["Uploaddocument"]" onclick="downloadPDF()(this)" download="document.pdf">Download PDF</a></td>
+                                <td><button type="button" class="btn btncolor btn-sm" disabled data-bs-toggle="modal" data-bs-target="#loan"> Approve/Reject </button></td>
+
+                            }
+
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class='row justify-content-center d-flex m-5' id='datanotdound'>
+                <img src='~/Content/Img/nodata1.png' style="height:50%;width:50%" />
+            </div>
+        }
+    }
+    catch (Exception ex)
+    {
+        try
+        {
+            string pageUrl = "", moduleName = "", errorLine = "", errorMessage = "", errorName = "", errorTrace = "";
+            // Get the page URL, if available
+            pageUrl = System.Web.HttpContext.Current.Request.Url.AbsoluteUri;
+            // Get the module name
+            moduleName = ex.TargetSite.Module.Name;
+            // Get the error line number, if available
+            var stackTrace = ex.StackTrace;
+            if (!string.IsNullOrEmpty(stackTrace))
+            {
+                var lineNumberIndex = stackTrace.LastIndexOf(":line ");
+                if (lineNumberIndex >= 0)
+                {
+                    var lineNumber = stackTrace.Substring(lineNumberIndex + 6);
+                    var newLineIndex = lineNumber.IndexOf(Environment.NewLine);
+                    if (newLineIndex >= 0)
+                    {
+                        errorLine = lineNumber.Substring(0, newLineIndex);
+                    }
+                    else
+                    {
+                        errorLine = lineNumber;
+                    }
+                }
+            }
+            // Get the error message and name
+            if (ex.Message.ToString().Length >= 1000)
+            {
+                errorMessage = ex.Message.Substring(1, 500);
+            }
+            else
+            {
+                errorMessage = ex.Message;
+            }
+            errorName = ex.GetType().FullName;
+            // Get the error trace
+            errorTrace = ex.StackTrace;
+            //error_15_16.Error_15_16ins(pageUrl, moduleName, errorLine, errorMessage.Replace("'", "`"), errorName.Replace("'", "`"), errorTrace.Replace("'", "`"), Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        }
+
+        catch
+        {
+
+        }
+        ViewBag.msg = "Error";
+    }
+    finally
+    {
+        db.connectionstate();
+    }
+
+}
+
+
+<!-- Modal Loan-->
+<div class="modal fade" id="loan" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <form action="/Admin/Loan" method="post" class="needs-validation" novalidate>
+                <div class="modal-header justify-content-center nevigationstrip">
+                    <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Loan Info</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row row-cols-1 row-cols-3">
+                        
+                        <div class="col mb-2">
+                            <input type="hidden" id="reqid" name="reqid" />
+                            <input type="hidden" id="empid" name="empid" />
+                            <input type="hidden" id="branchname" name="branchname" />
+                            <input type="hidden" id="branchcode" name="branchcode" />
+                            <input type="hidden" id="uploaddocument" name="uploaddocument" />
+                            <h6 class="mt-2">Employee Name</h6>
+                            <input type="text" class="form-control shadow-none" id="name" name="name" required readonly />
+                            <div class="invalid-feedback" id="spnum">
+                                Please enter only numbers
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Department</h6>
+                            <input type="text" class="form-control shadow-none" id="department" name="department" required  readonly/>
+                            <div class="invalid-feedback" id="spnum">
+                                Please enter only numbers
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Designation</h6>
+                            <input type="text" class="form-control shadow-none" id="designation" name="designation" required  readonly/>
+                            <div class="invalid-feedback" id="spnum">
+                                Please enter only numbers
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Amount(Rs.)</h6>
+                            <input type="text" class="form-control shadow-none" id="amount" name="amount" required oninput="validateNumericInput(this,10,'spnum')" />
+                            <div class="invalid-feedback" id="spnum">
+                                Please enter only numbers
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Approve/Reject</h6>
+                            <select class="form-select shadow-none" id="status" name="status" required>
+                                <option selected disabled value="">Select one</option>
+                                <option value="Approved">Approve</option>
+                                <option value="Rejected">Reject</option>
+                                <option value="Verified">Verify</option>
+                                <option value="Re Check">Reject</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a valid Status.
+                            </div>
+                        </div>
+
+                        
+                    </div>
+                    <div class="row">
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Reason</h6>
+                            <textarea rows="4" class="form-control shadow-none" name="reason" id="reason" placeholder="Type Here..." maxlength="200" readonly></textarea>
+                            <div class="invalid-feedback">
+                                Please enter only letters, and spaces
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Remark</h6>
+                            <textarea rows="4" class="form-control shadow-none" name="remark" id="remark" placeholder="Type Here..." maxlength="200" required></textarea>
+                            <div class="invalid-feedback">
+                                Please enter only letters, and spaces
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+                    <button type="submit" class="btn btncolor"><i class="fa fa-check"></i></button>
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+

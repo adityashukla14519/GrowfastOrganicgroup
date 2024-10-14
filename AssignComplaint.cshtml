@@ -1,0 +1,471 @@
+﻿
+@{
+    ViewBag.Title = "Complaint";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+<script>
+$(document).ready(function() {
+    var msg = '@ViewBag.msg';
+
+    if (msg) {
+        var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+            msg +
+            '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+            '</div>';
+        $(alertElement).insertBefore('#alert-container');
+        setTimeout(function () {
+            $('#alert').alert('close');
+        }, 5000);
+    }
+});
+</script>
+<style>
+    .row {
+        margin-bottom: 10px;
+    }
+</style>
+@using System.Data;
+@using System.Globalization;
+@{
+    EncryptDecrypt ed = new EncryptDecrypt();
+    DbManager db = new DbManager();
+    Activitylog activitylog = new Activitylog();}
+<div class="row mt-1 mb-3 nevigationstrip fw-bold ps-2 pe-2">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext"> Admin <i class="fa fa-angle-double-right"></i> All Complaints </label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+<div class="row mt-3 mb-1 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col"></div>
+</div>
+@{
+    try
+    {
+        string query = "SELECT * FROM tbl_Complaint where Status='Active'";
+        activitylog.Activitylogins("tbl_Complaint", "", query, "Failed", "", Session["suid"] + "", Session["sname"] + "", Session["smail"] + "");
+        DataTable dt = db.GetAllRecord(query);
+        activitylog.Activitylogupd("Success", "");
+        int count1 = 1;
+        <div class="row">
+            <div class="col-12 col-sm-12">
+                <div class="card rounded-0">
+                    <div class="card-header rounded-0 theadg">
+                        <center>  Complaint Details</center>
+                    </div>
+                    <div class="card-body rounded-0">
+                        <div class="row">
+                            @{
+                                if (dt.Rows.Count > 0)
+                                {
+                                    <div class="col-12 col-sm-12">
+                                        <div class="col-1 col-sm-1"></div>
+                                        <div class="col-10 col-sm-10">
+
+                                        </div>
+
+                                        <div class="col-1 col-sm-1"></div>
+                                    </div>
+                                    <hr />
+                                    <div class="col-12 col-sm-12">
+                                        @foreach (DataRow row in dt.Rows)
+                                        {
+                                            if (row["Complaint_status"].ToString() == "Open")
+                                            {
+                                                <div class="row mb-3">
+                                                    <div class="col-12 col-sm-12 justify-content-start d-flex">
+                                                        <div class="card rounded-0" style="width:100%">
+                                                            <div class="card-header rounded-0 theadb" style="padding-top:2px;padding-bottom:0.6px">
+
+                                                                <div class="row" style="margin-top:6px">
+                                                                    <div class="col-sm-6">  <b> Complaint By :</b> @row["Complaintbyname"]</div>
+                                                                    <div class="col-sm-6" style="text-align:right">  <b>Status :</b> @row["Complaint_status"]</div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="card-body rounded-i">
+                                                                <table width="100%">
+                                                                    <tr>
+                                                                        <td style="width: 25%;"><span class="card-text"><b>Complaint Type</b> </span></td>
+                                                                        <td style="width: 25%;">@row["ComplaintType"]</td>
+                                                                        <td style="width: 25%;"> <span class="card-text"><b>Subject</b></span></td>
+                                                                        <td style="width: 25%;">@row["Subject"]</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td style="width: 25%;"><span class="card-text"><b>Priority</b></span></td>
+                                                                        <td style="width: 25%;">@row["Priority"]</td>
+                                                                        <td style="width: 25%;"><span class="card-text"><b>Complaint</b></span>  </td>
+                                                                        <td style="width: 25%;">@row["Complaint"]</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td style="width: 25%;"><span class="card-text"><b>Complaint Raise</b></span></td>
+                                                                        <td style="width: 25%;">@(Convert.ToDateTime(row["Datetime"]).ToString("yyyy-MM-dd"))</td>
+                                                                        <td style="width: 25%;"><span class="card-text"><b>Complaint ID</b></span></td>
+                                                                        <td style="width: 25%;">@row["CmpID"]</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td style="width: 25%;"></td>
+                                                                        <td style="width: 25%;"></td>
+                                                                        <td style="width: 25%;"></td>
+                                                                        <td class="text-end" style="width: 25%;"><a @*href='/Admin/Reply?cm=@row["CmpID"]'*@ data-bs-toggle="modal" data-bs-target="#StockDistribution1" onclick="Getcomplaintid('@row["CmpID"]')"><button class='btn btncolor' value='Reply'><i class='fa fa-reply'></i></button></a></td>
+                                                                    </tr>
+
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" name="CmpID" value="@row["CmpID"]" />
+                                                <input type="hidden" name="ctype" value="@row["ComplaintType"]" />
+                                                <input type="hidden" name="sub" value=" @row["Subject"]" />
+                                                <input type="hidden" name="priority" value=" @row["Priority"]" />
+                                                <input type="hidden" name="cmp" value="@row["Complaint"]" />
+                                            }
+                                            else
+                                            {
+                                    <div class="row mb-3">
+                                        <div class="col-12 col-sm-12 justify-content-start d-flex">
+                                            <div class="card rounded-0" style="width:100%">
+                                                <div class="card-header rounded-0 theadb" style="padding-top:2px;padding-bottom:0.6px">
+
+                                                    <div class="row" style="margin-top:6px">
+                                                        <div class="col-sm-6">  <b> Complaint By :</b> @row["Complaintbyname"]</div>
+                                                        <div class="col-sm-6" style="text-align:right">  <b>Status :</b> @row["Complaint_status"]</div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body rounded-i">
+                                                    <table width="100%">
+                                                        <tr>
+                                                            <td style="width: 25%;"><span class="card-text"><b>Complaint Type</b> </span></td>
+                                                            <td style="width: 25%;">@row["ComplaintType"]</td>
+                                                            <td style="width: 25%;"> <span class="card-text"><b>Subject</b></span></td>
+                                                            <td style="width: 25%;">@row["Subject"]</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="width: 25%;"><span class="card-text"><b>Priority</b></span></td>
+                                                            <td style="width: 25%;">@row["Priority"]</td>
+                                                            <td style="width: 25%;"><span class="card-text"><b>Complaint</b></span>  </td>
+                                                            <td style="width: 25%;">@row["Complaint"]</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="width: 25%;"><span class="card-text"><b>Complaint Raise</b></span></td>
+                                                            <td style="width: 25%;">@(Convert.ToDateTime(row["Datetime"]).ToString("yyyy-MM-dd"))</td>
+                                                            <td style="width: 25%;"><span class="card-text"><b>Complaint ID</b></span></td>
+                                                            <td style="width: 25%;">@row["CmpID"]</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="width: 25%;"></td>
+                                                            <td style="width: 25%;"></td>
+                                                            <td style="width: 25%;"></td>
+                                                            <td class="text-end" style="width: 25%;"></td>
+                                                        </tr>
+
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                            }
+                                        }
+                                    </div>
+
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    }
+    catch (Exception ex)
+    {
+        try
+        {
+            Error_15_16 error_15_16 = new Error_15_16();
+            string pageUrl = "", moduleName = "", errorLine = "", errorMessage = "", errorName = "", errorTrace = "";
+            // Get the page URL, if available
+            pageUrl = System.Web.HttpContext.Current.Request.Url.AbsoluteUri;
+            // Get the module name
+            moduleName = ex.TargetSite.Module.Name;
+            // Get the error line number, if available
+            var stackTrace = ex.StackTrace;
+            if (!string.IsNullOrEmpty(stackTrace))
+            {
+                var lineNumberIndex = stackTrace.LastIndexOf(":line ");
+                if (lineNumberIndex >= 0)
+                {
+                    var lineNumber = stackTrace.Substring(lineNumberIndex + 6);
+                    var newLineIndex = lineNumber.IndexOf(Environment.NewLine);
+                    if (newLineIndex >= 0)
+                    {
+                        errorLine = lineNumber.Substring(0, newLineIndex);
+                    }
+                    else
+                    {
+                        errorLine = lineNumber;
+                    }
+                }
+            }
+            // Get the error message and name
+            if (ex.Message.ToString().Length >= 1000)
+            {
+                errorMessage = ex.Message.Substring(1, 500);
+            }
+            else
+            {
+                errorMessage = ex.Message;
+            }
+            errorName = ex.GetType().FullName;
+            // Get the error trace
+            errorTrace = ex.StackTrace;
+            error_15_16.Error_15_16ins(pageUrl, moduleName, errorLine, errorMessage.Replace("'", "`"), errorName.Replace("'", "`"), errorTrace.Replace("'", "`"), Session["suid"] + "", Session["sname"] + "", Session["smail"] + "");
+        }
+
+        catch
+        {
+
+        }
+    }
+    finally
+    {
+        db.connectionstate();
+    }
+}
+<div class="row row-cols-12 row-cols-sm-12" id="reply">
+
+    <form action="/Admin/Resolvecomplain" method="post" class="needs-validation" novalidate onsubmit="return" enctype="multipart/form-data">
+        <div class="row row-cols-12 row-cols-sm-12" id="list">
+
+            <div class="col dv">
+                <div class="card card1">
+
+                    <div class="card-body">
+                        <table width="100%">
+                            <tr>
+                                <td style="width: 25%;"><b>Complaint Type : </b><span id="cmptype"></span></td>
+                                <td style="width: 25%;"><b>Priority : </b><span id="Priority"></span></td>
+                            </tr>
+                            <tr>
+                                <td style="width: 25%;"><b>Subject : </b><span id="Subject"></span></td>
+                                <td style="width: 25%;"><b>Complaint : </b><span id="Complaint"></span></td>
+                            </tr>
+
+                            <tr>
+                                <td style="width: 25%;">
+                                    <b>datetime : <span id="datetime"></span></b>
+                                </td>
+                                <td style="width: 25%;"><b>CmpID : </b><span id="CmpID"></span></td>
+                            </tr>
+                            <tr>
+                                @*<td><b>Attachment : </b><span id="Attachment"></span></td>*@
+                                <td style="width: 25%;"><b>Status : </b><span id="Statuss"></span></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="mb-1">
+            <label class="mt-2"><b>STATUS</b><i class="text-danger">*</i></label>
+            <select class="form-select shadow-none" id="Status" name="Status" required>
+                <option selected disabled value="">Select One</option>
+                <option>Assign</option>
+                <option>Close</option>
+                <option>In Progress</option>
+            </select>
+            <div class="invalid-feedback">
+                Please select a valid status.
+            </div>
+        </div>
+        <label><b>SUBJECT</b></label>
+        <div class="mb-1">
+            <textarea class="form-control shadow-none" readonly required name="statusMessage" id="statusMessage"></textarea>
+        </div>
+
+        <label><b>REPLY</b></label>
+<textarea class="form-control shadow-none" required name="Advisereply" placeholder="Reply">
+
+</textarea>
+        <div class="row row-cols-1 row-cols-sm-5 mb-5 mt-4 pb-5 m-b-30">
+            <div class="col-4 col-sm-4"></div>
+            @*<div class="col"></div>*@
+
+            <div class="col-4 col-sm-4 " style="text-align:center">
+                <button type="submit" class="btn btncolor shadow-none"><i class="fa fa-check">REPLY</i> </button>
+            </div>
+            <div class="col-4 col-sm-4"></div>
+            <input type="hidden" name="cmpid" id="hcmpid" />
+            @*<input type="hidden" name="cmptype" id="hcmptype" />
+                <input type="hidden" name="Priority" id="hPriority" />
+                <input type="hidden" name="Subject" id="hSubject" />
+                <input type="hidden" name="Complaint" id="hComplaint" />*@
+
+        </div>
+    </form>
+</div>
+<script>
+    // Get references to the select and textarea elements
+    const statusSelect = document.getElementById("Status");
+    const statusMessage = document.getElementById("statusMessage");
+
+    // Add an event listener to the select element
+    statusSelect.addEventListener("change", function () {
+        const selectedStatus = statusSelect.value;
+
+        // Update the message in the textarea based on the selected option
+        if (selectedStatus === "Assign") {
+            statusMessage.value = "Your problem assigned";
+        } else if (selectedStatus === "Close") {
+            statusMessage.value = "Your problem resolved";
+        } else if (selectedStatus === "In Progress") {
+            statusMessage.value = "Your problem is in progress";
+        } else {
+            statusMessage.value = ""; // Clear the textarea if no option is selected
+        }
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $("#allgrid1").show();
+        $("#allgrid2").show();
+        $("#reply").hide();
+        $("#replyButton").click(function () {
+            // Hide the showgrid section
+            $("#allgrid1").hide();
+            $("#allgrid2").hide();
+            // Show the reply section
+            $("#reply").show();
+        });
+    });
+</script>
+
+<script>
+    function CmpID(CmpID) {
+        $("#hcmpid").val(CmpID);
+        $.ajax({
+            url: '/Admin/getcmpID',
+            type: 'Get',
+            dataType: "Json",
+            data: { CmpID: CmpID },
+            success: function (data) {
+                $("#reply").show();
+                $("#allgrid").hide();
+                $("#replyButton").hide();
+                var jsonarray = JSON.parse(data);
+                if (jsonarray.length > 0) {
+                    $('#cmptype').text(jsonarray[0].ComplaintType);
+                    $('#Priority').text(jsonarray[0].Priority);
+                    $('#Subject').text(jsonarray[0].Subject);
+                    $('#Complaint').text(jsonarray[0].Complaint);
+                    $('#Attachment').text(jsonarray[0].Attachment);
+                    $('#Statuss').text(jsonarray[0].Status);
+                    $('#datetime').text(jsonarray[0].datetime);
+                    $('#CmpID').text(jsonarray[0].CmpID);
+                }
+            },
+            error: function () {
+                alert('failed to fetch Hospital data');
+            }
+
+        })
+    }
+    //$("#cmpid").val(ComplaintType);
+    //$("#cmpid").val(Priority);
+    //$("#cmpid").val(Subject);
+    //$("#cmpid").val(Complaint);
+    //$("#cmpid").val(CmpID);
+    //$("#cmpid").val(CmpID);
+    //$("#cmpid").val(CmpID);
+    //$("#cmpid").val(CmpID);
+</script>
+
+<script>
+    function Getcomplaintid(cmpid) {
+        $("#complaintid").val(cmpid);
+    }
+
+    $(document).ready(function () {
+        $("#employee").change(function () {
+            var employee= $("#employee").val();
+            $.ajax({
+                url: "/Admin/Getcomplaintcount",  // Replace with the actual URL that handles the verification
+                type: "GET",
+                dataType: "JSON",
+                data: { employee: employee },  // Send the verification code as data
+                success: function (data) {
+                    $("#pendingcom").val(data);
+                }
+            });
+        })
+    })
+</script>
+
+
+<!-- Modal StockDistribution-->
+<div class="modal fade" id="StockDistribution1" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <form action="/Admin/AssignComplaint" method="post" class="needs-validation" novalidate enctype="multipart/form-data">
+            <div class="modal-header justify-content-center nevigationstrip">
+                <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Assign Complaint</h5>
+            </div>
+            <div class="modal-body">
+                <span id="spotherresource" class="text-danger"></span>
+                <div class="row row-cols-1 row-cols-sm-1">
+                    <div class="col mb-2">
+                        <input type="hidden" id="complaintid" name="complaintid" />
+                        <label>Employee Name</label>
+                        <select class="form-select shadow-none mt-1" id="employee" name="employee" required>
+                            <option disabled selected value="">Select one</option>
+                            @{
+                                string query5 = "select * from tbl_registration where Employee_Type='Auser'";
+                                DataTable dt5 = db.GetAllRecord(query5);
+                                if (dt5.Rows.Count > 0)
+                                {
+                                    for (int i = 0; i < dt5.Rows.Count; i++)
+                                    {
+                                        <option value="@dt5.Rows[i]["Id"]">@dt5.Rows[i]["Name"] (@dt5.Rows[i]["Employee_id"])</option>
+
+                                    }
+                                }
+                            }
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select a valid option.
+                        </div>
+
+                        <input type="hidden" name="empid" id="empid" />
+                        <input type="hidden" name="empname" id="empname" />
+
+                    </div>
+
+                    <div class="col mb-2">
+                        <h6 class="mt-2"> Pending Complaints</h6>
+                        <input type="text" class="form-control shadow-none readonly" id="pendingcom" name="pendingcom" required onkeyup="validateTextbox(this)" pattern="^[0-9,./ ]*$" title="Please enter only letters, and spaces" readonly />
+                    </div>
+                    <div class="mb-2">
+                        <h6 class="mt-2">Remark</h6>
+                        <input type="text" class="form-control shadow-none" id="remark" name="remark" required placeholder="Enter Remark" onkeyup="validateTextbox(this)" pattern="^[A-Za-z0-9,./ ]*$" title="Please enter only letters, and spaces"/>
+                        <div class="invalid-feedback" id="spnum">
+                            Please enter only numbers
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+                <button type="submit" class="btn btncolor" id="btnsub"><i class="fa fa-check"></i></button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>

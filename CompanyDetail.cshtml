@@ -1,0 +1,159 @@
+﻿
+@{
+    ViewBag.Title = "CompanyDetail";
+    Layout = "~/Views/Shared/Adminmaster.cshtml";
+}
+
+<script>
+    $(document).ready(function () {
+        $('#tbl').DataTable();
+        $('.dataTables_length').addClass('bs-select');
+    });
+</script>
+<script>
+    function delconfirm() {
+        let text = "If You want to delete\n Press OK.";
+        if (confirm(text) == true) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $("#cancel").click(function () {
+            $("input[type='text'],input[type='number'],input[type='email'],#hid").val("");
+        })
+
+    })
+</script>
+<script>
+    function Getid(id) {
+        var up = id;
+        //alert(up);
+        $.ajax({
+            url: '/Proposal/UpdateCompanyDetails',
+            type: "GET",
+            dataType: "JSON",
+            data: { Up: up },
+            success: function (data) {
+                //alert(data);
+                $("#hid").val(data[0]);
+                $("#txtcompnm").val(data[1]);
+                $("#txtcont").val(data[2]);
+                $("#txtmail").val(data[3]);
+                $("#txtweb").val(data[4]);
+                $("#txtadd").val(data[5]);
+                $("#logo").val(data[6]);
+                $("#stamp").val(data[7]);
+                $("#coverpg").val(data[8]);
+                $("#mainpg").val(data[9]);
+            }
+        })
+    }
+</script>
+
+<script>
+    function validatefile(textbox) {
+        var allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i; // Regular expression pattern to allow only JPG, JPEG, and PNG file extensions
+
+        if (!allowedExtensions.exec(textbox.value)) {
+            textbox.setCustomValidity("Please upload a file with a JPG, JPEG, or PNG extension"); // Set custom error message if input is not valid
+        } else {
+            textbox.setCustomValidity(""); // Clear error message if input is valid
+        }
+    }
+</script>
+<script>
+
+    function mail() {
+        var ml = document.getElementById("txtmail").value;
+        var mll = ml.substr(ml.lastIndexOf(".") + 1);
+        if (ml != null && ml != "") {
+            if (ml.indexOf(".") != -1) {
+                if (mll != null && mll != "") {
+                    spmail.innerText = "";
+                    return true;
+                }
+                else {
+                    spmail.innerText = "Please enter a valid email address ex:- john@gmail.com";
+                    spmail.style.color = "red";
+                    return false;
+                }
+
+            }
+            else {
+                spmail.innerText = "Please enter a valid email address ex:- john@gmail.com";
+                spmail.style.color = "red";
+                return false;
+            }
+        }
+        else {
+            spmail.innerText = "Please enter your email";
+            spmail.style.color = "red";
+            return false;
+        }
+    }
+</script>
+
+
+
+<div class="modal fade" id="Form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="col-sm-12">
+            <div class="col-sm-12">
+                <form action="/Proposal/CompanyDetails" method="post" enctype="multipart/form-data" onsubmit="return mail()">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title text-uppercase text-center" id="exampleModalLabel">Company Details</h4>
+
+                        </div>
+                        <div class="modal-body" style="min-height:390px">
+                            <div class=" col-sm-12">
+                                <div class="col-sm-6">
+                                    <input type="hidden" id="hid" name="hid" />
+                                    <h5>Enter Company Name</h5>
+                                    <input type="text" name="txtcompnm" id="txtcompnm" class="form-control" required placeholder="Enter Company Name" onkeyup="validateTextbox(this)" pattern="^[a-zA-Z.() ]*$" title="Please enter only letters,( ) . and spaces" />
+                                    <h5>Enter Contact Number</h5>
+                                    <input type="text" name="txtcont" id="txtcont" class="form-control" required placeholder="Contact" onkeyup="validateTextbox(this)" pattern="^[0-9]{10}$" title="Please enter a valid 10-digit mobile number" /><span id="spnum"></span>
+
+                                    <h5>Upload Company Logo</h5>
+                                    <input type="file" name="complogo" id="complogo" class="form-control" placeholder="Choose Logo" onchange="validatefile(this)" />
+                                    <input type="hidden" name="logo" id="logo" />
+
+                                    <h5>Upload Company Cover Page</h5>
+                                    <input type="file" name="compcoverpg" id="compcoverpg" class="form-control" placeholder="Choose Cover Page" onchange="validatefile(this)" />
+                                    <input type="hidden" name="coverpg" id="coverpg" />
+                                </div>
+                                <div class="col-sm-6">
+                                    <h5>Enter Website Url</h5>
+                                    <input type="text" name="txtweb" id="txtweb" class="form-control" required placeholder="Enter Website" onkeyup="validateTextbox(this)" pattern="^[a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*\.[a-zA-Z]{2,6}$" title="Please enter a valid domain name, e.g. example.com" />
+                                    <h5>Enter mail Address</h5>
+                                    <input type="email" name="txtmail" id="txtmail" class="form-control" required placeholder="Enter Mail id" onkeyup="mail()" /><span id="spmail"></span>
+                                    <h5>Upload Company Stamp</h5>
+                                    <input type="file" name="compstamp" id="compstamp" class="form-control" placeholder="Choose Stamp" onchange="validatefile(this)" />
+                                    <input type="hidden" id="stamp" name="stamp" />
+                                    <h5>Upload Company Main Page</h5>
+                                    <input type="file" name="compmainpg" id="compmainpg" class="form-control" placeholder="Choose Logo" onchange="validatefile(this)" />
+                                    <input type="hidden" name="mainpg" id="mainpg" />
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="col-sm-12">
+                                    <h5>Enter Address</h5>
+                                    <input type="text" name="txtadd" id="txtadd" class="form-control" required placeholder="Enter Address here" onkeyup="validateTextbox(this)" pattern="^[a-zA-Z0-9(),/ ]*$" title="Please enter only letters, ( ) , / and spaces" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-dismiss="modal" id="cancel"><i class="fa fa-times" style="margin: 5px"></i></button>
+                            <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-ok" style="margin: 5px"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+

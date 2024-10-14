@@ -1,0 +1,547 @@
+﻿
+@{
+    ViewBag.Title = "Branch";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+
+<script>
+    function statuschange(id, status, tdstatus) {
+        //alert(id + "," + status);
+        //alert(status)
+        tdstatus = "#" + tdstatus;
+        //alert(tdstatus);
+        $.ajax({
+            url: "/Admin/Statuschangetive",
+            type: "Post",
+            dataType: "JSON",
+            data: { id: id, status: status, tblnm: 'tbl_branch' },
+            success: function (data) {
+                //alert(data);
+                if (data == "Active") {
+                    //alert(data);
+                    $(tdstatus).empty();
+                    $(tdstatus).append('<i class="fa fa-check text-success"></i><span style="display:none">' + data + '</span>');
+                    //alert('<i class="fa fa-check text-success"></i><span style="display:none">' + data + '</span>')
+
+                }
+                else {
+                    //alert(data);
+                    $(tdstatus).empty();
+
+                    $(tdstatus).append('<i class="fa fa-ban text-danger"></i><span style="display:none">' + data + '</span>');
+                }
+                //location.reload();
+            },
+        });
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        var table = $('#tblbranch').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                }
+            ]
+        });
+    });
+
+</script>
+<script>
+    function Getid(id) {
+        var up = id;
+        //alert(up);
+        $.ajax({
+            url: '/Admin/Updatebranch',
+            type: "GET",
+            dataType: "JSON",
+            data: { Up: up },
+            success: function (data) {
+                //alert(data);
+                $("#hid").val(data[0]);
+                $("#branchnm").val(data[1]);
+                $("#status").val(data[2]);
+                $("#yardrowid").val(data[10]);
+                $("#officetype").val(data[11]);
+                $("#status").removeClass("readonly");
+                $("#status").prop("disabled", false);
+                $("#state").val(data[8]);
+                $("#Statename").val(data[5]);
+                $("#Gstinnumber").val(data[12]);
+                $("#branchaddress").val(data[13]);
+                //$("#billno").val(data[14]);
+                $("#Branchcontact").val(data[15]);
+
+
+                $("#Companyname").val(data[16]);
+                $("#Companyprefix").val(data[17]);
+                $("#companyid").val(data[18]);
+
+                var state = $("#state").val();
+                $.ajax({
+                    url: "/Admin/GetCity",
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { State: state },
+                    success: function (data1) {
+                        //alert(data);
+                        $("#city").empty();
+                        $("#city").append(data1);
+
+                        $("#city").val(data[7]);
+                        $("#Cityname").val(data[6]);
+
+                    }
+                })
+
+
+            }
+        })
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $("#status").val("Active");
+        $("#status").addClass("readonly");
+        $("#status").prop("disabled", true);
+
+        $("#cancel").click(function () {
+            $("input[type='text'],.form-select,#hid,#status").val("");
+            $("#status").val("Active");
+            $("#status").addClass("readonly");
+            $("#status").prop("disabled", true);
+        })
+
+    var msg = '@ViewBag.msg';
+
+
+    if (msg) {
+        var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+            msg +
+            '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+            '</div>';
+        $(alertElement).insertBefore('#alert-container');
+        setTimeout(function () {
+            $('#alert').alert('close');
+        }, 5000);
+        //$('.alert').on('closed.bs.alert', function () {
+        //    window.location.href = '/Admin/branch';
+        //});
+        //$('#btnclose').on('click', function () {
+        //    window.location.href = '/Admin/branch';
+        //});
+    }
+});
+</script>
+<script>
+    $(document).ready(function () {
+        $("#state").change(function () {
+            var state = $("#state").val();
+            $.ajax({
+                url: "/Admin/GetCity",
+                type: "GET",
+                dataType: "JSON",
+                data: { State: state },
+                success: function (data) {
+                    //alert(data);
+                    $("#city").empty();
+                    $("#city").append(data);
+
+                }
+            })
+            $.ajax({
+                url: "/Admin/GetStatedetail",
+                type: "GET",
+                dataType: "JSON",
+                data: { State: state },
+                success: function (data) {
+                    //alert(data);
+                    $("#Statename").val(data[1]);
+
+                }
+            })
+        })
+        $("#city").change(function () {
+            var city = $("#city").val();
+
+            $.ajax({
+                url: "/Admin/GetCitydetail",
+                type: "GET",
+                dataType: "JSON",
+                data: { City: city },
+                success: function (data) {
+                    //alert(data);
+                    $("#Cityname").val(data[1]);
+
+                }
+            })
+        })
+        $("#companyid").change(function () {
+            var companyid = $("#companyid").val();
+
+            $.ajax({
+                url: "/Admin/UpdateMCompany",
+                type: "GET",
+                dataType: "JSON",
+                data: { Up: companyid },
+                success: function (data) {
+                    //alert(data);
+                    $("#Companyname").val(data[1]);
+                    $("#Companyprefix").val(data[5]);
+
+                }
+            })
+        })
+    })
+</script>
+
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i>  branch</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+<div class="row mt-2 mb-3 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+
+        <button type="button" class="btn btncolor btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#branch">
+            <i class="fa fa-plus" aria-hidden="true"></i> New
+        </button>
+    </div>
+
+</div>
+@using System.Data;
+@{
+
+    DbManager db = new DbManager();
+    Activitylog activitylog = new Activitylog();
+}
+@{
+    try
+    {
+        string query = "select * from tbl_branch";
+        activitylog.Activitylogins("tbl_branch", "", query, "Failed", "", Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        DataTable dt = db.GetAllRecord(query);
+        activitylog.Activitylogupd("Success", "");
+        int count = 1;
+        if (dt.Rows.Count > 0)
+        {
+            <div class="row table table-responsive">
+                <table class="table table-responsive table-bordered" id="tblbranch">
+                    <thead class="text-center theadb text-light">
+                        <tr>
+                            <th class="text-center">Id</th>
+                            <th class="text-center">Company Name</th>
+                            <th class="text-center">State</th>
+                            <th class="text-center">City</th>
+                            <th class="text-center">Office Name</th>
+                            <th class="text-center">Office Type</th>
+                            <th class="text-center">Yard</th>
+                            <th class="text-center">Gstin number</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Active/Inactive</th>
+                            <th class="text-center">Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        @for (int i = 0; i < dt.Rows.Count; i++)
+                        {
+
+
+                        <tr>
+                            <td>@(count + i)<input type="hidden" id="@dt.Rows[i]["id"]" value="@dt.Rows[i]["id"]" /></td>
+                            <td>@dt.Rows[i]["Companyname"]</td>
+                            <td>@dt.Rows[i]["State"]</td>
+                            <td>@dt.Rows[i]["City"]</td>
+                            <td>@dt.Rows[i]["Branch"]</td>
+                            <td>@dt.Rows[i]["Officetype"]</td>
+                            <td>@dt.Rows[i]["Yardname"]</td>
+                            <td>@dt.Rows[i]["Gstinnumber"]</td>
+
+                            @if (@dt.Rows[i]["Status"] + "" == "Active")
+                            {
+
+                                <td id="tdi_@dt.Rows[i]["id"]"><i class="fa fa-check text-success"></i><span style="display:none">@dt.Rows[i]["Status"]</span></td>
+                                <td>
+                                    <input type="checkbox" checked data-toggle="toggle" data-on="Active" data-off="Inactive" onchange="statuschange('@dt.Rows[i]["id"]','Inactive','tdi_@dt.Rows[i]["id"]')" style="font-size:7px;padding:1px">
+                                </td>
+
+                            }
+                            else
+                            {
+
+                                <td id="tda_@dt.Rows[i]["id"]"><i class="fa fa-ban text-danger"></i><span style="display:none">@dt.Rows[i]["Status"]</span></td>
+                                <td>
+                                    <input type="checkbox" data-toggle="toggle" data-on="Active" data-off="Inactive" onchange="statuschange('@dt.Rows[i]["id"]','Active','tda_@dt.Rows[i]["id"]')" style="font-size:7px;padding:1px">
+                                </td>
+                            }
+                            <td><button class="btn btncolorblue" onclick="Getid($('#@dt.Rows[i]["id"]').val())" data-bs-toggle="modal" data-bs-target="#branch"><i class="fa fa-edit"></i></button></td>
+
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class='row justify-content-center d-flex m-5' id='datanotdound'>
+                <img src='~/Content/Img/nodata1.png' style="height:50%;width:50%" />
+            </div>
+        }
+    }
+
+
+    catch (Exception ex)
+    {
+        try
+        {
+            Error_15_16 error_15_16 = new Error_15_16();
+            string pageUrl = "", moduleName = "", errorLine = "", errorMessage = "", errorName = "", errorTrace = "";
+            // Get the page URL, if available
+            pageUrl = System.Web.HttpContext.Current.Request.Url.AbsoluteUri;
+            // Get the module name
+            moduleName = ex.TargetSite.Module.Name;
+            // Get the error line number, if available
+            var stackTrace = ex.StackTrace;
+            if (!string.IsNullOrEmpty(stackTrace))
+            {
+                var lineNumberIndex = stackTrace.LastIndexOf(":line ");
+                if (lineNumberIndex >= 0)
+                {
+                    var lineNumber = stackTrace.Substring(lineNumberIndex + 6);
+                    var newLineIndex = lineNumber.IndexOf(Environment.NewLine);
+                    if (newLineIndex >= 0)
+                    {
+                        errorLine = lineNumber.Substring(0, newLineIndex);
+                    }
+                    else
+                    {
+                        errorLine = lineNumber;
+                    }
+                }
+            }
+            // Get the error message and name
+            if (ex.Message.ToString().Length >= 1000)
+            {
+                errorMessage = ex.Message.Substring(1, 500);
+            }
+            else
+            {
+                errorMessage = ex.Message;
+            }
+            errorName = ex.GetType().FullName;
+            // Get the error trace
+            errorTrace = ex.StackTrace;
+            error_15_16.Error_15_16ins(pageUrl, moduleName, errorLine, errorMessage.Replace("'", "`"), errorName.Replace("'", "`"), errorTrace.Replace("'", "`"), Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        }
+
+        catch
+        {
+
+        }
+    }
+    finally
+    {
+        db.connectionstate();
+    }
+}
+@{ 
+    string selquery = "select * from tbl_branch where Officetype='Head Office'";
+    DataTable sdt = db.GetAllRecord(selquery);
+
+}
+
+<!-- Modal branch-->
+<div class="modal fade" id="branch" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <form action="/Admin/Branch" method="post" class="needs-validation" novalidate>
+                <div class="modal-header justify-content-center nevigationstrip">
+                    <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Branch Info</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="col-sm-12">
+                        <div class="mb-3">
+                            <input type="hidden" id="hid" name="hid" />
+                            <h6 class="mt-2">Office Type</h6>
+                            <select class="form-select shadow-none" id="officetype" name="officetype" required>
+                                <option selected disabled value="">Select one</option>
+                                @if (sdt.Rows.Count > 0)
+                                {
+                                    <option disabled>Head Office</option>
+                                    <option>Branch Office</option>
+                                }
+                                else
+                                {
+                                    <option>Head Office</option>
+                                    <option>Branch Office</option>
+                                }
+
+
+                            </select>
+                            <input type="hidden" id="Statename" name="Statename" />
+                            <input type="hidden" id="Cityname" name="Cityname" />
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">Company</h6>
+                            <select class="form-select shadow-none" id="companyid" name="companyid" required>
+                                <option selected disabled value="">Select one</option>
+                                @{
+                                    string query1c = "select * from tbl_mcompany";
+                                    DataTable dt1c = db.GetAllRecord(query1c);
+                                    if (dt1c.Rows.Count > 0)
+                                    {
+                                        for (int i = 0; i < dt1c.Rows.Count; i++)
+                                        {
+                                            <option value="@dt1c.Rows[i]["Id"]">@dt1c.Rows[i]["CompanyName"]</option>
+
+                                        }
+                                    }
+                                }
+
+                            </select>
+                            <input type="hidden" id="Companyname" name="Companyname" />
+                            <input type="hidden" id="Companyprefix" name="Companyprefix" />
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">State</h6>
+                            <select class="form-select shadow-none" id="state" name="state" required>
+                                <option selected disabled value="">Select one</option>
+                                @{
+                                    string query1 = "select * from tbl_state";
+                                    DataTable dt1 = db.GetAllRecord(query1);
+                                    if (dt1.Rows.Count > 0)
+                                    {
+                                        for (int i = 0; i < dt1.Rows.Count; i++)
+                                        {
+                                            <option value="@dt1.Rows[i]["Statecode"]">@dt1.Rows[i]["Statename"]</option>
+
+
+                                        }
+                                    }
+                                }
+
+                            </select>
+                            <input type="hidden" id="Statename" name="Statename" />
+                            <input type="hidden" id="Cityname" name="Cityname" />
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">City</h6>
+                            <select class="form-select shadow-none" id="city" name="city" required>
+                                <option selected disabled value="">Select one</option>
+
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">Branch Name</h6>
+                            <input type="text" class="form-control shadow-none" name="branchnm" id="branchnm" required placeholder="Enter Branch" onkeyup="validateTextbox(this)" pattern="^[a-zA-Z ]*$" title="Please enter only letters, and spaces" maxlength="50" />
+                            <div class="invalid-feedback">
+                                Please enter only letters, and spaces
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">Yard</h6>
+                            <select class="form-select shadow-none" id="yardrowid" name="yardrowid" required>
+                                <option selected disabled value="">Select one</option>
+                                @{
+                                    string query1y = "select * from tbl_godown where Status='Active'";
+                                    DataTable dt1y = db.GetAllRecord(query1y);
+                                    if (dt1y.Rows.Count > 0)
+                                    {
+                                        for (int i = 0; i < dt1y.Rows.Count; i++)
+                                        {
+                                            <option value="@dt1y.Rows[i]["Id"]">@dt1y.Rows[i]["GodownName"]</option>
+
+
+                                        }
+                                    }
+                                }
+
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">Gstin number</h6>
+                            <input type="text" class="form-control shadow-none" name="Gstinnumber" id="Gstinnumber" required placeholder="Gstin number" onkeyup="validateTextbox(this)" pattern="^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$" title="Please enter only letters, and spaces" maxlength="50" />
+                            <div class="invalid-feedback">
+                                Please enter valid Gstin number
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">Branch Full Address</h6>
+                            <input type="text" class="form-control shadow-none" name="branchaddress" id="branchaddress" required placeholder="Branch Full Address" onkeyup="validateTextbox(this)" pattern="^[-,a-zA-Z0-9 ]*$" title="Please enter only letters, and spaces" maxlength="50" />
+                            <div class="invalid-feedback">
+                                Please enter only letters, and spaces
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">Contact number</h6>
+                            <input type="text" class="form-control shadow-none" name="Branchcontact" id="Branchcontact" required placeholder="Contact" onkeyup="validateTextbox(this)" pattern="^[a-zA-Z0-9 ]*$" title="Please enter only letters, and spaces" maxlength="50" />
+                            <div class="invalid-feedback">
+                                Please enter Contact number
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">Status</h6>
+                            <select class="form-select shadow-none" id="status" name="status" required>
+                                @*<option selected disabled value="">Select one</option>*@
+                                <option selected>Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a valid Status.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+                    <button type="submit" class="btn btncolor"><i class="fa fa-check"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+

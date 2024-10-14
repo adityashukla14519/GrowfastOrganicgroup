@@ -1,0 +1,740 @@
+﻿
+@{
+    ViewBag.Title = "EmployeeInfo";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+
+<script>
+
+    $(document).ready(function () {
+        $("#btnubranch").click(function () {
+            var Id = $("#id").val();
+            var Empid = $("#empid").val();
+            var brname = $("#branchname").val();
+            var brcode = $("#branchcode").val();
+            if (brcode != "") {
+                $.ajax({
+                    url: "/Admin/UpdateBranchofEmp",
+                    type: "Post",
+                    dataType: "JSON",
+                    data: { id: Id, empid: Empid, branchname: brname, branchcode: brcode },
+                    success: function (data) {
+                        $("#brmsg").text(data);
+                        location.reload();
+                    },
+                });
+            }
+            else {
+                $("#brmsg").text("Warning : First Select Branch");
+            }
+            
+        })
+
+        $("#branchid").change(function () {
+            var brid = $("#branchid").val();
+            $.ajax({
+                url: '/Admin/Updatebranch',
+                type: "GET",
+                dataType: "JSON",
+                data: { Up: brid },
+                success: function (data) {
+                    //alert(data);
+                    $("#branchname").val(data[1]);
+                    $("#branchcode").val(data[9]);
+
+                }
+            })
+        })
+
+
+    })
+
+
+    function Getidb(Empid, Id, name) {
+        $("#id").val(Id);
+        $("#empid").val(Empid);
+        $("#Empnm").val(name);
+    }
+</script>
+
+@model List<EmployeeInfo>
+@using System.Globalization;
+@{ int count1 = 0;}
+<script>
+    $(document).ready(function () {
+        $('#tblattendance').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom'
+                }
+            ]
+        });
+
+
+    });
+</script>
+@using System.Data;
+@{ EncryptDecrypt ed = new EncryptDecrypt();}
+@{ DbManager db = new DbManager();}
+@{
+
+    string query1 = "", query2 = "", query3 = "", query4 = "";
+    if (ViewBag.mtype != null && ViewBag.mtype != "")
+    {
+        query1 = "select * from tbl_registration where Status='Approved' and Employee_type ='" + ViewBag.mtype + "'";
+        query2 = "select * from tbl_registration where Status!='Approved' and Employee_type ='" + ViewBag.mtype + "'";
+        query3 = "select * from tbl_registration where Premises='Office Work' and Employee_type ='" + ViewBag.mtype + "'";
+        query4 = "select * from tbl_registration where Premises='Field Work' and Employee_type ='" + ViewBag.mtype + "'";
+    }
+    else
+    {
+        query1 = "select * from tbl_registration where Status='Approved'";
+        query2 = "select * from tbl_registration where Status!='Approved'";
+        query3 = "select * from tbl_registration where Premises='Office Work'";
+        query4 = "select * from tbl_registration where Premises='Field Work'";
+    }
+    DataTable dt1 = db.GetAllRecord(query1);
+    DataTable dt2 = db.GetAllRecord(query2);
+    DataTable dt3 = db.GetAllRecord(query3);
+    DataTable dt4 = db.GetAllRecord(query4);
+    int count = 0;
+    if (dt1.Rows.Count > 0)
+    {
+        for (int i = 0; i < dt1.Rows.Count; i++)
+        {
+            count++;
+        }
+    }
+    ViewBag.active = count;
+    count = 0;
+    if (dt2.Rows.Count > 0)
+    {
+        for (int i = 0; i < dt2.Rows.Count; i++)
+        {
+            count++;
+        }
+    }
+    ViewBag.inactive = count;
+    count = 0;
+    if (dt3.Rows.Count > 0)
+    {
+        for (int i = 0; i < dt3.Rows.Count; i++)
+        {
+            count++;
+        }
+    }
+    ViewBag.wfo = count;
+    count = 0;
+    if (dt4.Rows.Count > 0)
+    {
+        for (int i = 0; i < dt4.Rows.Count; i++)
+        {
+            count++;
+        }
+    }
+    ViewBag.wfh = count;
+}
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i> Employee Info <i class="fa fa-angle-double-right"></i> @ViewBag.nm Employees</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+<div class="row row-cols-1 row-cols-sm-4 mb-3 mt-2">
+    <div class="col mt-2 mb-2">
+        <div class="card dashcard success border rounded-3 border-success-subtle">
+
+            <div class="card-body approdashstat">
+                <div class="row align-items-end row-cols-2">
+                    <div class="col-2">
+                        <i class="fa fa-user fs-2"></i>
+                    </div>
+                    <div class="col-10 d-flex justify-content-end">
+                        <label class="fw-bolder mt-1 text-end">
+                            Active Employees
+                            <br />
+                            @ViewBag.active
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col mt-2 mb-2">
+        <div class="card dashcard success border rounded-3 border-success-subtle">
+
+            <div class="card-body approdashstat">
+                <div class="row align-items-end row-cols-2">
+                    <div class="col-2">
+                        <i class="fa fa-user fs-2"></i>
+                    </div>
+                    <div class="col-10 d-flex justify-content-end">
+                        <label class="fw-bolder mt-1 text-end">
+                            Inactive Employees<br />
+                            @ViewBag.inactive
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col mt-2 mb-2">
+        <div class="card dashcard success border rounded-3 border-success-subtle">
+
+            <div class="card-body approdashstat">
+                <div class="row align-items-end row-cols-2">
+                    <div class="col-2">
+                        <i class="fa fa-user fs-2"></i>
+                    </div>
+                    <div class="col-10 d-flex justify-content-end">
+                        <label class="fw-bolder mt-1 text-end">
+                            Office Work<br />
+                            @ViewBag.wfo
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col mt-2 mb-2">
+        <div class="card dashcard success border rounded-3 border-success-subtle">
+
+            <div class="card-body approdashstat">
+                <div class="row align-items-end row-cols-2">
+                    <div class="col-2">
+                        <i class="fa fa-user fs-2"></i>
+                    </div>
+                    <div class="col-10 d-flex justify-content-end">
+                        <label class="fw-bolder mt-1 text-end">
+                            Field Work<br />
+                            @ViewBag.wfh
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row table table-responsive">
+    <table class="table table-responsive table-bordered" id="tblattendance">
+        <thead class="theadb text-center">
+            <tr>
+                <th class="text-center">Id</th>
+                <th class="text-center">Photo</th>
+                <th class="text-center">Employee Code</th>
+                <th class="text-center">Name</th>
+                <th class="text-center">Department</th>
+                <th class="text-center">Designation</th>
+                @*<th class="text-center">Manager Name</th>*@
+                @*<th class="text-center">Email</th>*@
+                <th class="text-center">Work Primise</th>
+                <th class="text-center">Branch</th>
+                <th class="text-center">Attendance Today(In)</th>
+                <th class="text-center">Attendance Today(out)</th>
+                <th class="text-center">Status</th>
+                @*<th></th>*@
+
+            </tr>
+        </thead>
+        <tbody class="text-center">
+            @foreach (var registration in Model)
+            {
+                count1++;
+
+                if (registration.Status == "Approved")
+                {
+                    <tr>
+                        <td>@count1</td>
+                        <td><img src="@URL.ApiURL()@registration.imagepath" id="img" class="img rounded-circle img-responsive" style="height:50px;width:50px" onerror="this.src='/Content/Img/defaultprofile.jpg'"></td>
+                        <td><button type="button" class="btn btncolorblue" onclick="Getid('@registration.id')" data-bs-toggle="modal" data-bs-target="#empinfo">@registration.Employeeid</button></td>
+                        <td>@registration.Name</td>
+                        <td>@registration.Department</td>
+                        <td>@registration.Designation</td>
+                        @*<td>@registration.Managername</td>*@
+                        @*<td>@registration.Email</td>*@
+                        <td>@registration.Premice</td>
+                        <td><button type="button" class="btn btncolorblue" onclick="Getidb('@registration.Employeeid','@registration.id', '@registration.Name')" data-bs-toggle="modal" data-bs-target="#branch">@registration.Branchname (@registration.Branchcode)</button></td>
+                        @if (registration.punchintime != "" && registration.punchintime != null)
+                        {
+                            DateTime indate = DateTime.ParseExact(registration.punchintime, "HH:mm:ss", CultureInfo.InvariantCulture);
+                            <td>@indate.ToString("HH:mm")</td>
+                        }
+                        else
+                        {
+                            <td> </td>
+                        }
+                        @if (registration.punchouttime != "" && registration.punchouttime != null)
+                        {
+                            DateTime outdate = DateTime.ParseExact(registration.punchouttime, "HH:mm:ss", CultureInfo.InvariantCulture);
+                            <td>@outdate.ToString("HH:mm")</td>
+                        }
+                        else
+                        {
+                            <td> </td>
+                        }
+
+                        @if (registration.Status == "Approved")
+                        {
+                            <td><i class="fa fa-check text-success"></i></td>
+                        }
+                        else
+                        {
+                            <td><i class="fa fa-ban text-danger"></i></td>
+                        }
+                        <!--<td>
+                <div class="btn-group dropdown m-r-10">
+                    <button class="btn btncolorblue" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-cog"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+
+                        <li><a class="dropdown-item" onclick="Getidb('@registration.Employeeid', '@registration.id', '@registration.Name')" data-bs-toggle="modal" data-bs-target="#branch"><i class="fa fa-eye text-info dropicon" aria-hidden="true"> Change Branch</i> </a></li>
+
+                        <li><a class="dropdown-item sa-params" onclick="Getid('@registration.id')" data-bs-toggle="modal" data-bs-target="#empinfo"><i class="fa fa-eye text-primary dropicon" aria-hidden="true"> View</i> </a></li>-->
+                        @*<li><a class="dropdown-item" href="#"><i class="fa fa-eye text-info dropicon" aria-hidden="true"> Attendance Summary</i> </a></li>
+                    <li><a class="dropdown-item" href="/wacpl/employee/15391/location-summary"><i class="fa fa-eye text-info dropicon" aria-hidden="true"> Location Summary</i> </a></li>*@
+                        @*<li><a class="dropdown-item sa-params" href="#" onclick="Getbid('@registration.id'))"><i class="fa fa-times text-info dropicon" aria-hidden="true"> Inactive</i></a></li>*@
+                        @*<li><a class="dropdown-item sa-params permanent-delete" href="#" data-user-id="15391"><i class="fa fa-times text-info dropicon" aria-hidden="true"> Permanent Delete</i></a></li>*@
+                        <!--</ul>
+                    </div>
+                </td>-->
+                    </tr>
+                }
+                else
+                {
+                    <tr class="text-danger">
+                        <td>@count1</td>
+                        <td><img src="@URL.ApiURL()@registration.imagepath" id="img" class="img rounded-circle img-responsive" style="height:50px;width:50px" onerror="this.src='/Content/Img/defaultprofile.jpg'"></td>
+                        <td><button type="button" class="btn btncolorblue" onclick="Getid('@registration.id')" data-bs-toggle="modal" data-bs-target="#empinfo">@registration.Employeeid</button></td>
+                        <td>@registration.Name</td>
+                        <td>@registration.Department</td>
+                        <td>@registration.Designation</td>
+                        @*<td>@registration.Managername</td>*@
+                        @*<td>@registration.Email</td>*@
+                        <td>@registration.Premice</td>
+                        <td><button type="button" class="btn btncolorblue" onclick="Getidb('@registration.Employeeid','@registration.id', '@registration.Name')" data-bs-toggle="modal" data-bs-target="#branch">@registration.Branchname (@registration.Branchcode)</button></td>
+                        @if (registration.punchintime != "" && registration.punchintime != null)
+                        {
+                            DateTime indate = DateTime.ParseExact(registration.punchintime, "HH:mm:ss", CultureInfo.InvariantCulture);
+                            <td>@indate.ToString("HH:mm")</td>
+                        }
+                        else
+                        {
+                            <td> </td>
+                        }
+                        @if (registration.punchouttime != "" && registration.punchouttime != null)
+                        {
+                            DateTime outdate = DateTime.ParseExact(registration.punchouttime, "HH:mm:ss", CultureInfo.InvariantCulture);
+                            <td>@outdate.ToString("HH:mm")</td>
+                        }
+                        else
+                        {
+                            <td> </td>
+                        }
+
+                        @if (registration.Status == "Approved")
+                        {
+                            <td><i class="fa fa-check text-success"></i></td>
+                        }
+                        else
+                        {
+                            <td><i class="fa fa-ban text-danger"></i></td>
+                        }
+                        <!--<td>
+                <div class="btn-group dropdown m-r-10">
+                    <button class="btn btncolorblue" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-cog"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+
+                        <li><a class="dropdown-item" onclick="Getidb('@registration.Employeeid', '@registration.id', '@registration.Name')" data-bs-toggle="modal" data-bs-target="#branch"><i class="fa fa-eye text-info dropicon" aria-hidden="true"> Change Branch</i> </a></li>
+
+                        <li><a class="dropdown-item sa-params" onclick="Getid('@registration.id')" data-bs-toggle="modal" data-bs-target="#empinfo"><i class="fa fa-eye text-primary dropicon" aria-hidden="true"> View</i> </a></li>-->
+                        @*<li><a class="dropdown-item" href="#"><i class="fa fa-eye text-info dropicon" aria-hidden="true"> Attendance Summary</i> </a></li>
+                    <li><a class="dropdown-item" href="/wacpl/employee/15391/location-summary"><i class="fa fa-eye text-info dropicon" aria-hidden="true"> Location Summary</i> </a></li>*@
+                        @*<li><a class="dropdown-item sa-params" href="#" onclick="Getbid('@registration.id'))"><i class="fa fa-times text-info dropicon" aria-hidden="true"> Inactive</i></a></li>*@
+                        @*<li><a class="dropdown-item sa-params permanent-delete" href="#" data-user-id="15391"><i class="fa fa-times text-info dropicon" aria-hidden="true"> Permanent Delete</i></a></li>*@
+                        <!--</ul>
+                    </div>
+                </td>-->
+                    </tr>
+                }
+
+            }
+        </tbody>
+    </table>
+</div>
+
+
+
+<!-- Modal branch-->
+<div class="modal fade" id="branch" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header justify-content-center nevigationstrip">
+                <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Change Branch</h5>
+            </div>
+            <div class="modal-body">
+                <div class="col-sm-12">
+                    <h6 id="brmsg"></h6>
+                    <div class="mb-3">
+                        <h6 class="mt-2">Employee Name</h6>
+                        <input type="text" class="form-control shadow-none readonly" name="Empnm" id="Empnm" required readonly onkeyup="validateTextbox(this)" pattern="^[a-zA-Z ]*$" title="Please enter only letters, and spaces" />
+                        <div class="invalid-feedback">
+                            Please enter only letters, and spaces
+                        </div>
+                        <input type="hidden" class="form-control shadow-none" name="id" id="id" required />
+                        <input type="hidden" class="form-control shadow-none" name="empid" id="empid" required />
+                    </div>
+                    <div class="mb-3">
+                        <select class="form-select shadow-none" id="branchid" name="branchid" required>
+                            <option selected disabled value="">Select one</option>
+                            @{
+                                string query11 = "select * from tbl_branch where Status='Active'";
+                                DataTable dt11 = db.GetAllRecord(query11);
+                                if (dt11.Rows.Count > 0)
+                                {
+                                    for (int i = 0; i < dt11.Rows.Count; i++)
+                                    {
+                                        <option value="@dt11.Rows[i]["Id"]">@dt11.Rows[i]["Branch"]</option>
+                                    }
+                                }
+                            }
+                        </select>
+                        <input type="hidden" name="branchname" id="branchname" />
+                        <input type="hidden" name="branchcode" id="branchcode" />
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+                <button type="button" class="btn btncolor" id="btnubranch"><i class="fa fa-check"></i></button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Modal  Leave-->
+<div class="modal fade" id="empinfo" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header justify-content-center nevigationstrip">
+                <h5 class="modal-title" id="staticBackdropLabel"> Employee Info</h5>
+            </div>
+            <div class="modal-body">
+
+                <div data-bs-spy="scroll" data-bs-target="#navbar-example2" data-bs-offset="0" class="scrollspy-example" tabindex="0">
+                    <div class="row nevigationstripblue mt-2 mb-2"> <label class="text-uppercase text-light">PERSONAL DETAILS</label></div>
+                    <div class="row row-cols-1 row-cols-sm-3 border border-1 border-dark rounded-2 pb-3">
+
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Employee Code :  <br /><span id="code" class="fw-bold"></span> <h6 />
+
+
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Name :  <br /><span id="name" class="fw-bold"></span> <h6 />
+
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Father's/Husband's Name :  <br /><span id="fmn" class="fw-bold"></span> <h6 />
+
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Address :  <br /><span id="add" class="fw-bold"></span> <h6 />
+
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Temporary Address :  <br /><span id="tadd" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Email Id :  <br /><span id="eid" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Mobile number :  <br /><span id="mn" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Alternative Mobile number :  <br /> : <span id="amn" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">DOB :  <br /><span id="dob" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">Gender :  <br /><span id="gen" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">Marital Type :  <br /><span id="mtype" class="fw-bold"></span> <h6 />
+
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">Premises :  <br /><span id="pre" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">Blood Group :  <br /><span id="bg" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">Department :  <br /><span id="dep" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">Sub Department :  <br /><span id="sdep" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">Designation :  <br /><span id="des" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">Manager :  <br /><span id="manager" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Employement Type :  <br /><span id="et" class="fw-bold"></span> <h6 />
+                        </div>
+                    </div>
+                    <div class="row nevigationstripblue mt-2 mb-2"> <label class="text-uppercase text-light">LEAVE DETAILS</label></div>
+                    <div class="row row-cols-1 row-cols-sm-5 border border-1 border-dark rounded-2 pb-3">
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Total Leave :  <br /><span id="tl" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Pending Leave :  <br /><span id="pl" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Approved Leave :  <br /><span id="ap" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Balance Leave :  <br /><span id="bl" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Leave Without Pay :  <br /><span id="lwp" class="fw-bold"></span> <h6 />
+                        </div>
+                    </div>
+                    <div class="row nevigationstripblue mt-2 mb-2"> <label class="text-uppercase text-light">BANK DETAILS</label></div>
+                    <div class="row row-cols-1 row-cols-sm-4 border border-1 border-dark rounded-2 pb-3">
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Bank Name :  <br /><span id="bn" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Account Number :  <br /><span id="an" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Account Holder Name :  <br /><span id="ahn" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">IFSC Code :  <br /><span id="ifsc" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">PF No :  <br /><span id="pfn" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">ESIC Code :  <br /><span id="esic" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Payment Mode :  <br /><span id="pm" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">DOL :  <br /><span id="dol" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">PAN Number :  <br /><span id="pan" class="fw-bold"></span> <h6 />
+                        </div>
+                    </div>
+                    <div class="row nevigationstripblue mt-2 mb-2"> <label class="text-uppercase text-light">SALARY DETAILS</label></div>
+                    <div class="row row-cols-1 row-cols-sm-2 border border-1 border-dark rounded-2 pb-3">
+                        <div class="col">
+                            <h5 class="text-center">Earnings</h5>
+                            <div class="row row-cols-1 row-cols-sm-2">
+                                <div class="col mb-3">
+                                    <h6 class="mt-2">Basic Salary :  <br /><span id="bs" class="fw-bold"></span> <h6 />
+                                </div>
+                                <div class="col mb-3">
+                                    <h6 class="mt-2">House Rent Allowances :  <br /><span id="hra" class="fw-bold"></span> <h6 />
+                                </div>
+                                <div class="col mb-3">
+                                    <h6 class="mt-2">Conveyance Allowances :  <br /><span id="ca" class="fw-bold"></span> <h6 />
+                                </div>
+                                <div class="col mb-3">
+                                    <h6 class="mt-2">Medical Allowances :  <br /><span id="ma" class="fw-bold"></span> <h6 />
+                                </div>
+                                <div class="col mb-3">
+                                    <h6 class="mt-2">Special Allowances :  <br /><span id="sa" class="fw-bold"></span> <h6 />
+                                </div>
+                                <div class="col mb-3">
+                                    <h6 class="mt-2">Gross Salary :  <br /><span id="gs" class="fw-bold"></span> <h6 />
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col">
+                            <h5 class="text-center">Deduction</h5>
+                            <div class="row row-cols-1 row-cols-sm-2">
+                                <div class="col mb-3">
+                                    <h6 class="mt-2">EPF :  <br /><span id="erf" class="fw-bold"></span> <h6 />
+                                </div>
+                                <div class="col mb-3">
+                                    <h6 class="mt-2">Health Insurance :  <br /><span id="hi" class="fw-bold"></span> <h6 />
+                                </div>
+                                <div class="col mb-3">
+                                    <h6 class="mt-2">Professional Tax :  <br /><span id="pf" class="fw-bold"></span> <h6 />
+                                </div>
+                                <div class="col mb-3">
+                                    <h6 class="mt-2">TDS :  <br /><span id="tds" class="fw-bold"></span> <h6 />
+                                </div>
+                                <div class="col mb-3">
+                                    <h6 class="mt-2">Total Deduction :  <br /><span id="td" class="fw-bold"></span> <h6 />
+                                </div>
+                                <div class="col mb-3">
+                                    <h6 class="mt-2">Net Pay :  <br /><span id="np" class="fw-bold"></span> <h6 />
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="row nevigationstripblue mt-2 mb-2"> <label class="text-uppercase text-light">EMERGENCY CONTACT DETAILS</label></div>
+                    <div class="row row-cols-1 row-cols-sm-3 border border-1 border-dark rounded-2 pb-3">
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Name :  <br /><span id="emcont" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Mobile number :  <br /><span id="emmob" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Relation :  <br /><span id="emrel" class="fw-bold"></span> <h6 />
+                        </div>
+                    </div>
+                    <div class="row nevigationstripblue mt-2 mb-2"> <label class="text-uppercase text-light">ASSIGN LOCATION(s) & SHIFTS TO EMPLOYEE</label></div>
+                    <div class="row row-cols-1 row-cols-sm-3 border border-1 border-dark rounded-2 pb-3">
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Shift Timing :  <br /><span id="shift" class="fw-bold"></span> <h6 />
+                        </div>
+                    </div>
+                    <div class="row"> <h5>OTHER DETAILS</h5></div>
+
+                    <div class="row row-cols-1 row-cols-sm-4 mb-5 border border-1 border-dark rounded-2 pb-3">
+                        @*<div class="col mb-3">
+                                <h6 class="mt-2">No of Child :  <br /><span id="noc" class="fw-bold"></span> <h6 />
+                            </div>*@
+                        <div class="mb-3">
+                            <h6 class="mt-2">Citizenship :  <br /><span id="chitzen" class="fw-bold"></span> <h6 />
+
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Activate Checkin :  <br /><span id="actche" class="fw-bold"></span> <h6 />
+
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Flexi Hours :  <br /><span id="fh" class="fw-bold"></span> <h6 />
+                        </div>
+                        <div class="col mb-3">
+                            <h6 class="mt-2">Date Of Joining :  <br /><span id="doj" class="fw-bold"></span> <h6 />
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function Getid(id) {
+        //alert(id)
+        $.ajax({
+            url: "/Admin/GetEmpdata",
+            type: "GET",
+            dataType: "JSON",
+            data: { Empid: id },
+            success: function (data) {
+
+                $("#code").text(data[0]);
+                $("#emptype").text(data[1]);
+                $("#name").text(data[2]);
+                $("#mb").text(data[3]);
+                $("#eid").text(data[4]);
+                $("#dep").text(data[5]);
+                $("#des").text(data[6]);
+                $("#fnm").text(data[7]);
+                $("#add").text(data[8]);
+                $("#tadd").text(data[9]);
+                $("#amn").text(data[10]);
+                $("#dob").text(data[11]);
+                $("#gen").text(data[12]);
+                $("#mt").text(data[13]);
+                $("#pre").text(data[14]);
+                $("#bg").text(data[15]);
+                $("#sdep").text(data[16]);
+                $("#manager").text(data[17]);
+                /*$("#emptype").text(data[18]);*/
+                $("#etype").text(data[19]);
+                $("#bn").text(data[20]);
+                $("#an").text(data[21]);
+                $("#ahn").text(data[22]);
+                $("#che").text(data[23]);
+                $("#ifsc").text(data[24]);
+                $("#pfn").text(data[25]);
+                $("#esid").text(data[26]);
+                $("#pm").text(data[27]);
+                $("#dol").text(data[28]);
+                $("#pan").text(data[29]);
+                $("#emnm").text(data[30]);
+                $("#emmob").text(data[31]);
+                $("#emrel").text(data[32]);
+                $("#shift").text(data[33]);
+                //$("#emptype").text(data[34]);
+                //$("#emptype").text(data[35]);
+                //$("#emptype").text(data[36]);
+                $("#doj").text(data[37]);
+                $("#noc").text(data[38]);
+                $("#cit").text(data[39]);
+                $("#fh").text(data[40]);
+                //$("#emptype").text(data[41]);
+                //$("#emptype").text(data[42]);
+                $("#bs").text(data[43]);
+                $("#hra").text(data[44]);
+                $("#ca").text(data[45]);
+                $("#ma").text(data[46]);
+                $("#sa").text(data[47]);
+                $("#gs").text(data[48]);
+                $("#epf").text(data[49]);
+                $("#he").text(data[50]);
+                $("#pf").text(data[51]);
+                $("#tds").text(data[52]);
+                $("#td").text(data[53]);
+                $("#np").text(data[54]);
+
+
+            }
+        })
+
+    }
+</script>

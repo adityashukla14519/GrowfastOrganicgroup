@@ -1,0 +1,211 @@
+﻿
+@{
+    ViewBag.Title = "Uploaddocs";
+    Layout = "~/Views/Shared/GeneralMaster.cshtml";
+}
+@using System.Data;
+@{
+    DbManager db = new DbManager();
+    Activitylog activitylog = new Activitylog();
+}
+
+<div class="container-fluid">
+    <div class="row mt-1 mb-3 nevigationstrip">
+        <div class="col">
+            <label class="text-uppercase text-truncate trutext">Home <i class="fa fa-angle-double-right"></i>Documents</label>
+        </div>
+        <div class="col text-right d-flex justify-content-end">
+            <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+        </div>
+    </div> <div class="" style="margin:30px">
+        <form action="/Home/Uploaddocs" method="post" class="needs-validation" novalidate onsubmit="return" enctype="multipart/form-data" id="empform">
+            <div class="row nevigationstripblue mt-2 mb-2"> <label class="text-uppercase text-light">PERSONAL DETAILS</label></div>
+            <div class="row row-cols-1 row-cols-sm-3 border border-1 border-dark rounded-2 pb-3">
+
+
+                @{
+                    // Check if 'id' is not null or empty
+                    var hids = Request.QueryString["id"];
+                    if (!string.IsNullOrEmpty(hids))
+                    {
+                        // Construct the SQL query using the 'id' parameter
+                        string query45 = "select * from tbl_HRM where Id='" + hids + "'";
+                        DataTable dt = db.GetAllRecord(query45);
+
+                        if (dt.Rows.Count > 0)
+                        {
+                            <div class="col mb-1">
+                                <h6 class="mt-2"> Candidate Name <i class="text-danger">*</i></h6>
+                                <input type="text" class="form-control" id="canname" value="@dt.Rows[0]["canname"]" name="canname" readonly oninput="validateTextbox(this)" pattern="^[a-zA-Z ]*$" title="Please enter only letters, and spaces" autocomplete="off" placeholder="Enter Candidate Name" maxlength="30" required />
+                                <div class="invalid-feedback">
+                                    Please enter only letters, and spaces
+                                </div>
+                            </div>
+                            <div class="col mb-1">
+                                <h6 class="mt-2">Mobile <i class="text-danger">*</i></h6>
+                                <input type="text" class="form-control " id="canmobile" value="@dt.Rows[0]["canmobile"]" name="canmobile" readonly oninput="validateNumericInput(this,10,'spnum')" pattern="^[6-9][0-9]*$" title="Please enter only number" autocomplete="off" placeholder="Enter Mob no" maxlength="10" required />
+                                <div class="invalid-feedback">
+                                    Please enter only letters, and spaces
+                                </div>
+                            </div>
+                            <div class="col mb-1">
+                                <h6 class="mt-2">Email Id <i class="text-danger">*</i></h6>
+                                <input type="email" class="form-control shadow-none" id="canmail" autocomplete="off" value="@dt.Rows[0]["canmail"]" name="canmail" placeholder="Enter Email" readonly />
+                                <div class="invalid-feedback" id="spmail">
+                                    Please enter a valid email address ex:- john@gmail.com
+                                </div>
+                            </div>
+                            <div class="col mb-1" style="display:none">
+                                <h6 class="mt-2">Job Title</h6>
+                                <input type="text" class="form-control shadow-none" value="@dt.Rows[0]["Jobtittlefor"]" id="Jobtittlefor" name="Jobtittlefor" readonly />
+                                <div class="invalid-feedback">
+                                    Please select a valid option.
+                                </div>
+                            </div>
+                            <div class="col mb-1" style="display:none">
+                                <h6 class="mt-2">Joining Date</h6>
+                                <input class="form-control shadow-none" value="@dt.Rows[0]["joiningdate"]" name="joiningdate" id="joiningdate" readonly />
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="col mb-1">
+                            <h6 class="mt-2"> Candidate Name <i class="text-danger">*</i></h6>
+                            <input type="text" class="form-control" id="canname" name="canname" readonly oninput="validateTextbox(this)" pattern="^[a-zA-Z ]*$" title="Please enter only letters, and spaces" autocomplete="off" placeholder="Enter Candidate Name" maxlength="30" required />
+                            <div class="invalid-feedback">
+                                Please enter only letters, and spaces
+                            </div>
+                        </div>
+                        <div class="col mb-1">
+                            <h6 class="mt-2">Mobile <i class="text-danger">*</i></h6>
+                            <input type="text" class="form-control " id="canmobile" name="canmobile" readonly oninput="validateNumericInput(this,10,'spnum')" pattern="^[6-9][0-9]*$" title="Please enter only number" autocomplete="off" placeholder="Enter Mob no" maxlength="10" required />
+                            <div class="invalid-feedback">
+                                Please enter only letters, and spaces
+                            </div>
+                        </div>
+                        <div class="col mb-1">
+                            <h6 class="mt-2">Email Id <i class="text-danger">*</i></h6>
+                            <input type="email" class="form-control shadow-none" id="canmail" autocomplete="off" name="canmail" placeholder="Enter Email" required oninput="validateEmail('empmail','spmail')" maxlength="30" />
+                            <div class="invalid-feedback" id="spmail">
+                                Please enter a valid email address ex:- john@gmail.com
+                            </div>
+                        </div>
+                        <div class="col mb-1" style="display:none">
+                            <h6 class="mt-2">Job Title </h6>
+                            <input type="text" class="form-control shadow-none" id="Jobtittlefor" name="Jobtittlefor" />
+                            <div class="invalid-feedback">
+                                Please select a valid option.
+                            </div>
+                        </div>
+                        <div class="col mb-1" style="display:none">
+                            <h6 class="mt-2">Joining Date</h6>
+                            <input type="date" class="form-control" name="joiningdate" id="joiningdate" />
+                        </div>
+                    }
+                }
+
+            </div>
+
+            <div class="row nevigationstripblue mt-2 mb-2"> <h6 class="text-uppercase text-light">Upload Documents</h6></div>
+            <div class="row row-cols-1 row-cols-sm-3 border border-1 border-dark rounded-2 pb-3">
+
+                <div class="col mb-1">
+                    <h6 class="mt-2">Upload image</h6>
+                    <input type="file" class="form-control shadow-none" name="canimage" id="canimage" accept="image/*" />
+                    <div class="invalid-feedback">
+                        Please upload an image file.
+                    </div>
+                </div>
+                <div class="col mb-1">
+                    <h6 class="mt-2">10<sup>th</sup>  Marksheet</h6>
+                    <input type="file" class="form-control shadow-none" name="highsch" id="highsch" accept=".pdf,.doc,.docx" />
+                    <div class="invalid-feedback">
+                        Please upload an .pdf,.doc,.docx file.
+                    </div>
+                </div>
+                <div class="col mb-1">
+                    <h6 class="mt-2">12<sup>th</sup> Marksheet</h6>
+                    <input type="file" class="form-control shadow-none" name="Inter" id="Inter" accept=".pdf,.doc,.docx" />
+                    <div class="invalid-feedback">
+                        Please upload a file between 50 KB and 500 KB in size, in .pdf, .doc, or .docx format.
+                    </div>
+                </div>
+              
+
+                <div class="col mb-1">
+                    <h6 class="mt-2">Graduation</h6>
+                    <input type="file" class="form-control shadow-none" name="Gradmrk" id="Gradmrk" accept=".pdf,.doc,.docx" />
+                    <div class="invalid-feedback">
+                        Please upload a file between 50 KB and 500 KB in size, in .pdf, .doc, or .docx format.
+                    </div>
+                </div>
+                <div class="col mb-1">
+                    <h6 class="mt-2">Aadhar Card</h6>
+                    <input type="file" class="form-control shadow-none" name="aadhar" id="aadhar" accept=".pdf,.doc,.docx" />
+                    <div class="invalid-feedback">
+                        Please upload a file between 50 KB and 500 KB in size, in .pdf, .doc, or .docx format.
+                    </div>
+                </div>
+                <div class="col mb-1">
+                    <h6 class="mt-2">Pan card</h6>
+                    <input type="file" class="form-control shadow-none" name="pan" id="pan" accept=".pdf,.doc,.docx" />
+                    <div class="invalid-feedback">
+                        Please upload a file between 50 KB and 500 KB in size, in .pdf, .doc, or .docx format.
+                    </div>
+                </div>
+                <div class="col mb-1">
+                    <h6 class="mt-2">Releiving Letter</h6>
+                    <input type="file" class="form-control shadow-none" name="releiving" id="releiving" accept=".pdf,.doc,.docx" />
+                    <div class="invalid-feedback">
+                        Please upload a file between 50 KB and 500 KB in size, in .pdf, .doc, or .docx format.
+                    </div>
+                </div>
+                <div class="col mb-1">
+                    <h6 class="mt-2">Letter</h6>
+                    <input type="file" class="form-control shadow-none" name="letter" id="letter" accept=".pdf,.doc,.docx" />
+                    <div class="invalid-feedback">
+                        Please upload a file between 50 KB and 500 KB in size, in .pdf, .doc, or .docx format.
+                    </div>
+                </div>
+                <div class="col mb-1">
+                    <h6 class="mt-2">Signed</h6>
+                    <input type="file" class="form-control shadow-none" name="signed" id="signed" accept=".pdf,.doc,.docx" />
+                    <div class="invalid-feedback">
+                        Please upload a file between 50 KB and 500 KB in size, in .pdf, .doc, or .docx format.
+                    </div>
+                </div>
+            </div>
+
+            <div class="row row-cols-1 row-cols-sm-3 mb-5 mt-4 pb-5">
+                <div class="col"></div>
+                <div class="col mb-1 justify-content-center d-flex">
+                    <button type="submit" class="btn btncolor shadow-none fs-6" id="btnsub" style="width:100px" onclick="return validateDates()"><i class="fa fa-check"></i> Submit</button>
+                </div>
+                <div class="col"></div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var fileInputs = document.querySelectorAll('input[type="file"]');
+        fileInputs.forEach(function (input) {
+            input.addEventListener('change', function () {
+                var files = input.files;
+                if (files.length > 0) {
+                    var fileSize = files[0].size; // Size in bytes
+                    var maxSize = 500 * 1024; // 500 KB in bytes
+                    var minSize = 50 * 1024; // 50 KB in bytes
+
+                    if (fileSize < minSize || fileSize > maxSize) {
+                        input.classList.add('is-invalid');
+                        input.value = ''; // Clear the file input
+                    } else {
+                        input.classList.remove('is-invalid');
+                    }
+                }
+            });
+        });
+    });
+</script>

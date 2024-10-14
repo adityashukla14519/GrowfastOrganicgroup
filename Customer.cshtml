@@ -1,0 +1,719 @@
+﻿
+@{
+    ViewBag.Title = "Customer";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+@using System.Data;
+@{
+    DbManager db = new DbManager();
+    Activitylog activitylog = new Activitylog();
+
+}
+<script>
+    function statuschange(id, status, tdstatus) {
+        tdstatus = "#" + tdstatus;
+        $.ajax({
+            url: "/Admin/Statuschangetive",
+            type: "Post",
+            dataType: "JSON",
+            data: { id: id, status: status, tblnm: 'tbl_designation' },
+            success: function (data) {
+                if (data == "Active") {
+                    $(tdstatus).empty();
+                    $(tdstatus).append('<i class="fa fa-check text-success"></i><span style="display:none">' + data + '</span>');
+
+                }
+                else {
+                    $(tdstatus).empty();
+
+                    $(tdstatus).append('<i class="fa fa-ban text-danger"></i><span style="display:none">' + data + '</span>');
+                }
+            },
+        });
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        var table = $('#tblattendance').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                }
+            ]
+        });
+    });
+
+</script>
+<script>
+    function Getid(id) {
+        var up = id;
+        $.ajax({
+            url: '/Admin/UpdateCustomer',
+            type: "GET",
+            dataType: "JSON",
+            data: { Up: up },
+            success: function (data) {
+                var jsonArray = JSON.parse(data);
+
+                $("#hid").val(jsonArray[0].Id);
+                $("#name").val(jsonArray[0].Name);
+                $("#customerid").val(jsonArray[0].Customer_id);
+                $("#pincode").val(jsonArray[0].Postal_code);
+                $("#Statename").val(jsonArray[0].State);
+                $("#Cityname").val(jsonArray[0].City);
+                $("#block").val(jsonArray[0].Block);
+                $("#tahsil").val(jsonArray[0].Tahsil);
+                $("#address").val(jsonArray[0].Address);
+
+
+            }
+        })
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $("#status").val("Active");
+        $("#status").addClass("readonly");
+        $("#status").prop("disabled", true);
+
+        $("#cancel").click(function () {
+            $("input[type='text'],.form-select,#hid,#status").val("");
+            $("#status").val("Active");
+            $("#status").addClass("readonly");
+            $("#status").prop("disabled", true);
+        })
+
+    var msg = '@ViewBag.msg';
+        if (msg) {
+            var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+                msg +
+                '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                '</div>';
+            $(alertElement).insertBefore('#alert-container');
+            setTimeout(function () {
+                $('#alert').alert('close');
+            }, 5000);
+        }
+});
+</script>
+
+
+<script>
+    $(document).ready(function () {
+        var year = $("#year");
+        var currentYear = (new Date()).getFullYear();
+        for (var i = 2023; i <= currentYear; i++) {
+            var option = $("<option />");
+            option.html(i);
+            option.val(i);
+            if (i === currentYear) {
+                option.prop("selected", true);
+            }
+            year.append(option);
+        }
+
+        var monthSelect = $('#month');
+        var currentMonth = new Date().getMonth() + 1; // JavaScript months are zero-based
+
+        // Loop through options to find and select the current month
+        monthSelect.find('option').each(function () {
+            if (parseInt($(this).val()) === currentMonth) {
+                $(this).prop('selected', true);
+                return false; // exit loop
+            }
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        // Your document ready function code here
+        $('#month').select2({
+        });
+        $('#year').select2({
+        });
+        $('#reportfor').select2({
+        });
+        $('#employee').select2({
+        });
+        $('#startdate').select2({
+        });
+        $('#enddate').select2({
+        });
+        $('#company').select2({
+        });
+       
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $("#employee").change(function () {
+            const selectemp = document.querySelector('#employee');
+            const selectedemp = [];
+
+            for (let i = 0; i < selectemp.options.length; i++) {
+                const option = selectemp.options[i];
+                if (option.selected) {
+                    selectedemp.push(option.value);
+                }
+            }
+            $("#empid").val(selectedemp);
+        })
+
+    })
+</script>
+<script>
+    $(document).ready(function () {
+        $("#reportlabel").text("Groups");
+
+        var company = $("#company").val();
+        var month = $("#month").val();
+        var year = $("#year").val();
+        $.ajax({
+            url: "/Admin/GetAllORG",
+            type: "Get",
+            data: { ORGfor: "GPS", company: company, Month: month, Year: year },
+            success: function (response) {
+                // alert(response);
+                if (reportfor == "TPS") {
+                    $("#reportlabel").text("Teams");
+                }
+                else if (reportfor == "BPS") {
+                    $("#reportlabel").text("Branches");
+                }
+                else if (reportfor == "DPS") {
+                    $("#reportlabel").text("Divisions");
+                }
+                else if (reportfor == "RPS") {
+                    $("#reportlabel").text("Regions");
+                }
+                else if (reportfor == "ZPS") {
+                    $("#reportlabel").text("Zones");
+                }
+                else if (reportfor == "CPS") {
+                    $("#reportlabel").text("Companies");
+                }
+                else {
+                    $("#reportlabel").text("Groups");
+                }
+
+                $("#employee").empty();
+                $("#employee").append(response);
+
+            }
+        })
+
+        $("#search").click(function () {
+            var startdate = $("#startdate").val();
+            var enddate = $("#enddate").val();
+            var month = $("#month").val();
+            var year = $("#year").val();
+            var empid = $("#empid").val();
+            var reportfor = $("#reportfor").val();
+            var company = $("#company").val();
+             //alert("ok")
+            if (empid != "") {
+               // alert("ok")
+                $.ajax({
+                    url: "/Admin/GetCustomerAlldata",
+                    type: "Get",
+                    data: { Startdate: startdate, Enddate: enddate, Month: month, Year: year, Uniqueid: empid, Reportfor: reportfor },
+                    success: function (response) {
+                        //alert(response);
+                        var table = $('#tblattendance').DataTable();
+                        //$("#tblattendance1").empty();
+                        //$("#tblattendance1").append(response);
+
+                        var jsonArray = JSON.parse(response);
+                        table.clear().draw();
+                        $.each(jsonArray, function (index, item) {
+                            table.row.add([
+                                index + 1,
+                                item.Name,
+                                item.Mobile,
+                                item.Full_address,
+                                item.RegistrationType,
+                                item.Log_name + "(" + item.Groupname + ")",
+                                item.Status,
+                                "<button class='btn btncolorblue' onclick='Getid(" + item.Id + ")' data-bs-toggle='modal' data-bs-target='#Designation'><i class='fa fa-edit'></i></button>"
+                            ]).draw(false);
+                        });
+                        
+                    }
+                })
+            }
+            else {
+                $("#employee").addClass("border border-danger")
+            }
+
+        });
+      
+
+        $("#reportfor,#company,#month,#year").change(function () {
+            var reportfor = $("#reportfor").val();
+            var company = $("#company").val();
+            var month = $("#month").val();
+            var year = $("#year").val();
+            $.ajax({
+                url: "/Admin/GetAllORG",
+                type: "Get",
+                data: { ORGfor: reportfor, company: company, Month: month, Year: year },
+                success: function (response) {
+                    // alert(response);
+                    if (reportfor == "TPS") {
+                        $("#reportlabel").text("Teams");
+                    }
+                    else if (reportfor == "BPS") {
+                        $("#reportlabel").text("Branches");
+                    }
+                    else if (reportfor == "DPS") {
+                        $("#reportlabel").text("Divisions");
+                    }
+                    else if (reportfor == "RPS") {
+                        $("#reportlabel").text("Regions");
+                    }
+                    else if (reportfor == "ZPS") {
+                        $("#reportlabel").text("Zones");
+                    }
+                    else if (reportfor == "CPS") {
+                        $("#reportlabel").text("Companies");
+                    }
+                    else {
+                        $("#reportlabel").text("Groups");
+                    }
+
+                    $("#employee").empty();
+                    $("#employee").append(response);
+
+                }
+            })
+
+
+        });
+        $("#company").change(function () {
+            var reportfor = $("#reportfor").val();
+            var company = $("#company").val();
+            var month = $("#month").val();
+            var year = $("#year").val();
+            $.ajax({
+                url: "/Admin/GetAllORG",
+                type: "Get",
+                data: { ORGfor: reportfor, company: company, Month: month, Year: year },
+                success: function (response) {
+                    // alert(response);
+                    if (reportfor == "TPS") {
+                        $("#reportlabel").text("Teams");
+                    }
+                    else if (reportfor == "BPS") {
+                        $("#reportlabel").text("Branches");
+                    }
+                    else if (reportfor == "DPS") {
+                        $("#reportlabel").text("Divisions");
+                    }
+                    else if (reportfor == "RPS") {
+                        $("#reportlabel").text("Regions");
+                    }
+                    else if (reportfor == "ZPS") {
+                        $("#reportlabel").text("Zones");
+                    }
+                    else if (reportfor == "CPS") {
+                        $("#reportlabel").text("Companies");
+                    }
+                    else {
+                        $("#reportlabel").text("Groups");
+                    }
+
+                    $("#employee").empty();
+                    $("#employee").append(response);
+
+                }
+            })
+
+
+        });
+    });
+</script>
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i>  Customer</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+<div class="row mt-3 mb-3">
+
+    <div class="col" style="display:none">
+        <label for="exampleDataList" class="form-label">Start date</label><br />
+        <select class="form-control shadow-none mt-1" id="startdate" name="startdate">
+            @for (int i = 1; i <= 31; i++)
+            {
+                <option value="@i">@i</option>
+            }
+        </select>
+    </div>
+    <div class="col" style="display:none">
+        <label for="exampleDataList" class="form-label">End Date</label><br />
+        <select class="form-control shadow-none mt-1" id="enddate" name="enddate">
+            @for (int i = 1; i <= 31; i++)
+            {
+                <option value="@i">@i</option>
+            }
+        </select>
+    </div>
+    <div class="col" style="width:150px">
+        <label>Company</label><br />
+        <select class="form-control shadow-none mt-1" id="company" name="company" style="width:150px">
+            @{
+                string query6 = "select Distinct Companyid,Company from tbl_company where Status='Active'";
+                DataTable dt6 = db.GetAllRecord(query6);
+                if (dt6.Rows.Count > 0)
+                {
+                    <option selected value="">Select One</option>
+                    for (int i = 0; i < dt6.Rows.Count; i++)
+                    {
+                        <option value="@dt6.Rows[i]["Companyid"]">@dt6.Rows[i]["Company"]</option>
+                    }
+
+                }
+
+            }
+
+        </select>
+    </div>
+    <div class="col" style="width:150px">
+        <label for="exampleDataList" class="form-label">Customer of</label><br />
+        <select class="form-control shadow-none mt-1" id="reportfor" name="reportfor" style="width:150px">
+            <option value="">All</option>
+            <option selected value="GPS">Group</option>
+            <option value="CPS">Company</option>
+            <option value="ZPS">Zone</option>
+            <option value="RPS">Region</option>
+            <option value="DPS">Division</option>
+            <option value="BPS">Branch</option>
+            <option value="TPS">Team</option>
+        </select>
+    </div>
+
+
+    <div class="col" style="width:150px">
+        <label for="exampleDataList" class="form-label">Month</label><br />
+        <select class="form-control shadow-none mt-1" id="month" name="month" style="width:150px">
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+        </select>
+        <input type="hidden" id="empid" name="empid" />
+        <input type="hidden" id="desig" name="desig" />
+        <input type="hidden" id="depart" name="depart" />
+        <input type="hidden" id="managernm" name="managernm" />
+    </div>
+    <div class="col" style="width:150px">
+        <label for="exampleDataList" class="form-label">Year</label><br />
+        <select class="form-control shadow-none mt-1" id="year" name="year" style="width:150px">
+        </select>
+    </div>
+    <div class="col" style="width:150px">
+        <label id="reportlabel">Employee Name</label><br />
+        <select multiple class="form-control shadow-none mt-1" id="employee" name="employee" style="width:150px">
+        </select>
+    </div>
+    <div class="col justify-content-end d-flex pt-3">
+        <button class="btn btncolor" id="search" style="height: 30px; width: 100px; padding: 5px;width:100px">Search</button>
+    </div>
+</div>
+
+<div class="row mt-2 mb-3 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        @*<button type="button" class="btn btncolor btn-sm" data-bs-toggle="modal" data-bs-target="#Designation">
+            <i class="fa fa-plus" aria-hidden="true"></i> New
+        </button>*@
+    </div>
+</div>
+
+
+
+@{
+    try
+    {
+        string query = "select * from tbl_customer where Status='Active' order by id asc";
+        activitylog.Activitylogins("tbl_customer", "", query, "Failed", "", Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        DataTable dt = db.GetAllRecord(query);
+        activitylog.Activitylogupd("Success", "");
+        int count = 1;
+        if (dt.Rows.Count > 0)
+        {
+            <div class="row table table-responsive" id="tblattendance1">
+                <table class="display nowrap table table-responsive" id="tblattendance">
+                    <thead class="theadb text-center">
+                        <tr>
+                            <th class="text-center">Id</th>
+                            <th class="text-center">Name</th>
+                            <th class="text-center">Contact</th>
+                            <th class="text-center">Address</th>
+                            <th class="text-center">Registration Type</th>
+                            <th class="text-center">Lead by</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class='row justify-content-center d-flex m-5' id='datanotdound'>
+                <img src='~/Content/Img/nodata1.png' style="height:50%;width:50%" />
+            </div>
+        }
+    }
+
+    catch (Exception ex)
+    {
+        try
+        {
+            Error_15_16 error_15_16 = new Error_15_16();
+            string pageUrl = "", moduleName = "", errorLine = "", errorMessage = "", errorName = "", errorTrace = "";
+            // Get the page URL, if available
+            pageUrl = System.Web.HttpContext.Current.Request.Url.AbsoluteUri;
+            // Get the module name
+            moduleName = ex.TargetSite.Module.Name;
+            // Get the error line number, if available
+            var stackTrace = ex.StackTrace;
+            if (!string.IsNullOrEmpty(stackTrace))
+            {
+                var lineNumberIndex = stackTrace.LastIndexOf(":line ");
+                if (lineNumberIndex >= 0)
+                {
+                    var lineNumber = stackTrace.Substring(lineNumberIndex + 6);
+                    var newLineIndex = lineNumber.IndexOf(Environment.NewLine);
+                    if (newLineIndex >= 0)
+                    {
+                        errorLine = lineNumber.Substring(0, newLineIndex);
+                    }
+                    else
+                    {
+                        errorLine = lineNumber;
+                    }
+                }
+            }
+            // Get the error message and name
+            if (ex.Message.ToString().Length >= 1000)
+            {
+                errorMessage = ex.Message.Substring(1, 500);
+            }
+            else
+            {
+                errorMessage = ex.Message;
+            }
+            errorName = ex.GetType().FullName;
+            // Get the error trace
+            errorTrace = ex.StackTrace;
+            error_15_16.Error_15_16ins(pageUrl, moduleName, errorLine, errorMessage.Replace("'", "`"), errorName.Replace("'", "`"), errorTrace.Replace("'", "`"), Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        }
+
+        catch
+        {
+
+        }
+    }
+    finally
+    {
+        db.connectionstate();
+    }
+}
+
+<!-- Modal Designation-->
+<div class="modal fade" id="Designation" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-5idden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <form action="/Admin/Customer" method="post" class="needs-validation" novalidate>
+
+                <div class="modal-header justify-content-center nevigationstrip">
+                    <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Customer Info</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row row-cols-2 row-cols-sm-2">
+                        <div class="col mb-2">
+                            <input type="hidden" id="hid" name="hid" />
+                            <input type="hidden" id="customerid" name="customerid" />
+                            <h6 class="mt-2">Name <i class="text-danger">*</i></h6>
+                            <input type="text" class="form-control shadow-none" id="name" name="name" maxlength="50" required oninput="validateTextbox(this)" pattern="^[A-Za-z0-9 ]*$" title="Please enter only letters, and spaces" />
+                            <div class="invalid-feedback">
+                                Please enter valid name
+                            </div>
+                        </div>
+                        <!--<div class="col mb-2">
+    <h6 class="mt-2">Mobile Number <i class="text-danger">*</i></h6>
+    <input type="text" class="form-control shadow-none" id="mobile" name="mobile" maxlength="10"-->
+                        @*required*@
+                        <!--oninput="validateNumericInput(this, 10, 'spnum'),FindUser('mobile', 'spnum1')" pattern="^[0-9]{10,}$" title="Please enter only letters, and spaces" />
+        <div class="invalid-feedback" id="spnum">
+            Please enter valid mobile number
+        </div>
+        <div id="spnum1" class="text-danger">
+
+        </div>
+    </div>-->
+                        @*<div class="col mb-2">
+            <h6 class="mt-2">Email</h6>
+            <input type="email" class="form-control shadow-none" id="email" name="email" maxlength="50" oninput="validateEmail('email','spmail')" />
+            <span id="spmail"> </span>
+        </div>*@
+                       
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Pincode <i class="text-danger">*</i></h6>
+                            <input type="text" class="form-control shadow-none" id="pincode" name="pincode" maxlength="6" required oninput="validateNumericInput(this, 6, 'spnump');" onkeyup="getStateCityDetails()" pattern="^[0-9]{6,}$" title="Please enter only letters, and spaces" />
+                            <div class="invalid-feedback" id="spnump">
+                                Please enter only letters, and spaces
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="row row-cols-2 row-cols-sm-2">
+
+                        <div class="col mb-2">
+                            <h6 class="mt-2">State <i class="text-danger">*</i></h6>
+                            <input type="text" class="form-control shadow-none readonly" id="Statename" name="Statename" maxlength="25" readonly required onkeyup="validateTextbox(this)" />
+                            <div class="invalid-feedback">
+                                Please enter valid state
+                            </div>
+                        </div>
+
+                        <div class="col mb-2">
+                            <h6 class="mt-2">District <i class="text-danger">*</i></h6>
+                            <input type="text" class="form-control shadow-none readonly" id="Cityname" name="Cityname" maxlength="25" readonly required onkeyup="validateTextbox(this)" />
+                            <div class="invalid-feedback">
+                                Please enter valid district
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Block <i class="text-danger">*</i></h6>
+                            <input type="text" class="form-control shadow-none" id="block" name="block" maxlength="25" required onkeyup="validateTextbox(this)" />
+                            <div class="invalid-feedback">
+                                Please enter valid block
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2">Tahsil <i class="text-danger">*</i></h6>
+                            <input type="text" class="form-control shadow-none" id="tahsil" name="tahsil" maxlength="25" required onkeyup="validateTextbox(this)" />
+                            <div class="invalid-feedback">
+                                Please enter valid tahsil
+                            </div>
+
+                        </div>
+
+                        <div class="col-12 col-sm-12 mb-2">
+                            <h6 class="mt-2">Address <i class="text-danger">*</i></h6>
+                            <input type="text" class="form-control shadow-none" id="address" name="address" maxlength="250" required onkeyup="validateTextbox(this)" />
+                            <div class="invalid-feedback">
+                                Please enter valid address
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+                    <button type="submit" class="btn btncolor"><i class="fa fa-check"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // Function to fetch state and city details based on pincode using postalpincode.in API
+    function getStateCityDetails() {
+        // Construct the API URL
+        var pincode = $("#pincode").val();
+
+        if (pincode.length == 6) {
+            //alert(pincode)
+            const apiUrl = `https://api.postalpincode.in/pincode/${pincode}`;
+
+            // Make a GET request to the API
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const postOfficeData = data[0];
+                    if (postOfficeData && postOfficeData.Status === 'Success') {
+                        const state = postOfficeData.PostOffice[0].State;
+                        const district = postOfficeData.PostOffice[0].District;
+                        $("#Statename").val(state);
+                        $("#Cityname").val(district);
+
+                        //alert(`State: ${state}, City: ${city}`);
+                    } else {
+                        //alert('Invalid pincode or data not found.');
+                        var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert"> Invalid pincode or data not found. <button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+                        $(alertElement).insertBefore('#alert-container');
+                        setTimeout(function () {
+                            $('#alert').alert('close');
+                        }, 5000);
+
+                        return false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    }
+
+</script>

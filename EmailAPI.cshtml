@@ -1,0 +1,363 @@
+﻿
+@{
+    ViewBag.Title = "EmailAPI";
+    Layout = "~/Views/Shared/Adminmaster.cshtml";
+}
+<script src="~/Content/css/mailvalid.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#tblsublocation').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom'
+                }
+            ]
+        });
+
+
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $("#company").change(function () {
+            var compid = $("#company").val();
+            $.ajax({
+                url: '/Admin/GetCompAllDetails',
+                type: "GET",
+                dataType: "JSON",
+                data: { Compid: compid },
+                success: function (data) {
+                    //alert(data);
+                    $("#hid").val(data[0]);
+                    $("#compname").val(data[1]);
+                    $("#compcode").val(data[2]);
+                    $("#compcont").val(data[3]);
+                    $("#compmail").val(data[4]);
+                    $("#compnurl").val(data[5]);
+                }
+            })
+            //$.ajax({
+            //    url: '/Admin/GetDltPEID',
+            //    type: "GET",
+            //    dataType: "JSON",
+            //    data: { Compid: compid },
+            //    success: function (data) {
+            //        //alert(data);
+            //        $("#peid").empty();
+            //        $("#peid").append(data);
+            //    }
+            //})
+        })
+    })
+</script>
+<script>
+    $(document).ready(function () {
+        $("#cancel").click(function () {
+            $("input[type='text'],.hidden,#hid,#company,#headerid,#peid").val("");
+        })
+    var msg = '@ViewBag.msg';
+
+        if (msg) {
+            var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+                msg +
+                '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                '</div>';
+            $(alertElement).insertBefore('#alert-container');
+            setTimeout(function () {
+                $('#alert').alert('close');
+            }, 5000);
+            //$('.alert').on('closed.bs.alert', function () {
+            //    window.location.href = '/Admin/Department';
+            //});
+            //$('#btnclose').on('click', function () {
+            //    window.location.href = '/Admin/Department';
+            //});
+        }
+});
+</script>
+<script>
+    function validatePasswordbox(textbox) {
+        var pattern = /^[^\\']+$/g;
+        if (!pattern.test(textbox.value)) {
+            textbox.setCustomValidity("Please enter a valid string");
+        } else {
+            textbox.setCustomValidity("");
+        }
+    }
+    function validateEmailHost(textbox) {
+        var pattern = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i;
+        if (!pattern.test(textbox.value)) {
+            textbox.setCustomValidity("Please enter a valid email host name");
+        } else {
+            textbox.setCustomValidity("");
+        }
+    }
+</script>
+<script>
+    function mail() {
+        var ml = document.getElementById("mailuid").value;
+        var mll = ml.substr(ml.lastIndexOf(".") + 1);
+        if (ml != null && ml != "") {
+            if (ml.indexOf(".") != -1) {
+                if (mll != null && mll != "") {
+                    spmail.innerText = "";
+                    return true;
+                }
+                else {
+                    spmail.innerText = "Please enter a valid email address ex:- john@gmail.com";
+                    spmail.style.color = "red";
+                    return false;
+                }
+
+            }
+            else {
+                spmail.innerText = "Please enter a valid email address ex:- john@gmail.com";
+                spmail.style.color = "red";
+                return false;
+            }
+        }
+        else {
+            spmail.innerText = "Please enter your email";
+            spmail.style.color = "red";
+            return false;
+        }
+    }
+</script>
+
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i>  Email Api</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+<div class="row mt-2 mb-2 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <button type="button" class="btn btncolor btn-sm" data-bs-toggle="modal" data-bs-target="#emailapi">
+            <i class="fa fa-plus" aria-hidden="true"></i> New
+        </button>
+    </div>
+</div>
+
+
+
+@using System.Data;
+@{ DbManager db = new DbManager();
+    Activitylog activitylog = new Activitylog();
+    Error_15_16 error_15_16 = new Error_15_16();}
+
+@{
+    try
+    {
+        string query = "select * from tbl_email_api";
+        activitylog.Activitylogins("tbl_email_api", "", query, "Failed", "", Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        DataTable dt = db.GetAllRecord(query);
+        activitylog.Activitylogupd("Success", "");
+        int count = 1;
+        if (dt.Rows.Count > 0)
+        {
+            <div class="row table table-responsive" id="tbl">
+                <table class="table table-responsive table-bordered" id="tblsublocation">
+                    <thead class="theadb text-center">
+                        <tr>
+                            <th class="text-center">ID</th>
+                            <th class="text-center">Company Name</th>
+                            <th class="text-center">Host Name</th>
+                            <th class="text-center">Userid (Email)</th>
+                            <th class="text-center">Mail Password</th>
+                            <th class="text-center">Port Number</th>
+                            <th class="text-center">Status</th>
+                            @*<th class="text-center">Date & Time</th>*@
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        @for (int i = 0; i < dt.Rows.Count; i++)
+                        {
+                            <tr>
+                                <td>@(count+i)<input type="hidden" id="@dt.Rows[i]["id"]" value="@dt.Rows[i]["id"]" /></td>
+                                <td>@dt.Rows[i]["Companyname"]</td>
+                                <td>@dt.Rows[i]["Hostname"]</td>
+                                <td>@dt.Rows[i]["Userid"]</td>
+                                <td>@dt.Rows[i]["Password"]</td>
+                                <td>@dt.Rows[i]["Portno"]</td>
+                                @if (@dt.Rows[i]["Status"] + "" == "Active")
+                                {
+                                    <td><i class="fa fa-check text-success"></i></td>
+
+                                }
+                                else
+                                {
+                                    <td><i class="fa fa-ban text-danger"></i></td>
+                                }
+                                @*<td>@dt.Rows[i]["Datetime"]</td>*@
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class='row justify-content-center d-flex m-5' id='datanotdound'>
+                <img src='~/Content/Img/nodata1.png' style="height:50%;width:50%" />
+            </div>
+        }
+    }
+    catch (Exception ex)
+    {
+        try
+        {
+            string pageUrl = "", moduleName = "", errorLine = "", errorMessage = "", errorName = "", errorTrace = "";
+            // Get the page URL, if available
+            pageUrl = System.Web.HttpContext.Current.Request.Url.AbsoluteUri;
+            // Get the module name
+            moduleName = ex.TargetSite.Module.Name;
+            // Get the error line number, if available
+            var stackTrace = ex.StackTrace;
+            if (!string.IsNullOrEmpty(stackTrace))
+            {
+                var lineNumberIndex = stackTrace.LastIndexOf(":line ");
+                if (lineNumberIndex >= 0)
+                {
+                    var lineNumber = stackTrace.Substring(lineNumberIndex + 6);
+                    var newLineIndex = lineNumber.IndexOf(Environment.NewLine);
+                    if (newLineIndex >= 0)
+                    {
+                        errorLine = lineNumber.Substring(0, newLineIndex);
+                    }
+                    else
+                    {
+                        errorLine = lineNumber;
+                    }
+                }
+            }
+            // Get the error message and name
+            if (ex.Message.ToString().Length >= 1000)
+            {
+                errorMessage = ex.Message.Substring(1, 500);
+            }
+            else
+            {
+                errorMessage = ex.Message;
+            }
+            errorName = ex.GetType().FullName;
+            // Get the error trace
+            errorTrace = ex.StackTrace;
+            error_15_16.Error_15_16ins(pageUrl, moduleName, errorLine, errorMessage.Replace("'", "`"), errorName.Replace("'", "`"), errorTrace.Replace("'", "`"), Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        }
+
+        catch
+        {
+
+        }
+        ViewBag.msg = "Error";
+    }
+    finally
+    {
+        db.connectionstate();
+    }
+
+}
+
+<script>
+    function validateNumericInput(inputElement, maxDigits) {
+        // Get the current input value as a string
+        const errorMessage = document.getElementById('spnum');
+        let inputValue = inputElement.value.toString();
+        // Remove any non-digit characters (e.g., commas, periods)
+        inputValue = inputValue.replace(/\D/g, '');
+        const dataType = typeof inputValue;
+        // Truncate the value to the specified maximum number of digits
+        if (inputValue.length > maxDigits) {
+            inputValue = inputValue.slice(0, maxDigits);
+        }
+        // Update the input value with the sanitized and truncated value
+        inputElement.value = inputValue;
+        // Check if the sanitized value is different from the original input
+        if (inputValue.length > maxDigits) {
+            errorMessage.textContent = 'Please enter no more than ' + maxDigits + ' digits.';
+        } else {
+            errorMessage.textContent = '';
+        }
+    }
+</script>
+<!-- Modal SMSAPI-->
+<div class="modal fade" id="emailapi" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <form action="/Admin/EmailAPI" method="post" class="needs-validation" novalidate>
+               
+                <div class="modal-header justify-content-center nevigationstrip">
+                    <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Email API Info</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row row-cols-1">
+                        <div class="col mb-2">
+                            <input type="hidden" id="hid" name="hid" />
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2"> Host Name</h6>
+                            <input type="text" class="form-control shadow-none" id="hostnm" maxlength="20" name="hostnm" placeholder="Enter host name" required oninput="validateEmailHost(this)" />
+                            <div class="invalid-feedback">
+                                Please enter only letters, and spaces
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2"> Userid (Email)</h6>
+                            <input type="email" class="form-control shadow-none"  id="mailuid" name="mailuid" placeholder="Enter Userid" required oninput="validateEmail('mailuid','spmail')" />
+                            <span id="spmail"></span>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2"> Password</h6>
+                            <input type="text" class="form-control shadow-none" id="mailpass" name="mailpass" placeholder="Enter password" required onkeyup="validatePasswordbox(this)" />
+                            <div class="invalid-feedback">
+                                Please enter a valid string
+                            </div>
+                        </div>
+                        <div class="col mb-2">
+                            <h6 class="mt-2"> Port Number</h6>
+                            <input type="text" class="form-control shadow-none" id="portnum" name="portnum" placeholder="Enter port number" required oninput="validateNumericInput(this,10)" pattern="^[0-9]*$" title="Please enter only letters, and spaces" />
+                            <div class="invalid-feedback">
+                                Please enter only letters, and spaces
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+                    <button type="submit" class="btn btncolor"><i class="fa fa-check"></i></button>
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+

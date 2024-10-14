@@ -1,0 +1,579 @@
+﻿
+@{
+    ViewBag.Title = "CSR";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+@using System.Data;
+@{ DbManager db = new DbManager();}
+
+<script>
+    $(document).ready(function () {
+        var table = $('#tbldesignation').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom'
+                }
+            ]
+        });
+    });
+
+</script>
+<script>
+    $(document).ready(function () {
+        var year = $("#year");
+        var currentYear = (new Date()).getFullYear();
+        for (var i = 2023; i <= currentYear; i++) {
+            var option = $("<option />");
+            option.html(i);
+            option.val(i);
+            if (i === currentYear) {
+                option.prop("selected", true);
+            }
+            year.append(option);
+        }
+
+        var monthSelect = $('#month');
+        var currentMonth = new Date().getMonth() + 1; // JavaScript months are zero-based
+
+        // Loop through options to find and select the current month
+        monthSelect.find('option').each(function () {
+            if (parseInt($(this).val()) === currentMonth) {
+                $(this).prop('selected', true);
+                return false; // exit loop
+            }
+        });
+    });
+</script>
+<script>
+    function ExportToExcel(type, fn, dl) {
+        const now = new Date();
+        var elt = document.getElementById('tbldesignation');
+        // Add top row data
+        var monthn = $("#month").val();
+        var year = $("#year").val();
+        const monthName = new Date(2000, monthn - 1).toLocaleString('en-US', { month: 'short' });
+        var toprowtext = "Sales Report " + monthName + "_" + year;
+        //alert(monthName)
+        const topRow = ['Sales Report'];
+        var tbody = elt.getElementsByTagName('tbody')[0];
+        var tr = document.createElement('tr');
+        topRow.forEach(function (cellData) {
+            var td = document.createElement('td');
+            td.appendChild(document.createTextNode(cellData));
+            td.setAttribute('colspan', '30');
+            td.classList.add('text-center');
+            td.classList.add('fs-5');
+            td.classList.add('fw-bold');
+            tr.appendChild(td);
+        });
+        tbody.insertBefore(tr, tbody.firstChild);
+        // Convert table to workbook
+        var wb = XLSX.utils.table_to_book(elt, { sheet: "sheet1" });
+        return dl ?
+            XLSX.write(wb, { bookType: type, bookSST: true, type: 'base64' }) :
+            XLSX.writeFile(wb, fn || (toprowtext + '_' + now + '.' + (type || 'xlsx')));
+    }
+</script>
+<script>
+    $(function () {
+        $('input[name="daterange"]').daterangepicker({
+            opens: 'left',
+            locale: {
+                format: 'DD/MM/YYYY'
+            }
+        }, function (start, end, label) {
+            console.log("A new date selection was made: " + start.format('DD/MM/YYYY') + ' to ' + end.format('DD/MM/YYYY'));
+        });
+    });
+</script>
+
+
+
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i> Customer Sales Record </label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+<div class="row mt-3 mb-3">
+    <div class="col" style="display:none">
+        <label>Date Range</label>
+        <input type="text" name="daterange" id="daterange" class="form-control shadow-none mt-1" />
+    </div>
+    <div class="col" style="width:150px">
+        <label for="exampleDataList" class="form-label">Month</label><br />
+        <select class="form-control shadow-none mt-1" id="month" name="month" style="width:150px">
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+        </select>
+        <input type="hidden" id="empid" name="empid" />
+        <input type="hidden" id="desig" name="desig" />
+        <input type="hidden" id="depart" name="depart" />
+        <input type="hidden" id="managernm" name="managernm" />
+    </div>
+    <div class="col" style="width:150px">
+        <label for="exampleDataList" class="form-label">Year</label><br />
+        <select class="form-control shadow-none mt-1" id="year" name="year" style="width:150px">
+        </select>
+
+    </div>
+    <div class="col" style="width:150px">
+        <label for="exampleDataList" class="form-label">Report for</label><br />
+        <select class="form-control shadow-none mt-1" id="reportfor" name="reportfor" style="width:150px">
+            <option selected value="order">Select One</option>
+            <option value="invoice">Invoice No</option>
+            <option value="order">Order Id</option>
+            <option value="customer">Customer Name</option>
+            <option value="post">Post Office</option>
+            <option value="block">Block</option>
+            <option value="tahsil">Tahsil</option>
+            <option value="district">District</option>
+            <option value="state">State</option>
+            <option value="pincode">Pincode</option>
+        </select>
+    </div>
+    <div class="col" style="width:150px">
+        <label id="reportlabel"></label><br />
+        <select class="form-control shadow-none mt-1" id="employee" name="employee" style="width:150px">
+        </select>
+    </div>
+    <div class="col" style="width:150px">
+        <label for="exampleDataList" class="form-label">Activity</label><br />
+        <select class="form-control shadow-none mt-1" id="activity" name="activity" style="width:150px">
+            <option selected value="">All</option>
+            <option value="Planted">Plantation</option>
+            <option value="Counted">Counting</option>
+            <option value="Replaced">Replacement</option>
+            <option value="Technical Service">Tecthical Service</option>
+            <option value="Delivered">Fresh Delivery</option>
+        </select>
+    </div>
+
+    <div class="col justify-content-end d-flex pt-3" style="width:150px">
+
+        <button class="btn btncolor mt-2" id="search" style="height:30px;width:100px">Search</button>
+    </div>
+</div>
+
+<div class="row mt-2 mb-3 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        @*<a href="">
+            <button class="btn btncolor btn-sm ms-2" onclick="ExportToExcel('xlsx')">Export to excel</button>
+        </a>*@
+
+    </div>
+
+</div>
+
+
+@{
+    Activitylog activitylog = new Activitylog();
+    string query1 = "select * from tbl_registration ";
+    DataTable dt1 = db.GetAllRecord(query1);
+
+
+    @*if (dt1.Rows.Count > 0)
+    {
+        <div class="table table-responsive">
+            <table class="display nowrap table table-responsive" id="tbldesignation">
+            </table>
+        </div>
+    }*@
+}
+
+@{
+    try
+    {
+        string query = "Select * from tbl_order where Status='Active' and Order_status!='Active' and Order_status!='Confirmed' and Order_status!='Dispatch'";
+        activitylog.Activitylogins("tbl_order", "", query, "Failed", "", Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        DataTable dt = db.GetAllRecord(query);
+        activitylog.Activitylogupd("Success", "");
+        int count = 1;
+        if (dt.Rows.Count > 0)
+        {
+            <div class="row table table-responsive">
+                <table class="table table-responsive table-bordered" id="tbldesignation">
+                    <thead class="theadb text-l text-center">
+                        <tr>
+                            <th class="text-center">Sr No</th>
+                            <th class="text-center">Invoice No</th>
+                            <th class="text-center">Delivery Month</th>
+                            <th class="text-center">Sell Person Name</th>
+                            <th class="text-center">Customer Name</th>
+                            <th class="text-center">Customer Address</th>
+                            <th class="text-center">Shipping Address</th>
+                            <th class="text-center">Product Name</th>
+                            <th class="text-center">Unit/Qty</th>
+                            <th class="text-center">Curr. Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        @for (int i = 0; i < dt.Rows.Count; i++)
+                        {
+                        <tr>
+                            <td>@(count+i)</td>
+                            <td>@dt.Rows[i]["Invoiceid"]</td>
+                            <td>@dt.Rows[i]["Dilivery_month"]</td>
+                            <td>@dt.Rows[i]["Orderby"]</td>
+                            <td>@dt.Rows[i]["Customer_name"]</td>
+                            <td>@dt.Rows[i]["Customer_address"]</td>
+                            <td>@dt.Rows[i]["Customer_address"]</td>
+                            <td>@dt.Rows[i]["Product_name"]</td>
+                            <td>@dt.Rows[i]["Product_quantity"]</td>
+                            <td>@dt.Rows[i]["Order_status"]</td>
+
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class='row justify-content-center d-flex m-5' id='datanotdound'>
+                <img src='~/Content/Img/nodata1.png' style="height:50%;width:50%" />
+            </div>
+        }
+    }
+
+    catch (Exception ex)
+    {
+        try
+        {
+            Error_15_16 error_15_16 = new Error_15_16();
+            string pageUrl = "", moduleName = "", errorLine = "", errorMessage = "", errorName = "", errorTrace = "";
+            // Get the page URL, if available
+            pageUrl = System.Web.HttpContext.Current.Request.Url.AbsoluteUri;
+            // Get the module name
+            moduleName = ex.TargetSite.Module.Name;
+            // Get the error line number, if available
+            var stackTrace = ex.StackTrace;
+            if (!string.IsNullOrEmpty(stackTrace))
+            {
+                var lineNumberIndex = stackTrace.LastIndexOf(":line ");
+                if (lineNumberIndex >= 0)
+                {
+                    var lineNumber = stackTrace.Substring(lineNumberIndex + 6);
+                    var newLineIndex = lineNumber.IndexOf(Environment.NewLine);
+                    if (newLineIndex >= 0)
+                    {
+                        errorLine = lineNumber.Substring(0, newLineIndex);
+                    }
+                    else
+                    {
+                        errorLine = lineNumber;
+                    }
+                }
+            }
+            // Get the error message and name
+            if (ex.Message.ToString().Length >= 1000)
+            {
+                errorMessage = ex.Message.Substring(1, 500);
+            }
+            else
+            {
+                errorMessage = ex.Message;
+            }
+            errorName = ex.GetType().FullName;
+            // Get the error trace
+            errorTrace = ex.StackTrace;
+            error_15_16.Error_15_16ins(pageUrl, moduleName, errorLine, errorMessage.Replace("'", "`"), errorName.Replace("'", "`"), errorTrace.Replace("'", "`"), Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        }
+
+        catch
+        {
+
+        }
+    }
+    finally
+    {
+        db.connectionstate();
+    }
+
+}
+
+<script>
+    $(document).ready(function () {
+        // Your document ready function code here
+        $('#month').select2({
+        });
+        $('#year').select2({
+        });
+        $('#reportfor').select2({
+        });
+        $('#employee').select2({
+        });
+        $('#startdate').select2({
+        });
+        $('#enddate').select2({
+        });
+        $('#activity').select2({
+        });
+        // Function to hide #opclbtn on mobile devices
+        function hideOpclBtn1() {
+            $('#month').select2({
+            });
+            $('#year').select2({
+            });
+            $('#reportfor').select2({
+            });
+            $('#employee').select2({
+            });
+
+            $('#startdate').select2({
+            });
+            $('#enddate').select2({
+            });
+            $('#activity').select2({
+            });
+        }
+
+
+        //// Handle window resize events
+        //$(window).resize(function () {
+        //    hideOpclBtn1();
+        //});
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        $("#reportlabel").text("Invoice no");
+        var month = $("#month").val();
+        var year = $("#year").val();
+        $.ajax({
+            url: "/Admin/Getorderdetails",
+            type: "Get",
+            data: { orderfor: "order", Month: month,Year:year },
+            success: function (response) {
+                // alert(response);
+                if (reportfor == "invoice") {
+                    $("#reportlabel").text("Invoice no");
+                }
+                else if (reportfor == "order") {
+                    $("#reportlabel").text("Order No");
+                }
+                else if (reportfor == "customer") {
+                    $("#reportlabel").text("Customer Name");
+                }
+                else if (reportfor == "post") {
+                    $("#reportlabel").text("Post Office");
+                }
+                else if (reportfor == "block") {
+                    $("#reportlabel").text("Block");
+                }
+                else if (reportfor == "tahsil") {
+                    $("#reportlabel").text("Tahsil");
+                }
+                else if (reportfor == "district") {
+                    $("#reportlabel").text("District");
+                }
+                else if (reportfor == "state") {
+                    $("#reportlabel").text("State");
+                }
+                else if (reportfor == "pincode") {
+                    $("#reportlabel").text("Pincode");
+                }
+                else {
+                    $("#reportlabel").text("Order No");
+                }
+
+                $("#employee").empty();
+                $("#employee").append(response);
+
+            }
+        })
+        
+        var table = $('#tbldesignation').DataTable();
+        var daterange = $("#daterange").val();
+        var dates = daterange.split(" - ");
+        var startDateStr = dates[0];
+        var endDateStr = dates[1];
+
+
+        var month = $("#month").val();
+        var year = $("#year").val();
+        var empid = $("#employee").val();
+        var reportfor = $("#reportfor").val();
+        var activity = $("#activity").val();
+        Swal.fire({
+            title: "<i class='fa fa-spinner fa-spin'></i>",
+            html: ` <p>Please wait while we process your request... It takes some time</p> `,
+            showConfirmButton: false,
+            position: 'center',
+            customClass: {
+                popup: 'custom-swal-popup-class',
+            },
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+
+            }
+        });
+        $.ajax({
+            url: "/Admin/GetCSR",
+            type: "Get",
+            data: { Month: month, Year: year, Uniqueid: empid, Reportfor: reportfor, Start_date: startDateStr, End_date: endDateStr, activity: activity  },
+            success: function (response) {
+                //alert(response);
+                Swal.close();
+                var jsonArray = JSON.parse(response);
+                table.clear().draw();
+                $.each(jsonArray, function (index, item) {
+                    table.row.add([
+                        index + 1,
+                        item.Invoiceid,
+                        item.Dilivery_month,
+                        item.Orderby,
+                        item.Customer_name,
+                        item.Customer_address,
+                        item.Customer_address,
+                        item.Product_name,
+                        item.Product_quantity,
+                        item.Order_status
+                    ]).draw(false);
+                });
+            }
+        })
+
+        $("#search").click(function () {
+
+            var table = $('#tbldesignation').DataTable();
+            var daterange = $("#daterange").val();
+            var dates = daterange.split(" - ");
+            var startDateStr = dates[0];
+            var endDateStr = dates[1];
+           
+            var month = $("#month").val();
+            var year = $("#year").val();
+            var empid = $("#employee").val();
+            var reportfor = $("#reportfor").val();
+            var activity = $("#activity").val();
+            Swal.fire({
+                title: "<i class='fa fa-spinner fa-spin'></i>",
+                html: ` <p>Please wait while we process your request... It takes some time</p> `,
+                showConfirmButton: false,
+                position: 'center',
+                customClass: {
+                    popup: 'custom-swal-popup-class',
+                },
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+
+                }
+            });
+            $.ajax({
+                url: "/Admin/GetCSR",
+                type: "Get",
+                data: { Month: month, Year: year, Uniqueid: empid, Reportfor: reportfor, Start_date: startDateStr, End_date: endDateStr, activity: activity },
+                success: function (response) {
+                    // alert(response);
+                    Swal.close();
+                    var jsonArray = JSON.parse(response);
+                table.clear().draw();
+                $.each(jsonArray, function (index, item) {
+                    table.row.add([
+                        index + 1,
+                        item.Invoiceid,
+                        item.Dilivery_month,
+                        item.Orderby,
+                        item.Customer_name,
+                        item.Customer_address,
+                        item.Customer_address,
+                        item.Product_name,
+                        item.Product_quantity,
+                        item.Order_status
+                    ]).draw(false);
+                });
+                }
+            })
+
+        });
+        $("#reportfor,#month,#year").change(function () {
+            var reportfor = $("#reportfor").val();
+            var month = $("#month").val();
+            var year = $("#year").val();
+            $.ajax({
+                url: "/Admin/Getorderdetails",
+                type: "Get",
+                data: { orderfor: reportfor, Month: month, Year: year },
+                success: function (response) {
+                    // alert(response);
+                    if (reportfor == "invoice") {
+                        $("#reportlabel").text("Invoice no");
+                    }
+                    else if (reportfor == "order") {
+                        $("#reportlabel").text("Order No");
+                    }
+                    else if (reportfor == "customer") {
+                        $("#reportlabel").text("Customer Name");
+                    }
+                    else if (reportfor == "post") {
+                        $("#reportlabel").text("Post Office");
+                    }
+                    else if (reportfor == "block") {
+                        $("#reportlabel").text("Block");
+                    }
+                    else if (reportfor == "tahsil") {
+                        $("#reportlabel").text("Tahsil");
+                    }
+                    else if (reportfor == "district") {
+                        $("#reportlabel").text("District");
+                    }
+                    else if (reportfor == "state") {
+                        $("#reportlabel").text("State");
+                    }
+                    else if (reportfor == "pincode") {
+                        $("#reportlabel").text("Pincode");
+                    }
+                    else {
+                        $("#reportlabel").text("Order No");
+                    }
+
+                    $("#employee").empty();
+                    $("#employee").append(response);
+
+                }
+            })
+
+
+        });
+    });
+</script>

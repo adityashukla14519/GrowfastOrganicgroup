@@ -1,0 +1,188 @@
+﻿
+@{
+    ViewBag.Title = "AttendanceInfo";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+
+<script>
+    $(document).ready(function () {
+        $('#tblattendance').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom'
+                }
+            ]
+        });
+
+
+    });
+</script>
+<script>
+    function Getid1(id) {
+        //alert("The ID is: " + id);
+        $.ajax({
+            url: '/Client/Getpunchincheckinimage',
+            type: 'POST',
+            data: { Up: id, Tblnm: "tbl_attendance" },
+            success: function (data) {
+                var jsonArray = JSON.parse(data);
+                $.each(jsonArray, function (index, item) {
+                    var dateStr = item.Date;
+                    var dateObj = new Date(dateStr);
+                    var formattedDate = dateObj.toLocaleDateString('en-GB');
+                    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                    var formattedDatemonthnm = dateObj.getDate() + " " + months[dateObj.getMonth()] + " " + dateObj.getFullYear();
+                    $("#summeryhead").text("Attendance Summery(" + formattedDate + ")");
+                    $("#nme").text(item.Name);
+                    $("#inimg").attr("src", "@URL.MainUrl()" + item.Punchinimg);
+                    $("#outimg").attr("src", "@URL.MainUrl()" + item.Punchoutimg);
+                    $("#intime").text(formattedDatemonthnm + " " + item.Punchin_time);
+                    $("#outtime").text(formattedDatemonthnm + " " + item.Punchout_time);
+                });
+            }
+        })
+    }
+</script>
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i> Attendance Info <i class="fa fa-angle-double-right"></i> @ViewBag.nm Employee</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+@model List<Attendanceinfo>
+@using System.Globalization;
+@{ int count1 = 0;}
+
+<div class="table table-responsive">
+    <table class="display nowrap table table-responsive" id="tblattendance">
+        <thead class="theadb text-center">
+            <tr>
+                <th>ID</th>
+                <th>EMPLOYEE CODE</th>
+                <th>EMPLOYEE NAME</th>
+                <th>DEPARTMENT</th>
+                <th>DESIGNATION</th>
+                <th>SHIFT NAME</th>
+                <th>ATTENDANCE DATE</th>
+                <th>PUNCHIN TIME</th>
+                <th>PUNCHOUT TIME</th>
+                <th>WORKING HOURS</th>
+                @*<th>PUNCHIN ADDRESS</th>
+                <th>PUNCHOUT ADDRESS</th>*@
+                @*<th></th>*@
+            </tr>
+        </thead>
+        <tbody class="text-center" id="tbl">
+            @foreach (var registration in Model)
+            {
+                count1++;
+
+
+                <tr>
+                    <td>@count1</td>
+                    <td>@registration.Employeeid</td>
+                    <td>@registration.Name</td>
+                    <td>@registration.Department</td>
+                    <td>@registration.Designation</td>
+                    <td>@registration.Shiftname (@registration.Starttime - @registration.Endtime)</td>
+                    
+                    <td>@registration.date</td>
+                    @if (registration.punchintime != "" && registration.punchintime != null)
+                    {
+                        DateTime indate = DateTime.ParseExact(registration.punchintime, "HH:mm:ss", CultureInfo.InvariantCulture);
+                        <td>@indate.ToString("HH:mm")</td>
+                    }
+                    else
+                    {
+                        <td> </td>
+                    }
+                    @if (registration.punchouttime != "" && registration.punchouttime != null)
+                    {
+                        DateTime outdate = DateTime.ParseExact(registration.punchouttime, "HH:mm:ss", CultureInfo.InvariantCulture);
+                        <td>@outdate.ToString("HH:mm")</td>
+                    }
+                    else
+                    {
+                        <td> </td>
+                    }
+
+
+                    <td>@registration.Workhours</td>
+                    @*<td>@registration.punchinlocation</td>
+                    <td>@registration.punchoutlocation</td>*@
+                    @*<td>
+                        <input type='hidden' id='@registration.id' value='@registration.id' /><button class='btn btn-outline-info' onclick='Getid(@registration.id)' data-bs-toggle='modal' data-bs-target='#attendanceimg'><i class='fa fa-eye'></i></button>
+                    </td>*@
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+<!-- Modal Area-->
+<div class="modal fade" id="attendanceimg" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header justify-content-center">
+                <h5 class="modal-title" id="staticBackdropLabel">Attendance View Logs</h5>
+
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col">
+                        <h6 class="mt-2" id="summeryhead">Attendance Summery </h6>
+                    </div>
+                    <div class="col text-end">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <span class="mt-3 mb-3 fs-5" id="nme"></span>
+                    </div>
+                </div>
+                <div class="row row-cols-1 row-cols-sm-2 text-center">
+                    <div class="col mb-3">
+                        <label>Punch In</label><br />
+                        <img id="inimg" style="height:200px;width:200px" /><br /><br />
+                        <label id="intime"></label>
+                        <label id="intime"></label>
+                    </div>
+                    <div class="col mb-3">
+
+                        <label>Punch out</label><br />
+                        <img id="outimg" style="height:200px;width:200px" /><br /><br />
+                        <label id="intime"></label>
+                        <label id="intime"></label>
+                        <label id="outtime"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,208 @@
+﻿
+@{
+    ViewBag.Title = "Dsupport";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+
+@using System.Data;
+@{ DbManager db = new DbManager();}
+<style>
+    h1 {
+        color: black;
+    }
+
+    a label {
+        color: black;
+    }
+</style>
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i> Support  Dashboard</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+        // create a new Date object
+        const currentDate = new Date();
+
+        // get the day, month, and year from the date object
+        const day = currentDate.getDate();
+        const month = currentDate.toLocaleString('default', { month: 'short' });
+        const year = currentDate.getFullYear();
+
+        // format the date string
+        const formattedDate = `${day} ${month} ${year}`;
+        $(".curdt").text("Summary as on " + formattedDate);
+    })
+</script>
+
+
+@{
+    string totalquery = "select * from tbl_Complaint where Status='Active'";
+    DataTable totaldt = db.GetAllRecord(totalquery);
+    int totalcount = totaldt.Rows.Count;
+
+    string open = "select * from tbl_Complaint where Complaint_status='Open' and Status='Active'";
+    DataTable opendt = db.GetAllRecord(open);
+    int opencount = opendt.Rows.Count;
+
+    string procesquery = "select * from tbl_Complaint where Complaint_status='InProgress' OR  Status='Assign' and Status='Active'";
+    DataTable processedt = db.GetAllRecord(procesquery);
+    int processcount = processedt.Rows.Count;
+
+    string Closequery = "select * from tbl_Complaint where Complaint_status='Close' and Status='Active'";
+    DataTable Closedt = db.GetAllRecord(Closequery);
+    int Closecount = Closedt.Rows.Count;
+
+
+    string torderquery = "select * from tbl_order where (Order_status='Planted' or Order_status='Counted' or Order_status='Replaced' or Order_status='Technical Service' or Order_status='Delivered') and Status='Active' and Product_type='Plant'";
+    DataTable torderdt = db.GetAllRecord(torderquery);
+
+    string porderquery = "select * from tbl_order where ((Order_status='Planted' and Plantation_status='Due') or Order_status='Delivered')  and Status='Active' and Product_type='Plant'";
+    DataTable porderdt = db.GetAllRecord(porderquery);
+
+    string corderquery = "select * from tbl_order where ((Order_status='Planted' and Plantation_status='No Due') or (Order_status='Counted' and Counting_status='Due')) and Status='Active' and Product_type='Plant'";
+    DataTable corderdt = db.GetAllRecord(corderquery);
+
+    string rorderquery = "select * from tbl_order where ((Order_status='Counted' and Counting_status='No Due') or (Order_status='Replaced' and Replacement_status='Due')) and Status='Active' and Product_type='Plant'";
+    DataTable rorderdt = db.GetAllRecord(rorderquery);
+
+    string tsorderquery = "select * from tbl_order where ((Order_status='Replaced' and Replacement_status='Due') or Order_status='Technical Service') and Status='Active' and Product_type='Plant'";
+    DataTable tsorderdt = db.GetAllRecord(tsorderquery);
+
+
+}
+
+<div class="row mt-3 mb-3">
+    <h5>Support Info</h5>
+    <span class="curdt"></span>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="col-sm-12 border border-dotted-1 border-dark-subtle"></div>
+    </div>
+</div>
+
+
+
+<div class="row">
+    <div class="col-sm-3 mt-3">
+        <div class="card dashcard info border rounded-4 border-info-subtle">
+
+            <div class="card-body approdashstat">
+                <div class="row align-items-center">
+                    <div class="col" >
+
+                        <a href='/Admin/ComplaintInfo?type=all'>
+                            <h1>@totalcount</h1>
+                            <label class="mt-1">Total Complaints</label>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-9 mt-3">
+        <div class="card dashcard danger border rounded-4 border-danger-subtle">
+
+            <div class="card-body approdashstat">
+                <div class="row align-items-center row-cols-2 row-cols-sm-3">
+
+
+                    <div class="col" >
+                        <a href='/Admin/ComplaintInfo?type=open'>
+                            <h1>@opencount</h1>
+                            <label class="mt-1">Open</label>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href='/Admin/ComplaintInfo?type=InProgress'>
+                            <h1>@processcount</h1>
+                            <label class="mt-1">In Process</label>
+                        </a>
+                    </div>
+                    <div class="col" >
+                        <a href='/Admin/ComplaintInfo?type=close'>
+                            <h1>@Closecount</h1>
+                            <label class="mt-1">Close</label>
+                        </a>
+                    </div>
+                 
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-sm-3 mt-3">
+        <div class="card dashcard info border rounded-4 border-info-subtle">
+
+            <div class="card-body approdashstat">
+                <div class="row align-items-center">
+                    <div class="col">
+
+                        <a href='/Admin/Serviceinfo?type=all'>
+                            <h1>@torderdt.Rows.Count</h1>
+                            <label class="mt-1">Pending Service</label>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-9 mt-3">
+        <div class="card dashcard danger border rounded-4 border-danger-subtle">
+
+            <div class="card-body approdashstat">
+                <div class="row align-items-center row-cols-2 row-cols-sm-4">
+
+
+                    <div class="col">
+                        <a href='/Admin/Serviceinfo?type=open'>
+                            <h1>@porderdt.Rows.Count</h1>
+                            <label class="mt-1">Plantation</label>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href='/Admin/Serviceinfo?type=InProgress'>
+                            <h1>@corderdt.Rows.Count</h1>
+                            <label class="mt-1">Counting</label>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href='/Admin/Serviceinfo?type=close'>
+                            <h1>@rorderdt.Rows.Count</h1>
+                            <label class="mt-1">Replacement</label>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href='/Admin/Serviceinfo?type=close'>
+                            <h1>@tsorderdt.Rows.Count</h1>
+                            <label class="mt-1">Technical Service</label>
+                        </a>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

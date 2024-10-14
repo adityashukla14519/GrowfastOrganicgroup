@@ -1,0 +1,137 @@
+﻿
+@{
+    ViewBag.Title = "AssignLeave";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+
+<script>
+    $(document).ready(function() {
+        var msg = '@ViewBag.msg';
+
+        if (msg) {
+            var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="malert">' +
+                msg +
+                '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                '</div>';
+            $(alertElement).insertBefore('#alert-container');
+            setTimeout(function () {
+                $('#malert').alert('close');
+            }, 5000);
+        }
+
+
+    });
+</script>
+
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">User <i class="fa fa-angle-double-right"></i> Leave <i class="fa fa-angle-double-right"></i> Assign Leave </label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+<div class="row mt-2 mb-2 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col"></div>
+</div>
+<form action="/Admin/AssignLeave?id=@ViewBag.leaveid" method="post" class="needs-validation" novalidate onsubmit="return">
+    <div class="row row-cols-1 row-cols-sm-2">
+        <div class="col mb-2">
+            <input type="hidden" id="rvid" name="rvid" readonly class="form-control shadow-none" value="@ViewBag.id" />
+            <input type="hidden" id="leaveid" name="leaveid" readonly class="form-control shadow-none" value="@ViewBag.leaveid" />
+            <h6 class="mt-2">Employee Name</h6>
+            <input type="text" id="employeename" name="employeename" readonly class="form-control shadow-none" value="@ViewBag.empname" />
+            <input type="hidden" id="emprid" name="emprid" readonly class="form-control shadow-none" value="@ViewBag.emprid" />
+            <input type="hidden" id="employeeid" name="employeeid" readonly class="form-control shadow-none" value="@ViewBag.empid" />
+
+            <input type="hidden" id="employeeltype" name="employeeltype" readonly class="form-control shadow-none" value="@ViewBag.leavetype" />
+            <input type="hidden" id="employeedur" name="employeedur" readonly class="form-control shadow-none" value="@ViewBag.duratuon" />
+
+            <input type="hidden" id="premise" name="premise" readonly class="form-control shadow-none" value="@ViewBag.Premise" />
+            <input type="hidden" id="regionid" name="regionid" readonly class="form-control shadow-none" value="@ViewBag.Regionid" />
+
+            <input type="hidden" id="employeemanagername" name="employeemanagername" readonly class="form-control shadow-none" value="@ViewBag.empmanagername" />
+            <input type="hidden" id="employeemanagerid" name="employeemanagerid" readonly class="form-control shadow-none" value="@ViewBag.empmanagerid" />
+
+            <input type="hidden" id="BranchCode" name="BranchCode" readonly class="form-control shadow-none" value="@ViewBag.BranchCode" />
+            <input type="hidden" id="BranchName" name="BranchName" readonly class="form-control shadow-none" value="@ViewBag.BranchName" />
+        </div>
+        <div class="col mb-2">
+            <h6 class="mt-2">Leave Type</h6>
+            <input type="text" id="employeeltype1" name="employeeltype1" readonly class="form-control shadow-none" value="@ViewBag.leavetype - @ViewBag.duratuon" />
+        </div>
+        <div class="col mb-2">
+            <h6 class="mt-2">Department</h6>
+            <input type="text" id="employeedepartment" name="employeedepartment" readonly class="form-control shadow-none" value="@ViewBag.depart" />
+        </div>
+        <div class="col mb-2">
+            <h6 class="mt-2">Designation</h6>
+            <input type="text" id="employeedesig" name="employeedesig" readonly class="form-control shadow-none" value="@ViewBag.desig" />
+        </div>
+
+        <div class="col mb-2">
+            <label>Status</label>
+            <select class="form-select shadow-none mt-1" id="employeestatus" name="employeestatus">
+                <option selected value="Approved">Approve</option>
+                <option value="Rejected">Reject</option>
+            </select>
+        </div>
+        <div class="col mb-2">
+            <label>Attatchment</label><br /><br />
+            <a href="@URL.ApiURL()@ViewBag.attatchment" target="_blank" class="text-danger">Click To View</a>
+            <input type="hidden" id="attatchment" name="attatchment" value="@ViewBag.attatchment" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col mb-2">
+            <h6 class="mt-2">Reason for Apply Leave :</h6>
+            <lavel class="ms-3">@ViewBag.reason</lavel>
+            <input type="hidden" name="reason" id="reason" value="@ViewBag.reason" />
+            <input type="date" class="form-control shadow-none" required id="reqdate" name="reqdate" value="@ViewBag.reqdate" hidden />
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-sm-2">
+        <div class="col mb-2">
+            <h6 class="mt-2">From Date</h6>
+            <input type="date" class="form-control shadow-none" required id="employeefromdate" name="employeefromdate" value="@ViewBag.fromDate" />
+            <div class="invalid-feedback">
+                please choose valid date
+            </div>
+        </div>
+        <div class="col mb-2">
+            <h6 class="mt-2">To Date</h6>
+            <input type="date" class="form-control shadow-none" required id="employeetodate" name="employeetodate" value="@ViewBag.toDate" />
+            <div class="invalid-feedback">
+                please choose valid date
+            </div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col mb-2">
+            <h6 class="mt-2">Remark</h6>
+            <input type="text" class="form-control shadow-none" id="remark" name="remark" required onkeyup="validateTextbox(this)" pattern="^[a-zA-Z,./ ]*$" title="Please enter only letters, and spaces" />
+            <div class="invalid-feedback">
+                Please enter only letters , . / and spaces
+            </div>
+        </div>
+    </div>
+    <div class="row row-cols-1 row-cols-sm-5">
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col mb-2">
+            <button type="submit" class="btn btncolor shadow-none" style="width:100px"><i class="fa fa-check"></i> Save</button>
+        </div>
+        <div class="col"></div>
+        <div class="col"></div>
+    </div>
+</form>
+

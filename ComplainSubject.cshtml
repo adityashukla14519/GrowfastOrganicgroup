@@ -1,0 +1,358 @@
+﻿
+@{
+    ViewBag.Title = "Complain Subject";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+
+
+<!-- toogle button -->
+<link href="~/Content/tooglebutton/bootstrap5-toggle.min.css" rel="stylesheet" />
+<script src="~/Content/tooglebutton/bootstrap5-toggle.ecmas.min.js"></script>
+
+<script>
+    function statuschange(id, status, tdstatus) {
+        tdstatus = "#" + tdstatus;
+        $.ajax({
+            url: "/Admin/Statuschangetive",
+            type: "Post",
+            dataType: "JSON",
+            data: { id: id, status: status, tblnm: 'tbl_complain_subject' },
+            success: function (data) {
+                if (data == "Active") {
+                    $(tdstatus).empty();
+                    $(tdstatus).append('<i class="fa fa-check text-success"></i><span style="display:none">' + data + '</span>');
+                }
+                else {
+                    $(tdstatus).empty();
+                    $(tdstatus).append('<i class="fa fa-ban text-danger"></i><span style="display:none">' + data + '</span>');
+                }
+            },
+        });
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        var table = $('#tblcomplainsubject').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom',
+                    exportOptions: {
+                        columns: ':lt(-2)' // Exclude the last 3 columns
+                    }
+                }
+            ]
+        });
+    });
+
+</script>
+<script>
+    function Getid(id) {
+        var up = id;
+        //alert(up);
+        $.ajax({
+            url: '/Admin/UpdateComplainSubject',
+            type: "GET",
+            dataType: "JSON",
+            data: { Up: up },
+            success: function (data) {
+                //alert(data);
+                $("#hid").val(data[0]);
+                $("#complaintype").val(data[1]);
+                $("#complaintypeid").val(data[2]);
+                $("#complainsubject").val(data[3]);
+                $("#status").val(data[4]);
+
+            }
+        })
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $("#cancel").click(function () {
+            $("input[type='text'],.form-select,#hid,#status").val("");
+        })
+
+    var msg = '@ViewBag.msg';
+
+
+    if (msg) {
+        var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+            msg +
+            '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+            '</div>';
+        $(alertElement).insertBefore('#alert-container');
+        setTimeout(function () {
+            $('#alert').alert('close');
+        }, 5000);
+    }
+});
+</script>
+<script>
+    $(document).ready(function () {
+        $("#complaintypeid").change(function () {
+            var complaintypeid = $("#complaintypeid").val();
+            $.ajax({
+                url: '/Admin/UpdateComplaintype',
+                type: "GET",
+                dataType: "JSON",
+                data: { Up: complaintypeid },
+                success: function (data) {
+                    //alert(data);
+                    //$("#hid").val(data[0]);
+                    $("#complaintype").val(data[1]);
+
+
+                }
+            })
+        })
+    })
+</script>
+
+
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i>  Complain Subject</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+<div class="row mt-2 mb-3 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+
+        <button type="button" class="btn btncolor btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#complainmaster">
+            <i class="fa fa-plus" aria-hidden="true"></i> New
+        </button>
+    </div>
+
+</div>
+@using System.Data;
+@{
+
+    DbManager db = new DbManager();
+    Activitylog activitylog = new Activitylog();
+}
+@{
+    try
+    {
+        string query = "select * from tbl_complain_subject";
+        activitylog.Activitylogins("tbl_complain_subject", "", query, "Failed", "", Session["suid"] + "".ToString(), Session["suname"] + "".ToString(), Session["smail"] + "".ToString());
+        DataTable dt = db.GetAllRecord(query);
+        activitylog.Activitylogupd("Success", "");
+        int count = 1;
+        if (dt.Rows.Count > 0)
+        {
+            <div class="row table table-responsive">
+                <table class="table table-responsive table-bordered" id="tblcomplainsubject">
+                    <thead class="text-center theadb text-light">
+                        <tr>
+                            <th class="text-center">Id</th>
+                            <th class="text-center">Complain Type</th>
+                            <th class="text-center">Complain Subject</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Active/Inactive</th>
+                            <th class="text-center">Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        @for (int i = 0; i < dt.Rows.Count; i++)
+                        {
+                            <tr>
+                                <td>@(count + i)<input type="hidden" id="@dt.Rows[i]["id"]" value="@dt.Rows[i]["id"]" /></td>
+                                <td>@dt.Rows[i]["Complaintype"]</td>
+                                <td>@dt.Rows[i]["Complainsubject"]</td>
+
+                                @if (@dt.Rows[i]["Status"] + "" == "Active")
+                                {
+
+                                    <td id="tdi_@dt.Rows[i]["id"]"><i class="fa fa-check text-success"></i><span style="display:none">@dt.Rows[i]["Status"]</span></td>
+                                    <td>
+                                        <input type="checkbox" checked data-toggle="toggle" data-on="Active" data-off="Inactive" onchange="statuschange('@dt.Rows[i]["id"]','Inactive','tdi_@dt.Rows[i]["id"]')" class="btn btncolorblue">
+                                    </td>
+
+                                }
+                                else
+                                {
+
+                                    <td id="tda_@dt.Rows[i]["id"]"><i class="fa fa-ban text-danger"></i><span style="display:none">@dt.Rows[i]["Status"]</span></td>
+                                    <td>
+                                        <input type="checkbox" data-toggle="toggle" data-on="Active" data-off="Inactive" onchange="statuschange('@dt.Rows[i]["id"]','Active','tda_@dt.Rows[i]["id"]')" class="btn btncolorblue">
+                                    </td>
+                                }
+                                <td><button class="btn btncolorblue" onclick="Getid($('#@dt.Rows[i]["id"]').val())" data-bs-toggle="modal" data-bs-target="#complainmaster"><i class="fa fa-edit"></i></button></td>
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class='row justify-content-center d-flex m-5' id='datanotfdound'>
+                <img src='~/Content/Img/nodata1.png' style="height:50%;width:50%" />
+            </div>
+        }
+    }
+
+    catch (Exception ex)
+    {
+        try
+        {
+            Error_15_16 error_15_16 = new Error_15_16();
+            string pageUrl = "", moduleName = "", errorLine = "", errorMessage = "", errorName = "", errorTrace = "";
+            // Get the page URL, if available
+            pageUrl = System.Web.HttpContext.Current.Request.Url.AbsoluteUri;
+            // Get the module name
+            moduleName = ex.TargetSite.Module.Name;
+            // Get the error line number, if available
+            var stackTrace = ex.StackTrace;
+            if (!string.IsNullOrEmpty(stackTrace))
+            {
+                var lineNumberIndex = stackTrace.LastIndexOf(":line ");
+                if (lineNumberIndex >= 0)
+                {
+                    var lineNumber = stackTrace.Substring(lineNumberIndex + 6);
+                    var newLineIndex = lineNumber.IndexOf(Environment.NewLine);
+                    if (newLineIndex >= 0)
+                    {
+                        errorLine = lineNumber.Substring(0, newLineIndex);
+                    }
+                    else
+                    {
+                        errorLine = lineNumber;
+                    }
+                }
+            }
+            // Get the error message and name
+            if (ex.Message.ToString().Length >= 1000)
+            {
+                errorMessage = ex.Message.Substring(1, 500);
+            }
+            else
+            {
+                errorMessage = ex.Message;
+            }
+            errorName = ex.GetType().FullName;
+            // Get the error trace
+            errorTrace = ex.StackTrace;
+            error_15_16.Error_15_16ins(pageUrl, moduleName, errorLine, errorMessage.Replace("'", "`"), errorName.Replace("'", "`"), errorTrace.Replace("'", "`"), Session["suid"] + "".ToString(), Session["suname"] + "".ToString(), Session["smail"] + "".ToString());
+        }
+
+        catch
+        {
+
+        }
+    }
+    finally
+    {
+        db.connectionstate();
+    }
+}
+
+<!-- Modal complain master-->
+<div class="modal fade" id="complainmaster" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <form action="/Admin/ComplainSubject" method="post" class="needs-validation" novalidate>
+                <div class="modal-header justify-content-center nevigationstrip">
+                    <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Complain Subject</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="col-sm-12">
+                        <div class="mb-3">
+                            <input type="hidden" id="hid" name="hid" />
+                            <h6 class="mt-2">Complain Type</h6>
+                            <select class="form-select shadow-none" id="complaintypeid" name="complaintypeid" required>
+                                <option selected disabled value="">Select one</option>
+                                @{
+                                    string query1 = "select * from tbl_complaintype";
+                                    DataTable dt1 = db.GetAllRecord(query1);
+                                    if (dt1.Rows.Count > 0)
+                                    {
+                                        for (int i = 0; i < dt1.Rows.Count; i++)
+                                        {
+                                            if (dt1.Rows[i]["Status"] + "" == "Active")
+                                            {
+                                                <option value="@dt1.Rows[i]["Id"]">@dt1.Rows[i]["Complaintype"]</option>
+                                            }
+
+
+                                        }
+
+                                    }
+
+                                }
+
+                            </select>
+
+                            <input type="hidden" id="complaintype" name="complaintype" />
+
+                            <div class="invalid-feedback">
+                                Please select a valid option.
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">Complain Subject</h6>
+                            <input type="text" class="form-control shadow-none" name="complainsubject" id="complainsubject" required placeholder="Enter Complain Subject" onkeyup="validateTextbox(this)" pattern="^[a-zA-Z ]*$" title="Please enter only letters, and spaces" />
+                            <div class="invalid-feedback">
+                                Please enter only letters, and spaces
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">Status</h6>
+                            <select class="form-select shadow-none" id="status" name="status" required>
+                                <option selected>Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a valid Status.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+                    <button type="submit" class="btn btncolor"><i class="fa fa-check"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+

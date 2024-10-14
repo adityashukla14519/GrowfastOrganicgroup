@@ -1,0 +1,425 @@
+﻿
+@{
+    ViewBag.Title = "Raw Material Stock";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+<script>
+    $(document).ready(function () {
+        $('#tblrowmeterialstock').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom'
+                }
+            ]
+        });
+
+
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $('#tblrawstock').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom'
+                }
+            ]
+        });
+
+
+    });
+</script>
+<script>
+    function Getid(id) {
+        var up = id;
+        //alert(up);
+        $.ajax({
+            url: '/Admin/UpdateRawMaterialStock',
+            type: "GET",
+            dataType: "JSON",
+            data: { Up: up },
+            success: function (data) {
+                //alert(data);
+                $("#hid").val(data[0]);
+                $("#row").val(data[0]);
+                $("#rowmeterial").val(data[2]);
+                $("#rowmeterialid").val(data[1]);
+                $("#crbal").val(data[3]);
+                $("#availbal").val(data[5]);
+                $("#totalbal").val(data[5]);
+                $("#unittype").val(data[6]);
+            }
+        })
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $("#row").change(function () {
+            var up = $("#row").val();
+            $.ajax({
+                url: '/Admin/UpdateRawMaterialStock',
+                type: "GET",
+                dataType: "JSON",
+                data: { Up: up },
+                success: function (data) {
+                    $("#hid").val(data[0]);
+                    $("#rowmeterial").val(data[2]);
+                    $("#rowmeterialid").val(data[1]);
+                    $("#crbal").val(data[3]);
+                    $("#totalbal").val(data[5]);
+                    $("#availbal").val(data[5]);
+                    $("#unittype").val(data[6]);
+                }
+            })
+        })
+    })
+</script>
+<script>
+        $(document).ready(function () {
+            $("#cancel").click(function () {
+                $("input[type='text'],.form-select,#hid,#status").val("");
+            })
+
+        var msg = '@ViewBag.msg';
+
+
+        if (msg) {
+            var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert">' +
+                msg +
+                '<button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                '</div>';
+            $(alertElement).insertBefore('#alert-container');
+            setTimeout(function () {
+                $('#alert').alert('close');
+            }, 5000);
+            //$('.alert').on('closed.bs.alert', function () {
+            //    window.location.href = '/Admin/ProductName';
+            //});
+            //$('#btnclose').on('click', function () {
+            //    window.location.href = '/Admin/ProductName';
+            //});
+        }
+    });
+</script>
+<script>
+    function Gettdata(id, type) {
+
+        var table = $('#tblrawstock').DataTable();
+        $.ajax({
+            url: '/Admin/RowMeterialTRStock',
+            type: "GET",
+            dataType: "JSON",
+            data: { Id: id, Type: type },
+            success: function (response) {
+                //alert(response);
+                if (type == "CR") {
+                    $("#rawmaterialsttrlbl").text("Added Raw Material Stock");
+                }
+                else {
+                    $("#rawmaterialsttrlbl").text("Used Raw Material Stock");
+                }
+                var jsonArray = JSON.parse(response);
+                table.clear().draw();
+                $.each(jsonArray, function (index, item) {
+                    var dateStr = item.Date_time;
+                    var dateObj = new Date(dateStr);
+                    var formattedDate = dateObj.toLocaleDateString('en-GB');
+                    table.row.add([
+                        index + 1,
+                        item.RowMeterial,
+                        item.Quntity + " " + item.Unit,
+                        /*item.Ttype,*/
+                        formattedDate
+                    ]).draw(false);
+                });
+            }
+        })
+    }
+</script>
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i>  Raw Material Stock</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+
+<div class="row mt-2 mb-3 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+
+        <button type="button" class="btn btncolor btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#RawMaterialStock">
+            <i class="fa fa-plus" aria-hidden="true"></i> New
+        </button>
+    </div>
+
+</div>
+@using System.Data;
+@{
+
+    DbManager db = new DbManager();
+    Activitylog activitylog = new Activitylog();
+}
+@{
+    try
+    {
+        string query = "select * from tbl_rowmeterialstock";
+        activitylog.Activitylogins("tbl_rowmeterialstock", "", query, "Failed", "", Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        DataTable dt = db.GetAllRecord(query);
+        activitylog.Activitylogupd("Success", "");
+        int count = 1;
+        if (dt.Rows.Count > 0)
+        {
+            <div class="row table table-responsive">
+                <table class="table table-responsive table-bordered" id="tblrowmeterialstock">
+                    <thead class="text-center theadb text-light">
+                        <tr>
+                            <th class="text-center">Id</th>
+                            <th class="text-center">Material Category</th>
+                            <th class="text-center">Material Name</th>
+                            <th class="text-center">Unit Type</th>
+                            <th class="text-center">Added Stock</th>
+                            <th class="text-center">Used Stock</th>
+                            <th class="text-center">Available Stock</th>
+                            <th class="text-center">Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        @for (int i = 0; i < dt.Rows.Count; i++)
+                        {
+                        <tr>
+                            <td>@(count + i)<input type="hidden" id="@dt.Rows[i]["id"]" value="@dt.Rows[i]["id"]" /></td>
+                            <td>@dt.Rows[i]["Materialcategory"]</td>
+                            <td>@dt.Rows[i]["RowMeterial"]</td>
+                            <td>@dt.Rows[i]["UnitType"]</td>
+                            @if (dt.Rows[i]["Cr"] + "" == "0")
+                            {
+                                <td><button type="button" class="btn btncolorblue">@dt.Rows[i]["Cr"]</button></td>
+                            }
+                            else
+                            {
+                                <td><button type="button" class="btn btncolorblue" onclick="Gettdata('@dt.Rows[i]["id"]','CR')" data-bs-toggle="modal" data-bs-target="#RowMeterialTRStock">@dt.Rows[i]["Cr"]</button></td>
+                            }
+
+                            @if (dt.Rows[i]["Dr"] + "" == "0")
+                            {
+                                <td><button type="button" class="btn btncolorblue">@dt.Rows[i]["Dr"]</button></td>
+                            }
+                            else
+                            {
+                                <td><button type="button" class="btn btncolorblue" onclick="Gettdata('@dt.Rows[i]["id"]','DR')" data-bs-toggle="modal" data-bs-target="#RowMeterialTRStock">@dt.Rows[i]["Dr"]</button></td>
+                            }
+
+
+
+                            <td>@dt.Rows[i]["Balance"]</td>
+                            <td><button class="btn btncolorblue" onclick="Getid($('#@dt.Rows[i]["id"]').val())" data-bs-toggle="modal" data-bs-target="#RawMaterialStock"><i class="fa fa-edit"></i></button></td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class='row justify-content-center d-flex m-5' id='datanotfdound'>
+                <img src='~/Content/Img/nodata1.png' style="height:50%;width:50%" />
+            </div>
+        }
+    }
+
+    catch (Exception ex)
+    {
+        try
+        {
+            Error_15_16 error_15_16 = new Error_15_16();
+            string pageUrl = "", moduleName = "", errorLine = "", errorMessage = "", errorName = "", errorTrace = "";
+            // Get the page URL, if available
+            pageUrl = System.Web.HttpContext.Current.Request.Url.AbsoluteUri;
+            // Get the module name
+            moduleName = ex.TargetSite.Module.Name;
+            // Get the error line number, if available
+            var stackTrace = ex.StackTrace;
+            if (!string.IsNullOrEmpty(stackTrace))
+            {
+                var lineNumberIndex = stackTrace.LastIndexOf(":line ");
+                if (lineNumberIndex >= 0)
+                {
+                    var lineNumber = stackTrace.Substring(lineNumberIndex + 6);
+                    var newLineIndex = lineNumber.IndexOf(Environment.NewLine);
+                    if (newLineIndex >= 0)
+                    {
+                        errorLine = lineNumber.Substring(0, newLineIndex);
+                    }
+                    else
+                    {
+                        errorLine = lineNumber;
+                    }
+                }
+            }
+            // Get the error message and name
+            if (ex.Message.ToString().Length >= 1000)
+            {
+                errorMessage = ex.Message.Substring(1, 500);
+            }
+            else
+            {
+                errorMessage = ex.Message;
+            }
+            errorName = ex.GetType().FullName;
+            // Get the error trace
+            errorTrace = ex.StackTrace;
+            error_15_16.Error_15_16ins(pageUrl, moduleName, errorLine, errorMessage.Replace("'", "`"), errorName.Replace("'", "`"), errorTrace.Replace("'", "`"), Session["suid"].ToString(), Session["suname"].ToString(), Session["smail"].ToString());
+        }
+
+        catch
+        {
+
+        }
+    }
+    finally
+    {
+        db.connectionstate();
+    }
+}
+
+<!-- Modal ProductName-->
+<div class="modal fade" id="RawMaterialStock" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <form action="/Admin/RawMaterialStock" method="post" class="needs-validation" novalidate>
+                <div class="modal-header justify-content-center nevigationstrip">
+                    <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Material Stock</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="col-sm-12">
+                        <div class="mb-3">
+                            <input type="hidden" id="hid" name="hid" />
+                            
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="mt-2">Select Material Name</h6>
+                            <select class="form-select shadow-none" id="row" name="row" required>
+                                <option selected disabled value="">Select</option>
+                                @{
+                                    string query1 = "select * from tbl_rowmeterialstock";
+                                    DataTable dt1 = db.GetAllRecord(query1);
+                                    if (dt1.Rows.Count > 0)
+                                    {
+                                        for (int i = 0; i < dt1.Rows.Count; i++)
+                                        {
+                                            <option value="@dt1.Rows[i]["Id"]">@dt1.Rows[i]["RowMeterial"]</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                            <input type="hidden" name="rowmeterial" id="rowmeterial" />
+                            <input type="hidden" name="rowmeterialid" id="rowmeterialid" />
+                            <input type="hidden" name="crbal" id="crbal" />
+                            <input type="hidden" name="totalbal" id="totalbal" />
+                            <div class="invalid-feedback">
+                                Please select a valid option.
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <h6 class="mt-2">Unit Type</h6>
+                            <input type="text" class="form-control shadow-none readonly" id="unittype" name="unittype" required onkeyup="validateTextbox(this)" pattern="^[0-9,./ ]*$" title="Please enter only letters, and spaces" readonly />
+                        </div>
+                        <div class="mb-2">
+                            <h6 class="mt-2"> Available Balance</h6>
+                            <input type="text" class="form-control shadow-none readonly" id="availbal" name="availbal" required onkeyup="validateTextbox(this)" pattern="^[0-9,./ ]*$" title="Please enter only letters, and spaces" readonly />
+                        </div>
+                        <div class="mb-2">
+                            <h6 class="mt-2">Quantity</h6>
+                            <input type="text" class="form-control shadow-none" id="cr" name="cr" required placeholder="Enter Quantity" onkeyup="validateTextbox(this)" pattern="^[0-9,./ ]*$" title="Please enter only letters, and spaces" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+                    <button type="submit" class="btn btncolor"><i class="fa fa-check"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<!-- Modal ProductName-->
+<div class="modal fade" id="RowMeterialTRStock" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header justify-content-center nevigationstrip">
+                <h5 class="modal-title text-uppercase" id="rawmaterialsttrlbl">Raw/Packing Material Stock</h5>
+            </div>
+            <div class="modal-body">
+                <div class="col-sm-12">
+                    <table class="display nowrap table table-responsive" id="tblrawstock">
+                        <thead class="theadb text-center">
+                            <tr>
+                                <th>ID</th>
+                                <th>Material Name</th>
+                                @*<th>Unit</th>*@
+                                <th>Quntity</th>
+                                @*<th>Transaction Type</th>*@
+                                <th>Date time</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center" id="tbl">
+
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+             
+            </div>
+        </div>
+    </div>
+</div>

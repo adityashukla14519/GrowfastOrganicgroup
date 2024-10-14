@@ -1,0 +1,454 @@
+﻿
+@{
+    ViewBag.Title = "Complaintreport";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+<script>
+    $(function () {
+        $('input[name="daterange"]').daterangepicker({
+            opens: 'left',
+            locale: {
+                format: 'DD/MM/YYYY'
+            }
+        }, function (start, end, label) {
+            console.log("A new date selection was made: " + start.format('DD/MM/YYYY') + ' to ' + end.format('DD/MM/YYYY'));
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+
+        $.ajax({
+            url: "/Admin/Getemployee",
+            type: "GET",
+            dataType: "JSON",
+            data: { Depart: depart },
+            success: function (data) {
+                //alert(data);
+                $("#empnm").empty();
+                $("#empnm").append(data);
+
+            }
+        })
+
+    })
+</script>
+<script>
+    $(document).ready(function () {
+
+        $.ajax({
+            url: "/Admin/Getemployee",
+            type: "GET",
+            dataType: "JSON",
+            data: { Depart: depart },
+            success: function (data) {
+                //alert(data);
+                $("#empnm").empty();
+                $("#empnm").append(data);
+
+            }
+        })
+
+    })
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('#tblleave,#tblcmpdetail').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom'
+                }
+            ]
+        });
+
+
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        var table = $('#tblleave').DataTable();
+        var daterange = $("#daterange").val();
+        var dates = daterange.split(" - ");
+        var startDateStr = dates[0];
+        var endDateStr = dates[1];
+        var status = $("#status").val();
+        //alert(status)
+        var branch = $("#branch").val();
+        var empnm = $("#empnm").val();
+        $.ajax({
+            url: "/Admin/GetComplaint",
+            type: "Get",
+            data: { Start_date: startDateStr, End_date: endDateStr, branch: branch, status: status, empnm: empnm },
+            success: function (response) {
+                var jsonArray = JSON.parse(response);
+                //alert(response);
+                table.clear().draw();
+                $.each(jsonArray, function (index, item) {
+
+                    //var fromdateStr = item.From_date;
+                    //var todateStr = item.To_date;
+                    //var applydateStr = item.Date;
+                    //var fromdateObj = new Date(fromdateStr);
+                    //var todateObj = new Date(todateStr);
+                    //var applydateObj = new Date(applydateStr);
+                    //var fromDate = fromdateObj.toLocaleDateString('en-GB');
+                    //var toDate = todateObj.toLocaleDateString('en-GB');
+                    //var applyDate = applydateObj.toLocaleDateString('en-GB');
+                    //alert(item.CmpID)
+                    table.row.add([
+                        index + 1,
+                        //item.Leave_id,
+                        //item.Employeeid, 
+                        "<button class='btn btncolorblue' onclick='getCmpdetail(\"" + item.CmpID + "\")' data-bs-toggle='modal' data-bs-target='#mdl'>" + item.CmpID + "</button>",
+                       /* "<button data-bs-target='#mdl' data-bs-toggle='modal' class='btn btn-success cmp-button'  onclick='getCmpdetail(" + item.CmpID + ")'>" + item.CmpID + "</button>",*/
+                        item.Complaintbyname,
+                        item.ComplaintType,
+                        item.Subject,
+                        item.Priority,
+                        /*item.Managercode,*/
+                        item.Complaint,
+                        /*item.Branchname,*/
+                        item.Complaint_status,
+                    ]).draw(false);
+
+                });
+
+            }
+        })
+        $("#search").click(function () {
+            var table = $('#tblleave').DataTable();
+            var daterange = $("#daterange").val();
+            var dates = daterange.split(" - ");
+            var startDateStr = dates[0];
+            var endDateStr = dates[1];
+            var status = $("#status").val();
+            //alert(status)
+            var branch = $("#branch").val();
+            var empnm = $("#empnm").val();
+            $.ajax({
+                url: "/Admin/GetComplaint",
+                type: "Get",
+                data: { Start_date: startDateStr, End_date: endDateStr, branch: branch, status: status, empnm: empnm },
+                success: function (response) {
+                    var jsonArray = JSON.parse(response);
+                    //alert(response);
+                    table.clear().draw();
+                    $.each(jsonArray, function (index, item) {
+                        //alert(item.CmpID)
+                        //var fromdateStr = item.From_date;
+                        //var todateStr = item.To_date;
+                        //var applydateStr = item.Date;
+                        //var fromdateObj = new Date(fromdateStr);
+                        //var todateObj = new Date(todateStr);
+                        //var applydateObj = new Date(applydateStr);
+                        //var fromDate = fromdateObj.toLocaleDateString('en-GB');
+                        //var toDate = todateObj.toLocaleDateString('en-GB');
+                        //var applyDate = applydateObj.toLocaleDateString('en-GB');
+
+                        table.row.add([
+                            index + 1,
+                            //item.Leave_id,
+                            //item.Employeeid,
+                            "<button class='btn btncolorblue' onclick='getCmpdetail(\"" + item.CmpID + "\")' data-bs-toggle='modal' data-bs-target='#mdl'>" + item.CmpID+"</button>",
+                            /*"<button data-bs-target='#mdl' data-bs-toggle='modal' class='btn btn-success cmp-button'  onclick='getCmpdetail(" + item.CmpID + ")'>" + item.CmpID + "</button>",*/
+                            item.Complaintbyname,
+                            item.ComplaintType,
+                            item.Subject,
+                            item.Priority,
+                            /*item.Managercode,*/
+                            item.Complaint,
+                         /*   item.Branchname,*/
+                            item.Complaint_status,
+                        ]).draw(false);
+
+                    });
+
+                }
+            })
+
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        function showcomplaint() {
+            var table = $('#tblleave').DataTable();
+            $.ajax({
+                url: "/Admin/GetallComplaint",
+                type: "GET",
+             
+                success: function (response) {
+                    var jsonArray = JSON.parse(response);
+                  /*  alert(response);*/
+                    table.clear().draw();
+                    $.each(jsonArray, function (index, item) {
+                        table.row.add([
+                            index + 1,
+                            //item.Leave_id,
+                            //item.Employeeid,
+                            "<input type='hidden' id='" + item.CmpID + "' value='" + item.CmpID + "'/><button class='btn btncolorblue' onclick='getCmpdetail(" + item.CmpID + ")' data-bs-toggle='modal' data-bs-target='#mdl'>" + item.CmpID + "</button>",
+                           /* "<button data-bs-target='#mdl' data-bs-toggle='modal' class='btn btn-success cmp-button' onclick='getCmpdetail(" + item.CmpID + ")'>" + item.CmpID + "</button>",*/
+                            item.Complaintbyname,
+                            item.ComplaintType,
+                            item.Subject,
+                            item.Priority,
+                            /*item.Managercode,*/
+                            item.Complaint,
+                           /* item.Branchname,*/
+                            item.Complaint_status,
+                       /*     item.statusmessage,*/
+                        ]).draw(false);
+                    });
+
+                    
+
+                }
+            });
+        }
+
+        // Call the showcomplaint function on document ready
+        //showcomplaint();
+    });
+
+    function getCmpdetail(complaintid) {
+        //alert(complaintid)
+        var table = $('#tblcmpdetail').DataTable();
+        //alert(complaintid)
+        $.ajax({
+            url: '/Admin/getcmpdetails',
+            type: "GET",
+            dataType: "JSON",
+            data: { CmpID: complaintid },
+            success: function (data) {
+                var jsonArray = JSON.parse(data);
+                //alert(data)
+              //  alert(jsonArray)
+                table.clear().draw();
+                $.each(jsonArray, function (index, item) {
+                    // Convert datetime to yyyy-MM-dd format
+
+                    var formattedDate = formatDate(item.Datetime);
+
+                    table.row.add([
+                        index + 1,
+                        item.CmpID,
+                        item.Complaintbyname,
+                        item.ComplaintType,
+                        item.Subject,
+                        item.Priority,
+                        formattedDate, // Use the formatted date here
+                        item.Reply,
+                        // item.Branchname,
+                        item.Complaint_status,
+                        item.Logname,
+                    ]).draw(false);
+                });
+
+                // Open the modal using Bootstrap's modal method
+                //$('#mdl').modal('show');
+            }
+        });
+    }
+
+    // Function to format date to yyyy-MM-dd
+    function formatDate(dateString) {
+        var date = new Date(dateString);
+        var year = date.getFullYear();
+        var month = ('0' + (date.getMonth() + 1)).slice(-2);
+        var day = ('0' + date.getDate()).slice(-2);
+        return year + '-' + month + '-' + day;
+    }
+</script>
+
+
+
+
+@using System.Data;
+@{ DbManager db = new DbManager();}
+
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i> Complaint </label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+<div class="row mt-2 mb-3 row-cols-1 row-cols-sm-3">
+    <div class="col"></div>
+    <div class="col">
+        <div id="alert-container"></div>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        @*<button type="button" class="btn btncolor btn-sm me-2" data-bs-toggle="modal" data-bs-target="#Leavehistory">
+                View Leave Balance
+            </button>*@
+        @*<button type="button" class="btn btncolor btn-sm" data-bs-toggle="modal" data-bs-target="#Leave">
+                Add  Leave <i class="fa fa-plus" aria-hidden="true"></i>
+            </button>*@
+    </div>
+</div>
+
+
+<div class="row mt-3 mb-3 row-cols-2 row-cols-sm-5">
+    <div class="col">
+        <label>Date Range</label>
+        <input type="text" name="daterange" id="daterange" class="form-control shadow-none mt-1" />
+    </div>
+    <div class="col" style="display:none">
+        <label>Branch</label>
+        <select class="form-select shadow-none mt-1" id="branch" name="branch">
+            <option selected value="">Select one</option>
+            @{
+                string query1 = "select * from tbl_branch";
+                DataTable dt1 = db.GetAllRecord(query1);
+                if (dt1.Rows.Count > 0)
+                {
+                    for (int i = 0; i < dt1.Rows.Count; i++)
+                    {
+                        if (@dt1.Rows[i]["Status"] + "" == "Active")
+                        {
+                            <option>@dt1.Rows[i]["Branch"]</option>
+                        }
+
+                    }
+                } }
+
+        </select>
+    </div>
+    <div class="col" style="display:none">
+        <label>Employee Name</label>
+        <select class="form-select shadow-none mt-1" id="empnm" name="empnm">
+            <option selected value="">Select one</option>
+            @{
+                string query5 = "select * from tbl_registration where Employee_Type='Auser'";
+                DataTable dt5 = db.GetAllRecord(query5);
+                if (dt5.Rows.Count > 0)
+                {
+                    for (int i = 0; i < dt5.Rows.Count; i++)
+                    {
+
+                        <option value="@dt5.Rows[i]["Employee_id"]">@dt5.Rows[i]["Name"] (@dt5.Rows[i]["Employee_id"])</option>
+
+                    }
+
+                }
+            }
+        </select>
+    </div>
+    <div class="col">
+        <label>Status</label>
+        <select class="form-select shadow-none mt-1" id="status" name="status">
+            <option selected value="">Select one</option>
+            @*@{
+        string query12 = "select * from tbl_Complaint";
+        DataTable dt12 = db.GetAllRecord(query12);
+        if (dt12.Rows.Count > 0)
+        {
+            for (int i = 0; i < dt12.Rows.Count; i++)
+            {
+
+                <option>@dt12.Rows[i]["Status"]</option>
+            }
+        } }*@
+
+
+            <option value="Open">Open</option>
+            <option value="InProgress">In Progress</option>
+            <option value="Assign">Assign</option>
+            <option value="Close">Close</option>
+        </select>
+    </div>
+    <div class="col mt-1">
+        <br />
+        <button class="btn btncolor mt-1" id="search">Search</button>
+    </div>
+</div>
+<div class="table table-responsive">
+    <table class="display nowrap table table-responsive" id="tblleave">
+        <thead class="theadb text-center">
+            <tr>
+                <th>ID</th>
+                <th>COMPLAINT ID</th>
+                <th>Customer name</th>
+                <th>ComplaintType</th>
+                <th>Subject</th>
+                <th>Priority</th>
+                <th>Complaint</th>
+                @*<th>Branchname</th>*@
+                <th>Status</th>
+                @*<th>statusmessage</th>*@
+                @*<th>Addvisereply</th>
+        <th>Assignname</th>*@
+
+            </tr>
+        </thead>
+        <tbody  id="tbl">
+        </tbody>
+    </table>
+</div>
+<div class="modal fade" id="mdl" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-5idden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+
+        <div class="modal-content">
+            <form action="/Admin/Designation" method="post" class="needs-validation" novalidate>
+
+                <div class="modal-header justify-content-center nevigationstrip">
+                    <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Complaint Info</h5>
+                </div>
+                <div class="modal-body ">
+                    <table class="table table-striped table-bordered" id="tblcmpdetail">
+                        <thead class="theadb text-l text-center">
+                            <tr>
+                                <th class="text-center">SN</th>
+                                <th class="text-center">COMPLAINT id</th>
+                                <th class="text-center">Customer NAME</th>
+                                <th class="text-center">COMPLAINT TYPE</th>
+                                <th class="text-center">SUBJECT</th>
+                                <th class="text-center">PRIORITY</th>
+                                <th class="text-center">DATETIME</th>
+                                <th class="text-center">COMPLAINT</th>
+                                <th class="text-center">STATUS</th>
+                                <th class="text-center">Action By</th>
+
+                            </tr>
+                        </thead>
+                        <tbody class="text-center" id="showcmptb">
+                            <!-- Loop through data and create rows -->
+
+                        </tbody>
+                    </table>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+

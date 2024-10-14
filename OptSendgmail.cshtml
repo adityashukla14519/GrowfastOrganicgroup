@@ -1,0 +1,206 @@
+﻿
+@{
+    ViewBag.Title = "OptSendgmail";
+    Layout = "~/Views/Shared/AppEmployeeMaster.cshtml";
+}
+
+<h2>OptSendgmail</h2>
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Webcam with Bootstrap</title>
+    <!-- Include Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+</head>
+<body>
+
+    <!-- Place your page content here -->
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h1>Webcam Example with Bootstrap</h1>
+                <div id="my_camera"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include Webcam.js and custom script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js"></script>
+    <script>
+        alert("ok")
+    // Your Webcam.js initialization code
+    Webcam.set({
+        width: 320,
+        height: 240,
+        image_format: 'jpeg',
+        jpeg_quality: 90
+    });
+
+    Webcam.attach('#my_camera');
+    </script>
+
+    <!-- Include Bootstrap 5 and any other necessary scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--<button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">Enable both scrolling & backdrop</button>
+
+
+
+<div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
+    <div class="offcanvas-header navbar navbar-inverse sticky-top bg-gradient text-light" style="background-color:#3F4346">
+
+        <button class="position-relative d-md-none btn btn-sm btn-info ms-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">
+            <i class="fa fa-bars border-1 ps-1 pe-1"></i>
+        </button>
+
+        <div class="col" id="namedis">
+            <img src="https://attendance.winaxis.in/@Session["empcompimg"]" id="logoimg" class="ms-2 img-circle img-responsive img-circle" style="height:40px;width:60px">
+        </div>
+
+        <label class="text-light fs-5 ps-2">@Session["empcompname"]</label>
+
+        <div class="col d-flex justify-content-end me-3">
+            <a href="/Employee/Profile">
+                <button type="button" class="ms-2 me-1 btn btn-outline-info btn-sm loaderbtn" id="btnpro">
+                    <i class="fa fa-user" aria-hidden="true"></i><span class="profile">Profile</span>
+                </button>
+            </a>
+            <a href="/Employee/Logout">
+                <button type="button" class="ms-2 me-1 btn btn-outline-info btn-sm loaderbtn" id="btsignout">
+                    <i class="fa fa-sign-out-alt" aria-hidden="true"></i><span class="signout">signout</span>
+                </button>
+            </a>-->
+@*<a href="/Employee/AppLogout">
+    <button type="button" class="ms-2 me-1 btn btn-outline-info btn-sm loaderbtn" id="btsignout">
+        <i class="fa fa-sign-out-alt" aria-hidden="true"></i><span class="signout">signout</span>
+    </button>
+    </a>*@
+<!--</div>
+
+</div>
+<div class="offcanvas-body" style="background-color:#3F4346;">
+    <div class="position-sticky">
+        <ul class="nav flex-column">-->
+@*<li class="nav-item mt-3">
+        <a class="nav-link active text-info" aria-current="page" href="/Employee/Dashboard">
+            <i class="fa fa-align-left fa-fw"></i>  Dashboard
+        </a>
+    </li>*@
+
+<!--<li class="nav-item mt-4 mb-2">
+    <a class="nav-link text-info fs-6 loaderbtn" href="/Employee/Dashboard">
+        <i class="fa fa-bars fa-fw"></i>  Dashboard
+    </a>
+</li>
+<li class="nav-item mb-2">
+    <a class="nav-link text-info loaderbtn" href="/Employee/Profile">
+        <i class="fa fa-user fa-fw"></i>  Profile
+    </a>
+</li>
+<li class="nav-item mb-2">
+    <a class="nav-link text-info loaderbtn" href="/Employee/Leave">
+        <i class="fa fa-building fa-fw"></i>  Leave Management
+    </a>
+</li>
+<li class="nav-item mb-2">
+    <a class="nav-link text-info loaderbtn" href="/Employee/LeaveApproval">
+        <i class="fa fa-building fa-fw"></i>  Leave Approval
+    </a>
+</li>
+<li class="nav-item mb-2">
+    <a class="nav-link text-info loaderbtn" href="/Employee/TeamAttendance">
+        <i class="fa fa-chart-area fa-fw"></i>  Team Attendance
+    </a>
+</li>
+<li class="nav-item mb-2">
+    <a class="nav-link text-info loaderbtn" href="/Employee/Attendance">
+        <i class="fa fa-chart-bar fa-fw"></i>  Self Attendance
+    </a>
+</li>
+<li class="nav-item mb-2">
+    <a class="nav-link text-info loaderbtn" href="/Employee/TeamCheckin">
+        <i class="fa fa-chart-line fa-fw"></i>  Team Checkin
+    </a>
+</li>
+<li class="nav-item mb-2">
+    <a class="nav-link text-info loaderbtn" href="/Employee/Checkin">
+        <i class="fa fa-chart-line fa-fw"></i>  Self Checkin
+    </a>
+</li>
+<li class="nav-item mb-2">
+    <a class="nav-link text-info loaderbtn" href="/Employee/Requests">
+        <i class="fa fa-plus-circle fa-fw"></i>  Request Management
+    </a>
+</li>
+
+<li class="nav-item mb-2">
+    <a class="nav-link text-info loaderbtn" href="/Employee/Approval">
+        <i class="fa fa-check-circle fa-fw"></i>  Request Approval
+    </a>
+</li>
+<li class="nav-item mb-2">
+    <a class="nav-link text-info loaderbtn" href="/Employee/EmployeeDirectory">
+        <i class="fa fa-database fa-fw"></i>  Employee Directory
+    </a>
+</li>
+<li class="nav-item mb-2">
+    <a class="nav-link text-info loaderbtn" href="/Employee/Notification">
+        <i class="fa fa-bell fa-fw"></i>  Notification
+    </a>
+</li>-->
+@*<li class="nav-item mb-2">
+        <a class="nav-link text-info loaderbtn" href="/Employee/ChangePassword">
+            <i class="fa fa-key fa-fw"></i>  Change Password
+        </a>
+    </li>
+    <li class="nav-item mb-2">
+        <a class="nav-link text-info loaderbtn" href="/Employee/Setting">
+            <i class="fa fa-cog fa-fw"></i>  Setting
+        </a>
+    </li>*@
+<!--<li class="nav-item mb-2">
+    <a class="colps nav-link text-info" data-bs-toggle="collapse" href="#clsv" role="button" aria-expanded="false" aria-controls="clsv"><i class="fa fa-cog"></i>  Setting <i class="fa fa-angle-right d-inline-block justify-content-end"></i></a>
+    <ul class="collapse collapse1 list-unstyled" id="clsv">
+        <li class="ms-5 mt-2"><a href="/Employee/Setting" class="text-info"> <i class="fa fa-angle-right"></i> Notification</a></li>
+        <li class="ms-5 mt-2"><a href="/Employee/ChangePassword" class="text-info"> <i class="fa fa-angle-right"></i>  Change Password</a></li>
+
+    </ul>
+</li>-->
+@*<li class="nav-item mb-2">
+        <a class="nav-link text-info loaderbtn" href="/Employee/Leave">Request
+        </a>
+    </li>
+    <li class="nav-item mb-2">
+        <a class="nav-link text-info loaderbtn" href="/Employee/EmployeeDirectory">
+            <i class="fa fa-bell fa-fw"></i>  Employee Directory
+        </a>
+    </li>*@
+<!--</ul>
+        </div>
+    </div>
+</div>-->

@@ -1,0 +1,197 @@
+﻿
+@{
+    ViewBag.Title = "AppIndex";
+    Layout = "~/Views/Shared/AppMaster.cshtml";
+}
+
+
+
+<script>
+    function validateTextbox(textbox) {
+        var pattern = /^[-a-zA-Z0-9 &()"',./\n ]*$/;
+        if (!pattern.test(textbox.value)) {
+            textbox.setCustomValidity("Please enter only letters, numbers, and spaces");
+        } else {
+            textbox.setCustomValidity("");
+        }
+    }
+</script>
+@*<script>
+        $(document).ready(function () {
+            $("#employeefromdate").change(function () {
+                alert($('#employeefromdate').val());
+            })
+        })
+    </script>
+    <input type="date" class="form-control shadow-none" required id="employeefromdate" name="employeefromdate" value="2022-06-02T12:01" />*@
+<script>
+    function mail() {
+        var ml = document.getElementById("loginid").value;
+        var mll = ml.substr(ml.lastIndexOf(".") + 1);
+        if (ml != null && ml != "") {
+            if (ml.indexOf(".") != -1) {
+                if (mll != null && mll != "") {
+                    spmail.innerText = "";
+                    return true;
+                }
+                else {
+                    spmail.innerText = "Please enter a valid email address ex:- john@gmail.com";
+                    spmail.style.color = "red";
+                    return false;
+                }
+
+            }
+            else {
+                spmail.innerText = "Please enter a valid email address ex:- john@gmail.com";
+                spmail.style.color = "red";
+                return false;
+            }
+        }
+        else {
+            spmail.innerText = "Please enter your email";
+            spmail.style.color = "red";
+            return false;
+        }
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $('#loginid').attr('required', true);
+        $("#dvmobile").hide();
+        $("#btnmail").hide();
+        $("#btnmail").click(function () {
+            $("#btnmail").hide();
+            $("#btnphone").show();
+            $("#mh1").text("Login Via Email");
+            /*$("#loginid").attr("placeholder", "Enter Email id");*/
+            $("#dvmail").show(); $("#dvmobile").hide();
+            $('#loginid').attr('required', true);
+            $('#mobile').removeAttr('required');
+            $("#password").val("");
+            $('#mobile').val("");
+
+        })
+        $("#btnphone").click(function () {
+            $("#btnphone").hide();
+            $("#btnmail").show();
+            $("#mh1").text("Login Via Mobile");
+            /* $("#loginid").attr("placeholder", "Enter Mobile number");*/
+            $("#dvmail").hide(); $("#dvmobile").show();
+            $('#mobile').attr('required', true);
+            $('#loginid').removeAttr('required');
+            $("#password").val("");
+            $('#loginid').val("");
+        })
+    })
+
+</script>
+<script>
+    $(document).ready(function () {
+        $("#togglePassword").click(function () {
+            var passwordField = $("#password");
+            var passwordFieldType = passwordField.attr("type");
+
+            // Toggle the password field type
+            if (passwordFieldType === "password") {
+                passwordField.attr("type", "text");
+                $(this).html('<i class="fa fa-eye-slash"></i>');
+            } else {
+                passwordField.attr("type", "password");
+                $(this).html('<i class="fa fa-eye"></i>');
+            }
+        });
+    });
+</script>
+
+<div class="justify-content-center row-cols-1 row-cols-sm-3 d-flex ">
+    <div class="col p-1">
+        @{
+            string token = "";
+            if (TempData["token"] != null && TempData["token"] != "")
+            {
+                token = TempData["token"] + "";
+            }
+            else
+            {
+
+                token = ViewBag.token;
+            }
+        }
+        <img src="~/Content/Img/presencelogo.png" class="img img-fluid mx-auto d-block" style="height:200px;width:200px" />
+        <div class="row card border-0 ps-0 pe-0 me-0 ms-0 mt-5 bg-light-subtle" style="margin: 0px;box-shadow: 0px -10px 10px -10px rgba(0, 0, 0, 0.1); ">
+            <div class="card-body me-0 ms-0">
+                <form class="needs-validation" novalidate action="/Home/AppIndex?token=@token" method="post" onsubmit="return">
+                    <div class="mb-4 text-center"><h2 id="mh1">Login Via Email</h2></div>
+                    <div class="mb-4 text-warning"><h6>@ViewBag.msg</h6></div>
+                    @*<div class="mb-4 text-warning"><h6>@ViewBag.token</h6></div>*@
+                    <div class="input-group mb-3" id="dvmail">
+
+                        <input type="hidden" id="htokenid" name="htokenid" value="@token" />
+                        <input type="email" class="form-control shadow-none" name="loginid" id="loginid" placeholder="Enter Email id">
+                        <span class="input-group-addon">
+                            <span class="btn btn-secondary border-1 rounded-0" style="width:50px">
+                                <i class="fa fa-envelope"></i>
+                            </span>
+                        </span>
+                        <div class="invalid-feedback">
+                            Please enter a valid email address ex:- john@gmail.com
+                        </div>
+                    </div>
+                    <span id="spmail"></span>
+                    <div class="input-group mb-3" id="dvmobile">
+                        <input type="text" class="form-control shadow-none" name="mobile" id="mobile" placeholder="Enter Mobile number" onkeyup="validateTextbox(this)" pattern="^[0-9]{10}$" title="Please enter a valid 10-digit mobile number">
+                        <span class="input-group-addon">
+                            <span class="btn btn-secondary border-1 rounded-0" style="width:50px">
+                                <i class="fa fa-mobile"></i>
+                            </span>
+                        </span>
+                        <div class="invalid-feedback">
+                            Please Enter Mobile Number
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <input type="password" class="form-control shadow-none" name="password" id="password" required placeholder="Enter Password">
+                        <span class="input-group-addon">
+                            <span class="btn btn-secondary border-1 rounded-0" type="button" id="togglePassword" style="width:50px">
+                                <i class="fa fa-eye"></i>
+                            </span>
+                        </span>
+                        <div class="invalid-feedback">
+                        </div>
+                    </div>
+                    <div class="mb-1">
+                        <input type="checkbox" class="form-check-input" id="rememberMe">
+                        <span class="text-truncate"><span>Remember me</span></span>
+                        <span class="float-end">
+                            <a href="/Home/AppForgotPassword?token=@token" class="text-decoration-none text-dark text-truncate">
+                                <i class="fa fa-lock fa-sm"></i>  <span>Forgot Password?</span>
+                            </a>
+                        </span>
+                    </div>
+                    <div class="mb-3">
+                        <button type="button" class="bg-light-subtle border-0 pe-auto text-truncate" id="btnphone">
+                            <i class="fa fa-phone fa-sm"></i>  <span>Login via Phone</span>
+                        </button>
+                        <button type="button" class="bg-light-subtle border-0 pe-auto text-truncate" id="btnmail">
+                            <i class="fa fa-envelope fa-sm"></i>  <span>Login via Email</span>
+                        </button>
+                        <span class="float-end">
+                            <a href="/Home/AppLoginWithOtp?token=@token" class="text-decoration-none text-dark text-truncate">
+                                <i class="fa fa-comment fa-sm"></i>  <span>Login via OTP</span>
+                            </a>
+                        </span>
+                    </div>
+                    <div class="d-grid col-4 mx-auto">
+                        <button type="submit" class="btn btn-info text-truncate loaderbtn">Login</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+

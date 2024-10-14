@@ -1,0 +1,1250 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Application Form</title>
+    <link href="~/Content/Img/Growfast Logo.png" rel="icon" />
+
+    <link href="~/Content/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/Content/css/bootstrap.bundle.min.js"></script>
+    <link href="~/Content/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+
+    <link href="~/Content/css/CustomCss.css" rel="stylesheet" />
+    <link href="~/Content/css/hover-min.css" rel="stylesheet" />
+    <link href="~/Content/css/nav.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-3.4.1.js"></script>
+    <link href="~/Content/datatable/datatables.min.css" rel="stylesheet" />
+    <script src="~/Content/datatable/datatables.min.js"></script>
+    <script src="~/Content/datatable/pdfmake.min.js"></script>
+    <script src="~/Content/datatable/jszip.min.js"></script>
+    <script src="~/Content/datatable/vfs_fonts.js"></script>
+    <script src="~/Content/datatable/dataTables.buttons.min.js"></script>
+    <script src="~/Content/datatable/buttons.print.min.js"></script>
+    <script src="~/Content/datatable/buttons.html5.min.js"></script>
+
+    <script src="~/Content/css/dist_xlsx.full.min.js"></script>
+    <link href="~/Content/Select2/select2.min.css" rel="stylesheet" />
+    <script src="~/Content/Select2/select2.min.js"></script>
+
+    <script src="~/Content/css/moment.min.js"></script>
+    <link href="~/Content/css/daterangepicker.css" rel="stylesheet" />
+    <script src="~/Content/css/daterangepicker.min.js"></script>
+    <link href="~/Content/css/mob.css" rel="stylesheet" />
+
+    <!-- Sweet Alert 2 -->
+    <link href="~/Content/css/sweetalert2.min.css" rel="stylesheet" />
+    <script src="~/Content/css/sweetalert2.all.min.js"></script>
+    <link href="~/Content/tooglebutton/bootstrap5-toggle.min.css" rel="stylesheet" />
+    <script src="~/Content/tooglebutton/bootstrap5-toggle.ecmas.min.js"></script>
+    <script src="~/Content/css/mailvalid.js"></script>
+    <script>
+        $(document).ready(function () {
+            var today = new Date();
+            var year = today.getFullYear();
+            var month = String(today.getMonth() + 1).padStart(2, '0');
+            var day = String(today.getDate()).padStart(2, '0');
+            var currentDate = year + '-' + month + '-' + day;
+            $(".pastdate").prop('max', currentDate);
+            $(".futuredate").prop('min', currentDate);
+        });
+    </script>
+
+    <script>
+        window.onload = function () {
+            // Get the ID value from the URL
+            var urlParams = new URLSearchParams(window.location.search);
+            var id = urlParams.get('id');
+
+            // Set the value of the 'id' input field
+            document.getElementById('hid').value = id;
+        };
+    </script>
+
+    <script>
+        function validateTextbox(textbox) {
+            /*var pattern = /^[-a-zA-Z0-9 &()"',./\n_ ]*$/;*/
+            var pattern = /^[a-zA-Z0-9][-a-zA-Z0-9 &()"',./\n_ ]*$/;
+            if (!pattern.test(textbox.value)) {
+                textbox.setCustomValidity("Please enter only letters, numbers, and spaces");
+            } else {
+                textbox.setCustomValidity("");
+            }
+        }
+    </script>
+    <script>
+        function validateTextbox1(textbox) {
+            var pattern = /^(?:[a-zA-Z0-9][-a-zA-Z0-9 &()"',./\n_ ]*|)$/;
+            if (!pattern.test(textbox.value)) {
+                textbox.setCustomValidity("");
+            } else {
+                textbox.setCustomValidity("");
+            }
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            // Example starter JavaScript for disabling form submissions if there are invalid fields
+            (function () {
+                'use strict'
+                // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                var forms = document.querySelectorAll('.needs-validation')
+                // Loop over them and prevent submission
+                Array.prototype.slice.call(forms)
+                    .forEach(function (form) {
+                        form.addEventListener('submit', function (event) {
+                            if (!form.checkValidity()) {
+                                event.preventDefault()
+                                event.stopPropagation()
+                            }
+                            form.classList.add('was-validated')
+                        }, false)
+                    })
+            })()
+        })
+    </script>
+    <script>
+        function validateNumericInput(inputElement, maxDigits, spid) {
+            // Get the current input value as a string
+            const errorMessage = document.getElementById(spid);
+            let inputValue = inputElement.value.toString();
+
+            // Remove any non-digit characters (e.g., commas, periods, except one dot)
+            inputValue = inputValue.replace(/[^0-9.]/g, '');
+
+            // If there is more than one dot, remove all but the first one
+            const dotIndex = inputValue.indexOf('.');
+            if (dotIndex !== -1) {
+                const beforeDot = inputValue.slice(0, dotIndex);
+                const afterDot = inputValue.slice(dotIndex + 1);
+                inputValue = beforeDot + '.' + afterDot.replace(/\./g, '');
+            }
+            //Truncate the value to the specified maximum number of digits
+            if (inputValue.length > maxDigits) {
+                inputValue = inputValue.slice(0, maxDigits);
+            }
+
+            // Update the input value with the sanitized and truncated value
+            inputElement.value = inputValue;
+
+            // Check if the sanitized value is different from the original input
+            if (inputValue.length > maxDigits) {
+                errorMessage.textContent = 'Please enter no more than ' + maxDigits + ' digits.';
+            } else {
+                errorMessage.textContent = '';
+            }
+        }
+    </script>
+    <script>
+        function validateDates() {
+            var fromDate = document.getElementById("Edufromdate").value;
+            var toDate = document.getElementById("EduTodate").value;
+
+            if (toDate < fromDate) {
+                document.getElementById("toDateError").style.display = "block";
+                setTimeout(function () {
+                    document.getElementById("toDateError").style.display = "none";
+                }, 5000); // Hide the error message after 4 seconds
+                return false;
+            }
+            return true;
+        }
+        document.getElementById("formId").addEventListener("submit", function (event) {
+            setTimeout(function () {
+                if (!validateDates()) {
+                    event.preventDefault();
+                }
+          }, 2000); // Delay of 1 second
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            // Get today's date
+            var today = new Date();
+
+            // Calculate the date 18 years ago
+            var maxDate = new Date(today.getFullYear() - 17, today.getMonth(), today.getDate());
+
+            // Set the maximum date
+            $("#empdob").attr("max", maxDate.toISOString().split("T")[0]);
+        });
+    </script>
+    <script>
+        function updateJobTitles() {
+            var department = $("#Appliedfor").val();
+            if (department) {
+                $.ajax({
+                    url: '/HR/GetJobTitles', // Replace this with your actual controller endpoint
+                    type: 'GET', // or 'POST' depending on your implementation
+                    data: { department: department },
+                    success: function (response) {
+                        $('#Jobtittlefor').empty();
+                        $('#Jobtittlefor').append($('<option>').text('Select one'));
+                        $.each(response, function (index, item) {
+                            $('#Jobtittlefor').append($('<option>').text(item).attr('value', item));
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(error);
+                    }
+                });
+            }
+        }
+    </script>
+</head>
+<body class="custom-body">
+    @using System.Data;
+    @{ DbManager db = new DbManager();}
+    @using System;
+    @{
+        // Check if 'id' is not null or empty
+        var hiiu = Request.QueryString["id"];
+        if (!string.IsNullOrEmpty(hiiu))
+        {
+            // Construct the SQL query using the 'id' parameter
+            string query45r = "select * from tbl_HRM where workStatus = 'Send' and Id = '" + hiiu + "'";
+            DataTable dtr = db.GetAllRecord(query45r);
+            if (dtr.Rows.Count > 0)
+            {
+                <div class="container-fluid">
+                    <div class="row mt-1 mb-3 nevigationstrip">
+                        <div class="col">
+                            <label class="text-uppercase text-truncate trutext">CANDIDATE <i class="fa fa-angle-double-right"></i>APPLICATION FORM </label>
+                        </div>
+                        <div class="col text-right d-flex justify-content-end">
+                            <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+                        </div>
+                        <div id="alert-container"></div>
+                    </div> <div class="" style="margin:30px">
+                        <form action="/Home/NewCanAppli" method="post" class="needs-validation" novalidate onsubmit="return" enctype="multipart/form-data" id="empform">
+                            <div class="row nevigationstripblue mt-2 mb-2"> <label class="text-uppercase text-light">PERSONAL DETAILS</label></div>
+                            <div class="row row-cols-1 row-cols-sm-3 border border-1 border-dark rounded-2 pb-3">
+                                @{
+                                    // Check if 'id' is not null or empty
+                                    var hids = Request.QueryString["id"];
+                                    if (!string.IsNullOrEmpty(hids))
+                                    {
+                                        // Construct the SQL query using the 'id' parameter
+                                        string query45 = "select * from tbl_HRM where Id='" + hids + "'";
+                                        DataTable dt = db.GetAllRecord(query45);
+
+                                        if (dt.Rows.Count > 0)
+                                        {
+                                            <div class="col mb-1">
+                                                <h6 class="mt-2"> Candidate Name <i class="text-danger">*</i></h6>
+                                                <input type="text" class="form-control" id="canname" value="@dt.Rows[0]["canname"]" name="canname" readonly oninput="validateTextbox(this)" pattern="^[a-zA-Z ]*$" title="Please enter only letters, and spaces" autocomplete="off" placeholder="Enter Candidate Name" maxlength="30" required />
+                                                <div class="invalid-feedback">
+                                                    Please enter only letters, and spaces
+                                                </div>
+                                            </div>
+                                            <div class="col mb-1">
+                                                <h6 class="mt-2">Mobile <i class="text-danger">*</i></h6>
+                                                <input type="text" class="form-control " id="canmobile" value="@dt.Rows[0]["canmobile"]" name="canmobile" readonly oninput="validateNumericInput(this,10,'spnum')" pattern="^[6-9][0-9]*$" title="Please enter only number" autocomplete="off" placeholder="Enter Mob no" maxlength="10" required />
+                                                <div class="invalid-feedback">
+                                                    Please enter only letters, and spaces
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="col mb-1">
+                                                <h6 class="mt-2"> Candidate Name <i class="text-danger">*</i></h6>
+                                                <input type="text" class="form-control " id="canname" name="canname" readonly oninput="validateTextbox(this)" pattern="^[a-zA-Z ]*$" title="Please enter only letters, and spaces" autocomplete="off" placeholder="Enter Candidate Name" maxlength="30" required />
+                                                <div class="invalid-feedback">
+                                                    Please enter only letters, and spaces
+                                                </div>
+                                            </div>
+                                            <div class="col mb-1">
+                                                <h6 class="mt-2">Mobile <i class="text-danger">*</i></h6>
+                                                <input type="text" class="form-control " id="canmobile" name="canmobile" readonly oninput="validateNumericInput(this,10,'spnum')" pattern="^[6-9][0-9]*$" title="Please enter only number" autocomplete="off" placeholder="Enter Mob no" maxlength="10" required />
+                                                <div class="invalid-feedback">
+                                                    Please enter only letters, and spaces
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div class="col mb-1">
+                                            <h6 class="mt-2"> Candidate Name <i class="text-danger">*</i></h6>
+                                            <input type="text" class="form-control" id="canname" name="canname" readonly oninput="validateTextbox(this)" pattern="^[a-zA-Z ]*$" title="Please enter only letters, and spaces" autocomplete="off" placeholder="Enter Candidate Name" maxlength="30" required />
+                                            <div class="invalid-feedback">
+                                                Please enter only letters, and spaces
+                                            </div>
+                                        </div>
+                                        <div class="col mb-1">
+                                            <h6 class="mt-2">Mobile <i class="text-danger">*</i></h6>
+                                            <input type="text" class="form-control " id="canmobile" name="canmobile" readonly oninput="validateNumericInput(this,10,'spnum')" pattern="^[6-9][0-9]*$" title="Please enter only number" autocomplete="off" placeholder="Enter Mob no" maxlength="10" required />
+                                            <div class="invalid-feedback">
+                                                Please enter only letters, and spaces
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                <div class="col mb-1">
+                                    <h6 class="mt-2">Father's/Husband's Name</h6>
+                                    <input type="text" class="form-control shadow-none" id="cangardian" name="cangardian" autocomplete="off" placeholder="Enter Father's/Husband's Name" oninput="validateTextbox(this)" pattern="^[a-zA-Z. ]*$" title="Please enter only letters, and spaces" maxlength="30" required />
+                                    <div class="invalid-feedback">
+                                        Please enter only letters, and spaces
+                                    </div>
+                                </div>
+                                <div class="col mb-1">
+                                    <h6 class="mt-2">Email Id <i class="text-danger">*</i></h6>
+                                    <input type="email" class="form-control shadow-none" id="canmail" autocomplete="off" name="canmail" placeholder="Enter Email" required oninput="validateEmail('empmail','spmail')" maxlength="30" />
+                                    <div class="invalid-feedback" id="spmail">
+                                        Please enter a valid email address ex:- john@gmail.com
+                                    </div>
+                                </div>
+                                <div class="col mb-1">
+                                    <h6 class="mt-2">DOB<i class="text-danger">*</i></h6>
+                                    <input type="date" class="form-control shadow-none pastdate" id="candob" name="candob" placeholder="dd/mm/yyyy" required onchange="calculateAge()" />
+                                    <div class="invalid-feedback">
+                                        Please Enter valid date only / symbol is allowed Ex:dd/mm/yyyy
+                                    </div>
+                                </div>
+                                <div class="col mb-1">
+                                    <h6 class="mt-2">Age <i class="text-danger">*</i></h6>
+                                    <input type="text" class="form-control shadow-none" id="canage" name="canage" autocomplete="off" placeholder="Enter Age" readonly />
+                                    <div class="invalid-feedback">
+                                        Please Enter valid letter,number and space.
+                                    </div>
+                                </div>
+                                <div class="mb-1">
+                                    <h6 class="mt-2">Gender <i class="text-danger">*</i></h6>
+                                    <select class="form-select shadow-none" id="cangender" name="cangender" required>
+                                        <option selected disabled value="">Select One</option>
+                                        <option>Male</option>
+                                        <option>Female</option>
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Please select Gender
+                                    </div>
+                                </div>
+                                <div class="mb-1">
+                                    <h6 class="mt-2">Marital Type</h6>
+                                    <select class="form-select shadow-none" id="canmaritalstatus" name="canmaritalstatus" onchange="family();">
+                                        <option selected disabled value="">Select One</option>
+                                        <option>Married</option>
+                                        <option>UnMarried</option>
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Please select a Marital Type
+                                    </div>
+                                </div>
+                                <div class="mb-1">
+                                    <h6 class="mt-2">Nationality <i class="text-danger">*</i></h6>
+                                    <select class="form-select shadow-none" id="canNationality" name="canNationality" required>
+                                        <option selected disabled value="">Select One</option>
+                                        <option>India</option>
+                                        @*<option>America</option>
+                                            <option>Canada</option>
+                                            <option>United Kingdom</option>
+                                            <option>Australia</option>
+                                            <option>Germany</option>
+                                            <option>France</option>
+                                            <option>China</option>
+                                            <option>Japan</option>
+                                            <option>Russia</option>*@
+                                        <!-- Add more options as needed -->
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Please select correct value.
+                                    </div>
+                                </div>
+                                <div class="col mb-1">
+                                    <h6 class="mt-2">Religion <i class="text-danger">*</i></h6>
+                                    <select class="form-select shadow-none" id="canReligion" name="canReligion" autocomplete="off" placeholder="Enter Religion">
+                                        <option>Hinduism</option>
+                                        <option>Judaism</option>
+                                        <option>Buddhism</option>
+                                        <option>Islam</option>
+                                        <option>Christianity</option>
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Please enter only letters , / . and spaces
+                                    </div>
+                                </div>
+
+                                <div class="mb-1">
+                                    @*@{ var hid = Request.QueryString["id"];
+
+                                        if (!string.IsNullOrEmpty(hid))
+                                        {
+                                            <input type="hidden" id="hid" name="hid"/>
+                                            Session["TemporaryId"] = hid;
+                                            var hidsd = Session["TemporaryId"];
+
+                                        } }*@
+                                    <input type="hidden" id="hid" name="hid" />
+                                    <h6 class="mt-2">Apply for Department<i class="text-danger">*</i></h6>
+                                    <select class="form-select shadow-none mt-1" id="Appliedfor" name="Appliedfor" onchange="updateJobTitles()" required>
+                                        <option selected disabled value="">Select one</option>
+                                        @{
+                                            string queryo = "select * from tbl_department";
+                                            DataTable dto = db.GetAllRecord(queryo);
+                                            if (dto.Rows.Count > 0)
+                                            {
+                                                for (int i = 0; i < dto.Rows.Count; i++)
+                                                {
+                                                    if (dto.Rows[i]["Status"] + "" == "Active")
+                                                    {
+                                                        <option>@dto.Rows[i]["Departmant"]</option>
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Please select a valid User type
+                                    </div>
+                                </div>
+                                <div class="col mb-1">
+                                    <h6 class="mt-2">Job Title </h6>
+                                    <select class="form-select shadow-none" id="Jobtittlefor" name="Jobtittlefor" required>
+                                        <option>Select one</option>
+                                        <!-- Options will be populated dynamically using JavaScript -->
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Please select a valid option.
+                                    </div>
+                                </div>
+                                <div class="col mb-1">
+                                    <h6 class="mt-2">Upload image</h6>
+                                    <input type="file" class="form-control shadow-none" name="canimage" id="canimage" accept="image/*" />
+                                    @*<input type="hidden" class="form-control shadow-none" name="filname" id="filname" required />*@
+                                    <div class="invalid-feedback">
+                                        Please upload an image file.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row nevigationstripblue mt-2 mb-2"> <h6 class="text-uppercase text-light">Permanent Address</h6></div>
+                            <div class="row row-cols-1 row-cols-sm-4 border border-1 border-dark rounded-2 pb-3">
+                                <div class="col mb-1">
+                                    <h6 class="mt-2">Pincode<i class="text-danger">*</i> </h6>
+                                    <input type="text" class="form-control shadow-none" id="Ppincode" name="Ppincode" autocomplete="off" placeholder="Enter pincode " onkeyup="getStateCityDetailss()" oninput="validateNumericInput(this,6,'spnum')" pattern="^[0-9 ]*$" title="Please enter only letters, and spaces" maxlength="6" required />
+                                    <div class="invalid-feedback">
+                                        Please enter only letters , / . and spaces
+                                    </div>
+                                </div>
+                                <div class="col mb-1">
+                                    <h6 class="mt-2">City <i class="text-danger">*</i></h6>
+                                    <input type="text" class="form-control shadow-none" id="Pcity" name="Pcity" autocomplete="off" required placeholder="Enter Address" oninput="validateTextbox(this)" pattern="^[a-zA-Z,/. ]*$" title="Please enter only letters, and spaces" maxlength="200" readonly />
+                                    <div class="invalid-feedback">
+                                        Please enter only letters , / . and spaces
+                                    </div>
+                                </div>
+                                <div class="col mb-1">
+                                    <h6 class="mt-2">State<i class="text-danger">*</i></h6>
+                                    <input type="text" class="form-control shadow-none" id="Pstate" name="Pstate" autocomplete="off" placeholder="Enter state" oninput="validateTextbox(this)" pattern="^[a-zA-Z,/. ]*$" title="Please enter only letters, and spaces" maxlength="30" readonly />
+                                    <div class="invalid-feedback">
+                                        Please enter only letters , / . and spaces
+                                    </div>
+                                </div>
+                                <div class="mb-1">
+                                    <h6 class="mt-2">Country <i class="text-danger">*</i></h6>
+                                    <select class="form-select shadow-none" id="Pcountry" name="Pcountry" autocomplete="off" required>
+                                        <option selected disabled value="">Select One</option>
+                                        <option>India</option>
+                                        @*<option>United States</option>
+                                            <option>Canada</option>
+                                            <option>United Kingdom</option>
+                                            <option>Australia</option>
+                                            <option>Germany</option>
+                                            <option>France</option>
+                                            <option>China</option>
+                                            <option>Japan</option>
+                                            <option>Russia</option>
+                                            <option>Brazil</option>
+                                            <option>South Africa</option>
+                                            <option>Italy</option>
+                                            <option>Spain</option>
+                                            <option>Mexico</option>*@
+                                        <!-- Add more options as needed -->
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Please select a country.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row nevigationstripblue mt-2 mb-2"> <h6 class="text-uppercase text-light">Temprory Address</h6></div>
+                            <div class="row row-cols-1 row-cols-sm-4 border border-1 border-dark rounded-2 pb-3">
+                                <div class="col mb-1">
+                                    <h6 class="mt-2">Pincode</h6>
+                                    <input type="text" class="form-control shadow-none" id="Tpincode" name="Tpincode" placeholder="Enter pincode" oninput="validateNumericInput(this,6,'spnum')" pattern="^[0-9 ]*$" onkeyup="getStateCityDetails()" title="Please enter only letters, and spaces" maxlength="6" autocomplete="off" />
+                                    <div class="invalid-feedback">
+                                        Please enter only letters , / . and spaces
+                                    </div>
+                                </div>
+                                <div class="col mb-1">
+                                    <h6 class="mt-2">City</h6>
+                                    <input type="text" class="form-control shadow-none" id="Tcity" name="Tcity" autocomplete="off" placeholder="Enter Address" oninput="validateTextbox(this)" pattern="^[a-zA-Z,/. ]*$" title="Please enter only letters, and spaces" maxlength="200" readonly />
+                                    <div class="invalid-feedback">
+                                        Please enter only letters , / . and spaces
+                                    </div>
+                                </div>
+                                <div class="col mb-1">
+                                    <h6 class="mt-2">State</h6>
+                                    <input type="text" class="form-control shadow-none" id="Tstate" name="Tstate" placeholder="Enter state" oninput="validateTextbox(this)" pattern="^[a-zA-Z,/. ]*$" title="Please enter only letters, and spaces" maxlength="30" autocomplete="off" readonly />
+                                    <div class="invalid-feedback">
+                                        Please enter only letters , /. and spaces
+                                    </div>
+                                </div>
+                                <div class="mb-1">
+                                    <h6 class="mt-2">Country</h6>
+                                    <select class="form-select shadow-none" id="Tcountry" name="Tcountry" autocomplete="off">
+                                        <option selected disabled value="">Select One</option>
+                                        <option>India</option>
+                                        @*<option>United States</option>
+                                            <option>Canada</option>
+                                            <option>United Kingdom</option>
+                                            <option>Australia</option>
+                                            <option>Germany</option>
+                                            <option>France</option>
+                                            <option>China</option>
+                                            <option>Japan</option>
+                                            <option>Russia</option>
+                                            <option>Brazil</option>
+                                            <option>South Africa</option>
+                                            <option>Italy</option>
+                                            <option>Spain</option>
+                                            <option>Mexico</option>*@
+                                        <!-- Add more options as needed -->
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Please select Work Premise
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row nevigationstripblue mt-2 mb-2"> <h6 class="text-uppercase text-light">DETAILS OF EDUCATIONAL QUALIFICATION</h6></div>
+                            <div class="row border border-1 border-dark rounded-2 ">
+                                <span id="spotherresource"></span>
+                                <div class="row row-cols-1 row-cols-sm-6 pb-3">
+                                    @{
+                                        var currentYear = DateTime.Now.Year;
+                                        var startYear = 1950; // Change this if you want a different start year
+                                    }
+
+                                    <div class="col mb-1">
+                                        <h6 class="mt-2">From </h6>
+                                        <select class="form-select shadow-none" id="Edufromdate" name="Edufromdate" title="Enter start year">
+                                            <!-- Populate years dynamically using Razor syntax -->
+                                            @for (var year = currentYear; year >= startYear; year--)
+                                            {
+                                                <option value="@year">@year</option>
+                                            }
+                                        </select>
+                                        <div class="invalid-feedback">
+                                            Please enter only letters, and spaces
+                                        </div>
+                                    </div>
+                                    <div class="col mb-1 ">
+                                        <h6 class="mt-2">To</h6>
+                                        <select class="form-select shadow-none" id="EduTodate" name="EduTodate" title="Enter End date">
+                                            <!-- Populate years dynamically using Razor syntax -->
+                                            @for (var year = currentYear; year >= startYear; year--)
+                                            {
+                                                <option value="@year">@year</option>
+                                            }
+
+
+
+                                        </select>
+                                        <div class="invalid-feedback" id="toDateError" style="display: none;">
+                                            To date cannot be earlier than From date
+                                        </div>
+                                    </div>
+                                    <div class="col mb-1 ">
+                                        <h6 class="mt-2">Degree<i class="text-danger">*</i></h6>
+                                        <input type="text" class="form-control shadow-none" id="degree" name="degree" autocomplete="off" placeholder="Enter degree" oninput="validateTextbox1(this)" pattern="^[a-zA-Z ]*$" title="Please enter only letters, and spaces" maxlength="25" />
+                                        <div class="invalid-feedback">
+                                            Please enter only letters, and spaces
+                                        </div>
+                                    </div>
+                                    <div class="col mb-2">
+                                        <h6 class="mt-2">University/Board<i class="text-danger">*</i></h6>
+                                        <input type="text" class="form-control shadow-none" id="University" name="University" autocomplete="off" placeholder="Enter Unversity/Board" oninput="validateTextbox1(this)" pattern="^[A-Za-z0-9 ]*$" title="Please enter only letters, and spaces" />
+                                        <div class="invalid-feedback">
+                                            Please enter only letter,number and space.
+                                        </div>
+                                    </div>
+                                    <div class="col mb-1">
+                                        <h6 class="mt-2">Division</h6>
+                                        <input type="text" class="form-control shadow-none" id="division" name="division" autocomplete="off" placeholder="Enter Division" oninput="validateTextbox1(this)" pattern="^[A-Za-z0-9 ]*$" title="Please enter only letters, and spaces" maxlength="26" />
+                                        <div class="invalid-feedback">
+                                            Please enter only number,letter and spaces.
+                                        </div>
+                                    </div>
+                                    <div class="col mb-2 text-end">
+                                        <button type="button" class="btn btn-primary btn-sm" style="margin-top:38px" onclick="return validateDates()"><i class="fa fa-plus" id="add-other-res"></i></button>
+                                    </div>
+                                </div>
+                                <div class="row row-cols-1 row-cols-sm-1">
+                                    <div class="col">
+                                        <div class="col-sm-12 table-responsive">
+                                            <table class="table table-responsive" id="tblotherresource">
+                                                <thead class="thead">
+                                                    <tr>
+                                                        <th>FromYear</th>
+                                                        <th>ToYear</th>
+                                                        <th>Degree</th>
+                                                        <th>University</th>
+                                                        <th>Division</th>
+                                                        <th>Delete</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="table-other-body">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row nevigationstripblue mt-2 mb-2"> <h6 class="text-uppercase text-light">PREVIOUS EXPERIENCE</h6></div>
+                            <div class="row border border-1 border-dark rounded-2  ">
+                                <span id="spotherresource2"></span>
+                                <div class="row row-cols-1 row-cols-sm-6 pb-3">
+                                    <div class="col mb-1">
+                                        <h6 class="mt-2">Company name</h6>
+                                        <input type="text" class="form-control shadow-none" id="preComName" autocomplete="off" name="preComName" placeholder="Enter Company Name" oninput="validateTextbox1(this)" pattern="^[a-zA-Z ]*$" title="Please enter only letters, and spaces" maxlength="30" />
+                                        <div class="invalid-feedback">
+                                            Please enter only letters, and spaces
+                                        </div>
+                                    </div>
+                                    <div class="col mb-1 ">
+                                        <h6 class="mt-2">Duration</h6>
+                                        <input type="text" class="form-control shadow-none" id="preDuration" name="preDuration" autocomplete="off" oninput="validateTextbox1(this)" pattern="^[a-zA-Z0-9 ]*$" title="Please enter only letters,number and spaces" placeholder="Enter Duration" />
+                                        <div class="invalid-feedback">
+                                            Please enter a valid date
+                                        </div>
+                                    </div>
+                                    <div class="col mb-1 ">
+                                        <h6 class="mt-2">Desination</h6>
+                                        <input type="text" class="form-control shadow-none" id="preDesination" name="preDesination" autocomplete="off" placeholder="Enter desination" oninput="validateTextbox1(this)" pattern="^[a-zA-Z ]*$" title="Please enter only letters, and spaces" maxlength="25" />
+                                        <div class="invalid-feedback">
+                                            Please enter only letters, and spaces
+                                        </div>
+                                    </div>
+                                    <div class="col mb-1">
+                                        <h6 class="mt-2">Salary(Per annum) </h6>
+                                        <input type="text" class="form-control shadow-none" id="presalary" name="presalary" placeholder="Enter Salary" autocomplete="off" oninput="validateTextbox1(this,10,'spnum')" pattern="^[0-9a-z ]*$" title="Please enter only number, and spaces" />
+                                        <div class="invalid-feedback">
+                                            Please enter only number, and spaces
+                                        </div>
+                                    </div>
+                                    <div class="col mb-1">
+                                        <h6 class="mt-2">Reason of Leaving</h6>
+                                        <input type="text" class="form-control shadow-none" id="preLeavingre" name="preLeavingre" placeholder="Enter reason of Leaving" oninput="validateTextbox1(this)" pattern="^[a-zA-Z ]*$" autocomplete="off" title="Please enter only letters, and spaces" maxlength="26" />
+                                        <div class="invalid-feedback">
+                                            Please enter only letters, and spaces
+                                        </div>
+                                    </div>
+                                    <div class="col mb-2 text-end">
+                                        <button type="button" class="btn btn-primary btn-sm" style="margin-top:38px"><i class="fa fa-plus" id="add-other-res2"></i></button>
+                                    </div>
+                                </div>
+                                <div class="row row-cols-1 row-cols-sm-1">
+                                    <div class="col">
+                                        <div class="col-sm-12 table-responsive">
+                                            <table class="table table-responsive" id="tblotherresource2">
+                                                <thead class="thead">
+                                                    <tr>
+                                                        <th>CompanyName</th>
+                                                        <th>Duration</th>
+                                                        <th>Desination</th>
+                                                        <th>Salary</th>
+                                                        <th>ReasonofLeaving</th>
+                                                        <th>Delete</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="table-other-body2">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row nevigationstripblue mt-2 mb-2"> <h6 class="text-uppercase text-light">OTHER DETAILS</h6></div>
+                            <div class="row row-cols-1 row-cols-sm-3 border border-1 border-dark rounded-2 pb-3">
+                                <div class="col mb-1">
+                                    <div class="col mb-1">
+                                        <h6 class="mt-2">Do you own a vehicle?<i class="text-danger">*</i></h6>
+                                        <select class="form-select shadow-none" id="vehicle" name="vehicle" onchange="toggleLicenceNo(this)" autocomplete="off" required>
+                                            <option selected disabled value="">Select one</option>
+                                            <option>Yes</option>
+                                            <option>No</option>
+                                        </select>
+                                        <div class="invalid-feedback">
+                                            Please select a valid status.
+                                        </div>
+                                    </div>
+                                    <div class="col mb-1" id="VehicleNoField" style="display: none;">
+                                        <h6 class="mt-2">Vehicle No</h6>
+                                        <input type="text" class="form-control shadow-none" id="Vehicleno" name="Vehicleno" autocomplete="off" placeholder="Enter Vehicle No" oninput="validateAlphanumericInput(this)" pattern="^[A-Z0-9]*$" title="Please enter only capital letters and numbers" maxlength="20" />
+                                        <div class="invalid-feedback">
+                                            Please enter only capital letters and numbers.
+                                        </div>
+                                    </div>
+                                    <div class="col mb-1" id="licenceNoField" style="display: none;">
+                                        <h6 class="mt-2">Licence No</h6>
+                                        <input type="text" class="form-control shadow-none" id="Licenceno" name="Licenceno" autocomplete="off" placeholder="Enter Licence No" oninput="validateAlphanumericInput(this)" pattern="^[A-Z0-9]*$" title="Please enter only capital letters and numbers" maxlength="20" />
+                                        <div class="invalid-feedback">
+                                            Please enter only capital letters and numbers.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col mb-1">
+                                    <div class="col mb-1">
+                                        <h6 class="mt-2">Reference if any ?<i class="text-danger">*</i></h6>
+                                        <select class="form-select shadow-none" id="reference" name="reference" onchange="toggleReferralFields(this)" autocomplete="off" required>
+                                            <option selected disabled value="">Select one</option>
+                                            <option>Yes</option>
+                                            <option>No</option>
+                                        </select>
+                                        <div class="invalid-feedback">
+                                            Please select a valid status.
+                                        </div>
+                                    </div>
+                                    <div class="col mb-1" id="referralFields1" style="display: none;">
+                                        <h6 class="mt-2">Referral Name</h6>
+                                        <input type="text" class="form-control shadow-none" id="referalName" name="referalName" autocomplete="off" placeholder="Enter Name" oninput="validateTextbox1(this)" pattern="^[a-zA-Z ]*$" title="Please enter only letters and spaces" />
+                                        <div class="invalid-feedback">
+                                            Please enter only letters and spaces.
+                                        </div>
+                                    </div>
+                                    <div class="col mb-1" id="referralFields2" style="display: none;">
+                                        <h6 class="mt-2">Referral Mob</h6>
+                                        <input type="text" class="form-control shadow-none" id="referalMob" name="referalMob" autocomplete="off" placeholder="Enter Mob no" oninput="validateNumericInput(this,10,'spnum')" pattern="^[0-9]*$" title="Please enter only numbers and spaces" />
+                                        <div class="invalid-feedback">
+                                            Please enter only numbers and spaces.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col mb-1">
+                                    <h6 class="mt-2">Upload Resume<i class="text-danger">*</i></h6>
+                                    <input type="file" class="form-control shadow-none" name="upresume" id="upresume" accept=".pdf" required />
+                                    <div class="invalid-feedback">
+                                        Please upload a file between 50 KB and 500 KB in size, in .pdf, .doc, or .docx format.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row row-cols-1 row-cols-sm-3 mb-5 mt-4 pb-5">
+                                <div class="col"> <span id="spotherresource3"></span></div>
+                                <div class="col mb-1 justify-content-center d-flex">
+                                    <button type="button" class="btn btncolor shadow-none fs-6" id="btnsub" style="width:100px" onclick="return validateDates()"><i class="fa fa-check"></i> Submit</button>
+                                </div>
+                                <div class="col"></div>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            }
+            else
+            {
+                @*<span style="color:red"> Already submitted</span>*@
+                <div class="centered-div" style="margin-top:200px">
+                    <h6>Thank you!</h6>
+                    <p>Form already submitted.</p>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="centered-div" style="margin-top:200px">
+                <h6>Thank you!</h6>
+                <p>
+                    Thanks for giving your valuable time.
+                </p>
+            </div>
+
+        }
+    }
+    <style>
+        .custom-body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0; /* Optional background color for the body */
+        }
+
+        .custom-html {
+            /* Additional styles specific to the html */
+        }
+
+        .centered-div {
+            color: black;
+            background-color: #c7f2e7;
+            height: 200px;
+            width: 300px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+            .centered-div h6 {
+                margin: 10px 0;
+                padding: 5px;
+                font-size: 1.2em;
+            }
+
+            .centered-div p {
+                margin: 10px 0;
+                padding: 5px;
+            }
+    </style>
+
+    <script>
+        function toggleLicenceNo(select) {
+            var licenceNoField = document.getElementById("licenceNoField");
+            var VehicleNoField = document.getElementById("VehicleNoField");
+            if (select.value === "Yes") {
+                licenceNoField.style.display = "block";
+                VehicleNoField.style.display = "block";
+            } else {
+                licenceNoField.style.display = "none";
+                VehicleNoField.style.display = "none";
+            }
+        }
+    </script>
+    <script>
+        function toggleReferralFields(select) {
+            var referralFields1 = document.getElementById("referralFields1");
+            var referralFields2 = document.getElementById("referralFields2");
+            if (select.value === "Yes") {
+                referralFields1.style.display = "block";
+                referralFields2.style.display = "block";
+            } else {
+                referralFields1.style.display = "none";
+                referralFields2.style.display = "none";
+            }
+        }
+    </script>
+    <script>
+        function calculateAge() {
+            var dob = document.getElementById("candob").value;
+            var dobDate = new Date(dob);
+            var today = new Date();
+            var ageDate = new Date(today - dobDate);
+            var years = ageDate.getUTCFullYear() - 1970;
+            var months = ageDate.getUTCMonth();
+
+            if (months > 12) {
+                var excessMonths = months % 12;
+                var excessYears = Math.floor(months / 12);
+                document.getElementById("canage").value = (years + excessYears) + " years " + excessMonths + " months";
+            } else {
+                document.getElementById("canage").value = years + " years " + months + " months";
+            }
+        }
+    </script>
+    <script>
+            $(document).ready(function () {
+                // Initialize selectedothValues as an empty array
+                var selectedothValues = [];
+
+                $("#tblotherresource").hide();
+                $("#add-other-res").click(function () {
+                    var Edufromdate = $("#Edufromdate").val();
+                    var EduTodate = $("#EduTodate").val();
+                    var degree = $("#degree").val();
+                    var University = $("#University").val();
+                    var division = $("#division").val(); alert(division)
+
+                    if (Edufromdate == null || Edufromdate == "" && EduTodate == null || EduTodate == "" && degree == null || degree == "" && University == null || University == "" && division == null || division == "") {
+                        // alert(fromdate)
+                        spotherresource.innerHTML = "Warning: Please fill all field( like-start year,end year,degree,University,division)";
+                        spotherresource.style.color = "red";
+                    } else if (degree == null || degree == "" && University == null || University == "" && division == null || division == "") {
+                        spotherresource.innerHTML = "Warning: Please select all field( like-degree,University,division)";
+                        spotherresource.style.color = "red";
+                    } else {
+                        var membertype1 = Edufromdate + " " + EduTodate;
+
+                        if (selectedothValues.includes(membertype1)) {
+                            spotherresource.innerHTML = "Warning: This date has been already selected. Please choose a different date.";
+                            spotherresource.style.color = "red";
+                        } else {
+                            selectedothValues.push(membertype1);
+                            spotherresource.innerHTML = "";
+                            $("#tblotherresource").show();
+
+                            var newRow = "<tr>" +
+                                "<td>" + Edufromdate + "</td>" +
+                                "<td>" + EduTodate + "</td>" +
+                                "<td>" + degree + "</td>" +
+                                "<td>" + University + "</td>" +
+                                "<td>" + division + "</td>" +
+                                "<td><i class='fa fa-trash' style='color:red;cursor:pointer' onclick='removeRowexpense(this)'></i></td>";
+
+                            $("#table-other-body").append(newRow);
+                       // Clear input fields after adding row
+                        $("#Edufromdate").val("2024");
+                        $("#EduTodate").val("2024");
+                        $("#degree").val("");
+                        $("#University").val("");
+                        $("#division").val("");
+                        }
+                    }
+                });
+            });
+            function removeRowexpense(element) {
+                var row = $(element).closest("tr");
+                row.remove();
+            }
+        </script>
+    <script>
+        $(document).ready(function () {
+            // Initialize selectedothValues as an empty array
+            var selectedothValues = [];
+            $("#tblotherresource2").hide();
+            $("#add-other-res2").click(function () {
+                var preComName = $("#preComName").val();
+                var preDuration = $("#preDuration").val();
+                var preDesination = $("#preDesination").val();
+                var presalary = $("#presalary").val();
+                var preLeavingre = $("#preLeavingre").val();
+
+                //if (preComName == null || preComName == "" && preDuration == null || preDuration == "" && preDesination == null || preDesination == "" && presalary == null || presalary == "") {
+                //    spotherresource2.innerHTML = "Warning : Please Select all field((like-company name,Duration,designation,salary)";
+                //    spotherresource2.style.color = "Red";
+                //}
+
+                //else {
+                    var membertype1 = preComName + "" + preDuration;
+
+                    if (selectedothValues.includes(membertype1)) {
+                        spotherresource2.innerHTML = "Warning : This option has been already selected. Please choose a different option.";
+                        spotherresource2.style.color = "Red";
+                    } else {
+                        selectedothValues.push(membertype1);
+
+                        spotherresource2.innerHTML = "";
+                        $("#tblotherresource2").show();
+
+                        var newRow = "<tr>" +
+                            "<td>" + preComName + "</td>" +
+                            "<td>" + preDuration + "</td>" +
+                            "<td>" + preDesination + "</td>" +
+                            "<td>" + presalary + "</td>" +
+                            "<td>" + preLeavingre + "</td>" +
+                            "<td><i class='fa fa-trash' style='color:red;cursor:pointer' onclick='removeRowexpensepre(this)'></i></td>" +
+                            "</tr>";
+                        $("#table-other-body2").append(newRow);
+                        $("#preComName").val("");
+                        $("#preDuration").val("");
+                        $("#preDesination").val("");
+                        $("#presalary").val("");
+                        $("#preLeavingre").val("");
+                    }
+               // }
+            });
+        });
+        function removeRowexpensepre(element) {
+            // Alert to check if the function is being called
+            // alert("Removing row");
+
+            var row = $(element).closest("tr");
+            row.remove();
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            $("#btnsub").click(function () {
+                // alert("ok")
+                var hid = $("#hid").val();// alert(hid)
+                var Edufromdate = $("#Edufromdate").val();
+                var EduTodate = $("#EduTodate").val();
+                var Appliedfor = $("#Appliedfor").val();
+                var canname = $("#canname").val();
+                var canmobile = $("#canmobile").val();
+                var cangardian = $("#cangardian").val();
+                var canmail = $("#canmail").val();
+                var candob = $("#candob").val();
+                var canage = $("#canage").val();
+                var cangender = $("#cangender").val();
+                var canmaritalstatus = $("#canmaritalstatus").val();
+                var canNationality = $("#canNationality").val();
+                var canReligion = $("#canReligion").val();
+                var canimage = $("#canimage")[0].files[0];
+                var Pcity = $("#Pcity").val();
+                var Ppincode = $("#Ppincode").val();
+                var Pstate = $("#Pstate").val();
+                var Pcountry = $("#Pcountry").val();
+                var Tcity = $("#Tcity").val();
+                var Tpincode = $("#Tpincode").val();
+                var Tstate = $("#Tstate").val();
+                var Tcountry = $("#Tcountry").val();
+
+                var vehicle = $("#vehicle").val();
+                var Licenceno = $("#Licenceno").val();
+                var reference = $("#reference").val();
+                var referalName = $("#referalName").val();
+                var referalMob = $("#referalMob").val();
+                var upresume = $("#upresume")[0].files[0];
+                var Vehicleno = $("#Vehicleno").val();
+                var Jobtittlefor = $("#Jobtittlefor").val();
+
+                var rowCount = $("#tblotherresource tr").length;
+                var rowCount2 = $("#tblotherresource2 tr").length;
+
+                if (Ppincode == null || Ppincode == "" || Tpincode == null || Tpincode == "" || vehicle == null || vehicle == "" || upresume == null || upresume == "" || Jobtittlefor == null || Jobtittlefor == "" || canmail == null || canmail == "" || candob == null || candob == "" || Appliedfor == null || Appliedfor == "" || degree == null || degree == "" || University == null || University == "") {
+                    spotherresource3.innerHTML = "Warning : Please check and fill all field Carefully.";
+                    spotherresource3.style.color = "Red";
+                }
+                else {
+
+                    if (Edufromdate == null || Edufromdate == "" && EduTodate == null || EduTodate == "") {
+                        spotherresource.innerHTML = "Warning : Please Enter Start date and end Date";
+                        spotherresource.style.color = "Red";
+                    }
+                    else if (rowCount >= 0 && rowCount2 >= 0) {
+                        // Hide the last two columns
+                        var restable = $("#tblotherresource").DataTable();
+                        var restable2 = $("#tblotherresource2").DataTable();
+                        var rowCount = restable.rows().count();
+                        var rowCount2 = restable2.rows().count();// alert(rowCount2)
+
+                        var resLastColumnIndex = restable.columns().count() - 1;
+                        var resLastColumnIndex2 = restable2.columns().count() - 1;
+
+                        restable.columns([resLastColumnIndex]).visible(false);
+                        restable2.columns([resLastColumnIndex2]).visible(false);
+
+                        var restableData = restable.rows().data().toArray();
+                        var restableData2 = restable2.rows().data().toArray();
+                          alert(restableData)
+                        // alert(restableData2)
+                        // Iterate over each row and remove the last column
+                        restableData.forEach(function (row) {
+                            row.pop(); // Remove the last column
+                        });
+                        restableData2.forEach(function (row) {
+                            row.pop(); // Remove the last column
+                        });
+                        //remove last one row end
+                        // Get the table headings as an array of strings, excluding the last two columns
+                        var restableHeadings = restable.columns().header().toArray().map(function (heading) {
+
+                            return heading.textContent;
+                        }).slice(0, -1); // This slices the array to exclude the last two elements
+
+                        var restableHeadings2 = restable2.columns().header().toArray().map(function (heading) {
+                            return heading.textContent;
+                        }).slice(0, -1);
+
+                        // Create an object to hold the table data and headings
+                        var restableObject = {
+                            tableHeadings: restableHeadings,
+                            tableData: restableData
+                        };
+                        var restableObject2 = {
+                            tableHeadings2: restableHeadings2,
+                            tableData2: restableData2
+                        };
+                        //alert(restableHeadings)
+                        //alert(restableData)
+                        // alert(restableObject)
+                        // Other resource table end
+                        var formData = new FormData();
+                        formData.append("restableObject", JSON.stringify(restableObject));
+                        formData.append("restableObject2", JSON.stringify(restableObject2));
+                        formData.append("hid", hid); //alert(hid)
+                        //formData.append("Edufromdate", Edufromdate);
+                        //formData.append("EduTodate", EduTodate);
+                        formData.append("Appliedfor", Appliedfor);
+                        formData.append("canname", canname);
+                        formData.append("canmobile", canmobile);
+                        formData.append("cangardian", cangardian);
+                        formData.append("canmail", canmail);
+                        formData.append("candob", candob);
+                        formData.append("canage", canage);
+                        formData.append("cangender", cangender);
+                        formData.append("canmaritalstatus", canmaritalstatus);
+                        formData.append("canNationality", canNationality);
+                        formData.append("canReligion", canReligion);
+                        formData.append("canimage", canimage);
+                        formData.append("Pcity", Pcity);
+                        formData.append("Ppincode", Ppincode);
+                        formData.append("Pstate", Pstate);
+                        formData.append("Pcountry", Pcountry);
+                        formData.append("Tcity", Tcity);
+                        formData.append("Tpincode", Tpincode);
+                        formData.append("Tstate", Tstate);
+                        formData.append("Tcountry", Tcountry);
+                        formData.append("vehicle", vehicle);
+                        formData.append("Licenceno", Licenceno);
+                        formData.append("reference", reference);
+                        formData.append("referalName", referalName);
+                        formData.append("referalMob", referalMob);
+                        formData.append("upresume", upresume);
+                        formData.append("Vehicleno", Vehicleno);
+                        formData.append("Jobtittlefor", Jobtittlefor);
+
+                        // Send the table object to the controller using AJAX
+                        $.ajax({
+                            url: '/Home/NewCanAppli',
+                            type: 'POST',
+                            data: formData,
+                            contentType: false, // Set contentType to false for FormData
+                            processData: false, // Set processData to false for FormData
+                            success: function (response) {
+                              //  alert(response);
+                               // This is likely for debugging purposes
+                                if (response == "Success") {
+                                    // Redirecting to '/Home/NewCanAppli' when response is "Success"
+                                    window.location.href = '/Home/NewCanAppli';
+                                }
+                            },
+                            error: function (xhr, status, error) {
+                                // Handle any error that occurs during the AJAX request
+                                //alert(error);
+                            }
+                        });
+                    }
+                    else {
+                    }
+                }
+            });
+        });
+    </script>
+
+    <script>
+        // Function to fetch state and city details based on pincode using postalpincode.in API
+        function getStateCityDetails() {
+            // Construct the API URL
+            var pincode = $("#Tpincode").val();
+            if (pincode.length == 6) {
+                //alert(pincode)
+                const apiUrl = `https://api.postalpincode.in/pincode/${pincode}`;
+
+                // Make a GET request to the API
+                fetch(apiUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const postOfficeData = data[0];
+                        if (postOfficeData && postOfficeData.Status === 'Success') {
+                            const state = postOfficeData.PostOffice[0].State;
+                            const district = postOfficeData.PostOffice[0].District;
+                            $("#Tstate").val(state);
+                            $("#Tcity").val(district);
+
+                            //alert(`State: ${state}, City: ${city}`);
+                        } else {
+                            //alert('Invalid pincode or data not found.');
+                            var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert"> Invalid pincode or data not found. <button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+                            $(alertElement).insertBefore('#alert-container');
+                            setTimeout(function () {
+                                $('#alert').alert('close');
+                            }, 5000);
+
+                            return false;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            }
+        }
+    </script>
+    <script>
+        // Function to fetch state and city details based on pincode using postalpincode.in API
+        function getStateCityDetailss() {
+
+            // Construct the API URL
+            var pincode = $("#Ppincode").val();
+            if (pincode.length == 6) {
+                //alert(pincode)
+                const apiUrl = `https://api.postalpincode.in/pincode/${pincode}`;
+
+                // Make a GET request to the API
+                fetch(apiUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const postOfficeData = data[0];
+                        if (postOfficeData && postOfficeData.Status === 'Success') {
+                            const state = postOfficeData.PostOffice[0].State;
+                            const district = postOfficeData.PostOffice[0].District;
+                            // const country = postOfficeData.PostOffice[0].country;
+
+                            $("#Pstate").val(state);
+                            $("#Pcity").val(district);
+                            //   $("#Pcountry").val(country);
+                            alert(`State: ${state}, City: ${city}`);
+                        } else {
+                            //alert('Invalid pincode or data not found.');
+                            var alertElement = '<div class="alert btncolorblue alert-dismissible fade show p-2" role="alert" id="alert"> Invalid pincode or data not found. <button type="button" class="btn-close mt-1 pe-2" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+                            $(alertElement).insertBefore('#alert-container');
+                            setTimeout(function () {
+                                $('#alert').alert('close');
+                            }, 5000);
+
+                            return false;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            }
+        }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var fileInputs = document.querySelectorAll('input[type="file"]');
+            fileInputs.forEach(function (input) {
+                input.addEventListener('change', function () {
+                    var files = input.files;
+                    if (files.length > 0) {
+                        var fileSize = files[0].size; // Size in bytes
+
+                        if (input.id === 'upresume') { // For the 'upresume' input
+                            var maxSize = 500 * 1024; // 500 KB in bytes
+                            var minSize = 50 * 1024; // 50 KB in bytes
+                            if (fileSize < minSize || fileSize > maxSize) {
+                                input.classList.add('is-invalid');
+                                input.value = ''; // Clear the file input
+                            } else {
+                                input.classList.remove('is-invalid');
+                            }
+                        } else if (input.id === 'canimage') { // For the 'canimage' input
+                            var imageMaxSize = 2 * 1024 * 1024; // 2 MB in bytes for image
+                            if (fileSize > imageMaxSize) {
+                                input.classList.add('is-invalid');
+                                input.value = ''; // Clear the file input
+                            } else {
+                                input.classList.remove('is-invalid');
+                            }
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+
+
+
+
+    @*<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCpVqODKtrTUdriBGR-wRVulkc7AnwBhWw&callback=initMap&libraries=maps,marker&v=beta" async defer></script>*@
+
+</body>
+</html>

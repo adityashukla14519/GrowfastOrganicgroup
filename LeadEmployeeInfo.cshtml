@@ -1,0 +1,342 @@
+﻿
+@{
+    ViewBag.Title = "LeadEmployeeInfo";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+@model List<EmpLead>
+@using System.Globalization;
+@{ int count1 = 0;}
+<script>
+    $(document).ready(function () {
+        $('#tblattendance').DataTable({
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'csv',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'pdf',
+                    className: 'btn-custom'
+                },
+                {
+                    extend: 'print',
+                    className: 'btn-custom'
+                }
+            ]
+        });
+
+
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        var year = $("#year");
+        var currentYear = (new Date()).getFullYear();
+        for (var i = 2023; i <= currentYear; i++) {
+            var option = $("<option />");
+            option.html(i);
+            option.val(i);
+            
+            year.append(option);
+        }
+        
+});
+</script>
+
+<script>
+    $(document).ready(function () {
+        $("#year").val('@ViewBag.year');
+        $("#month").val('@ViewBag.month');
+        $("#month,#year").change(function () {
+            var year = $("#year").val();
+            //alert(year)
+            var monthSelect = $('#month').val();
+            window.location.href = "/Admin/LeadEmployeeInfo?type=@ViewBag.nm&year=" + year + "&month=" + monthSelect;
+        })
+
+    })
+</script>
+
+@using System.Data;
+@{ EncryptDecrypt ed = new EncryptDecrypt();}
+@{ DbManager db = new DbManager();}
+
+<div class="row mt-1 mb-3 nevigationstrip">
+    <div class="col">
+        <label class="text-uppercase text-truncate trutext">Admin <i class="fa fa-angle-double-right"></i> Lead Info <i class="fa fa-angle-double-right"></i> @ViewBag.nm</label>
+    </div>
+    <div class="col text-right d-flex justify-content-end">
+        <label class="text-uppercase text-truncate trutext" style="cursor:pointer" onclick="navigateBack()"> <i class="fa fa-angle-double-left"></i> Back</label>
+    </div>
+</div>
+<div class="row mt-3 mb-3">
+
+    <div class="col-3 col-sm-3" >
+        <label for="exampleDataList" class="form-label">Month</label><br />
+        <select class="form-control shadow-none mt-1" id="month" name="month">
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+        </select>
+       
+    </div>
+    <div class="col-3 col-sm-3">
+        <label for="exampleDataList" class="form-label">Year</label><br />
+        <select class="form-control shadow-none mt-1" id="year" name="year">
+        </select>
+
+    </div>
+    
+</div>
+
+@using Newtonsoft.Json;
+<div class="row table table-responsive">
+    <table class="table table-responsive table-bordered" id="tblattendance">
+        <thead class="theadb text-center">
+            <tr>
+                <th class="text-center">Id</th>
+                <th class="text-center">Customer id</th>
+                <th class="text-center">Name</th>
+                <th class="text-center">Mobile</th>
+                @*<th class="text-center">Email</th>
+                    <th class="text-center">Statename</th>
+                    <th class="text-center">Cityname</th>*@
+                <th class="text-center">Address</th>
+                <th class="text-center">Pincode</th>
+                <th class="text-center">Support</th>
+                <th class="text-center">Employee Name</th>
+                @if (@ViewBag.nm == "Lead")
+                {
+
+                }
+                else
+                {
+                    <th class="text-center" style="width:400px">Rating</th>
+                }
+
+            </tr>
+        </thead>
+        <tbody class="text-center">
+            @foreach (var lead in Model)
+            {
+                count1++;
+
+
+                <tr>
+                    <td>@count1</td>
+                    <td>
+                        @lead.Customerid
+
+                        @*<button data-bs-target="#leadmdl" data-bs-toggle="modal" class="btn btn-success" onclick="getCmpdetail('@lead.Id')">@lead.Customerid</button>*@
+                    </td>
+                    <td>@lead.Name</td>
+                    <td>@lead.Mobile</td>
+                    @*<td>@lead.Email</td>
+                        <td>@lead.Statename</td>
+                        <td>@lead.Cityname</td>*@
+                    <td>@lead.Address</td>
+                    <td>@lead.Pincode</td>
+                    <td>@lead.Support</td>
+                    <td>@lead.Supportempname</td>
+                    @if (@ViewBag.nm == "Lead")
+                    {
+
+                    }
+                    else
+                    {
+                        <td class="text-start" style="width:400px">
+                            @if (@ViewBag.nm == "DKS")
+                            {
+                                if (lead.Feedback != "")
+                                {
+                                    var jsonObject = JsonConvert.DeserializeObject<dynamic>
+                                        (lead.Feedback);
+
+                                    <label>Way of Approching  : </label><button class="btn btncolor">@jsonObject["Way of Approching rating"]  </button> @Html.Raw(jsonObject["Way of Approching string"].ToString().Replace("@", "\""))<br />
+                                    <label>  Body Language  : </label><button class="btn btncolor">@jsonObject["Body Language rating"]  </button> @Html.Raw(jsonObject["Body Language string"].ToString().Replace("@", "\""))<br />
+                                    <label>Tone of Voice  : </label><button class="btn btncolor">@jsonObject["Tone of Voice rating"]  </button> @Html.Raw(jsonObject["Tone of Voice string"].ToString().Replace("@", "\""))<br />
+                                    <label>5 Magical Word rating: </label><button class="btn btncolor">@jsonObject["5 Magical Word rating"]  </button> @Html.Raw(jsonObject["5 Magical Word string"].ToString().Replace("@", "\""))<br />
+
+                                }
+
+
+                            }
+                            else if (@ViewBag.nm == "BSA")
+                            {
+                                if (lead.Feedback != "")
+                                {
+                                    var jsonObject = JsonConvert.DeserializeObject
+                                    <dynamic>
+                                        (lead.Feedback);
+
+                                    <label>
+                                        Way of Probing  :
+                                    </label><button class="btn btncolor">@jsonObject["Way of Probing rating"]  </button> @Html.Raw(jsonObject["Way of Probing string"].ToString().Replace("@", "\""))<br />
+                                    <label>
+                                        How to ask Specific questions from customer  :
+                                    </label><button class="btn btncolor">@jsonObject["How to ask Specific questions from customer rating"]  </button> @Html.Raw(jsonObject["How to ask Specific questions from customer string"].ToString().Replace("@", "\""))<br />
+                                    <label>
+                                        Customer Involvement  :
+                                    </label><button class="btn btncolor">@jsonObject["Customer Involvement rating"]  </button> @Html.Raw(jsonObject["Customer Involvement string"].ToString().Replace("@", "\""))<br />
+                                    <label>Is it right time to demo  : </label><button class="btn btncolor">@jsonObject["Is it right time to demo rating"]  </button> @Html.Raw(jsonObject["Is it right time to demo string"].ToString().Replace("@", "\""))<br />
+
+                                }
+                            }
+                            else if (@ViewBag.nm == "Demo")
+                            {
+                                if (lead.Feedback != "")
+                                {
+                                    var jsonObject = JsonConvert.DeserializeObject<dynamic>
+                                        (lead.Feedback);
+
+                                    <label>
+                                        Vartual Oral Presentation  :
+                                    </label><button class="btn btncolor">@jsonObject["Vartual Oral Presentation rating"]  </button> @Html.Raw(jsonObject["Vartual Oral Presentation string"].ToString().Replace("@", "\""))<br />
+                                    <label>
+                                        Written Demo  :
+                                    </label><button class="btn btncolor">@jsonObject["Written Demo rating"]  </button> @Html.Raw(jsonObject["Written Demo string"].ToString().Replace("@", "\""))<br />
+                                    <label>
+                                        Explaning about Product Benefit  :
+                                    </label><button class="btn btncolor">@jsonObject["Explaning about Product Benefit rating"]  </button> @Html.Raw(jsonObject["Explaning about Product Benefit string"].ToString().Replace("@", "\""))<br />
+                                    <label>
+                                        Objetion Handling  :
+                                    </label><button class="btn btncolor">@jsonObject["Objetion Handling rating"]  </button> @Html.Raw(jsonObject["Objetion Handling string"].ToString().Replace("@", "\""))<br />
+                                    <label>Elimination doubt  : </label><button class="btn btncolor">@jsonObject["Elimination doubt rating"]  </button> @Html.Raw(jsonObject["Elimination doubt string"].ToString().Replace("@", "\""))<br />
+
+                                }
+                            }
+                            else if (@ViewBag.nm == "Order")
+                            {
+                                if (lead.Feedback != "")
+                                {
+                                    var jsonObject = JsonConvert.DeserializeObject<dynamic>
+                                        (lead.Feedback);
+
+                                    <label>Closing Skill  : </label><button class="btn btncolor">@jsonObject["Closing Skill rating"] </button> @Html.Raw(jsonObject["Closing Skill string"].ToString().Replace("@", "\"")) <br />
+                                    <label>
+                                        Re Explaning Product Benefit rating  :
+                                    </label><button class="btn btncolor">@jsonObject["Re Explaning Product Benefit rating"] </button> @Html.Raw(jsonObject["Re Explaning Product Benefit string"].ToString().Replace("@", "\""))<br />
+                                    <label>
+                                        Payment Receipt Generation  :
+                                    </label><button class="btn btncolor">@jsonObject["Payment Receipt Generation rating"] </button> @Html.Raw(jsonObject["Payment Receipt Generation string"].ToString().Replace("@", "\""))<br />
+                                    <label>
+                                        Product Delivery and Payment Imformation  :
+                                    </label><button class="btn btncolor">@jsonObject["Product Delivery and Payment Imformation rating"] </button> @Html.Raw(jsonObject["Product Delivery and Payment Imformation string"].ToString().Replace("@", "\""))<br />
+
+                                }
+
+                            }
+                            else if (@ViewBag.nm == "Documentation")
+                            {
+                                if (lead.Feedback != "")
+                                {
+                                    var jsonObject = JsonConvert.DeserializeObject<dynamic>
+                                        (lead.Feedback);
+
+                                }
+                            }
+
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="leadmdl" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-5idden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header justify-content-center nevigationstrip">
+                <h5 class="modal-title text-uppercase" id="staticBackdropLabel">Lead Info</h5>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped table-bordered" id="tbl_leaddetail">
+                </table>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btncolorblue" data-bs-dismiss="modal" id="cancel"><i class="fa fa-times"></i></button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    function getCmpdetail(Cid) {
+        //alert(Cid)
+        $.ajax({
+            url: '/Admin/getLeaddetails',
+            type: "GET",
+            dataType: "JSON",
+            data: { Cid: Cid },
+            success: function (data) {
+                var jsonArray = JSON.parse(data);
+                // Parse the JSON string
+                var Location_In = JSON.parse(jsonArray[0]["Location_In"]);
+                // Extract the Closing Skill rating and string
+                var Location1 = Location_In["Location"];
+                var Latitude1 = Location_In["Latitude"];
+                var Longitude1 = Location_In["Longitude"];
+                var Location2 = "", Latitude2 = "", Longitude2 = "", loc_diffrence = "";
+                if (jsonArray[0]["Supportlocation_In"]) {
+                    var Supportlocation_In = JSON.parse(jsonArray[0]["Supportlocation_In"]);
+                    // Extract the Closing Skill rating and string
+                    Location2 = Supportlocation_In["Location"];
+                    Latitude2 = Supportlocation_In["Latitude"];
+                    Longitude2 = Supportlocation_In["Longitude"];
+                }
+                else {
+                    Location2 = "", Latitude2 = "", Longitude2 = "";
+                }
+                if (jsonArray[0]["Location_diffrence"]) {
+                    loc_diffrence = parseFloat(jsonArray[0]["Location_diffrence"]).toFixed(1);
+                }
+                else {
+                    loc_diffrence = "";
+                }
+
+
+
+                var str = "<tr><td><span class= 'card-title'><b> Name </b></span></td><td><span>" + jsonArray[0]["Name"] + "</span></td><td><span class= 'card-title '><b>Mobile  </b></span></td><td><span>" + jsonArray[0]["Mobile"] + "</span></td><td><span class= 'card-title '><b>Email  </b></span></td><td><span>" + jsonArray[0]["Email"] + "</span></td></tr>";
+
+                str += "<tr><td><span class= 'card-title'><b> State name </b></span></td><td><span>" + jsonArray[0]["Statename"] + "</span></td><td><span class= 'card-title '><b>City name  </b></span></td><td><span>" + jsonArray[0]["Cityname"] + "</span></td><td><span class= 'card-title '><b>Address  </b></span></td><td><span>" + jsonArray[0]["Address"] + " - " + jsonArray[0]["Pincode"] + "</span></td></tr>";
+
+                str += "<tr><td><span class= 'card-title'><b> Location In </b></span></td><td><span>" + Location1 + "</span></td><td><span class= 'card-title '><b>Support location  </b></span></td><td><span>" + Location2 + "</span></td><td><span class= 'card-title '><b>Location diffrence (Meter)  </b></span></td><td><span>" + loc_diffrence + "</span></td></tr>";
+
+                //str += "<tr><td><span class= 'card-title'><b> Name </b></span></td><td><span>" + jsonArray[0]["Name"] + "</span></td><td><span class= 'card-title '><b>Mobile  </b></span></td><td><span>" + jsonArray[0]["Mobile"] + "</span></td><td><span class= 'card-title '><b>Mobile  </b></span></td><td><span>" + jsonArray[0]["Email"] + "</span></td></tr>";
+
+                //str += "<tr><td><span class= 'card-title'><b> Name </b></span></td><td><span>" + jsonArray[0]["Name"] + "</span></td><td><span class= 'card-title '><b>Mobile  </b></span></td><td><span>" + jsonArray[0]["Mobile"] + "</span></td><td><span class= 'card-title '><b>Mobile  </b></span></td><td><span>" + jsonArray[0]["Email"] + "</span></td></tr>";
+
+
+                $("#tbl_leaddetail").empty();
+                $("#tbl_leaddetail").append(str);
+
+
+            }
+        });
+    }
+</script>

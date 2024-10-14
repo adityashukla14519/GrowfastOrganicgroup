@@ -1,0 +1,272 @@
+﻿
+@{
+    ViewBag.Title = "Charts";
+    Layout = "~/Views/Shared/AdminMaster.cshtml";
+}
+
+<h2>Charts</h2>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+
+<div class="row">
+    <div class="col-sm-6">
+        <canvas id="piemyChart" style="width:100%;max-width:600px"></canvas>
+    </div>
+    <div class="col-sm-6">
+        <canvas id="barmyChart" style="width:100%;max-width:600px"></canvas>
+    </div>
+    <div class="col-sm-6">
+        <canvas id="doughnutmyChart" style="width:100%;max-width:600px"></canvas>
+    </div>
+    <div class="col-sm-6">
+        <canvas id="linemyChart" style="width:100%;max-width:600px"></canvas>
+    </div>
+    <div class="col-sm-6">
+        <canvas id="scattermyChart" style="width:100%;max-width:600px"></canvas>
+    </div>
+    <div class="col-sm-6">
+        <canvas id="linemyChart1" style="width:100%;max-width:600px"></canvas>
+    </div>
+    <div class="col-sm-6">
+        <canvas id="linemyChart2" style="width:100%;max-width:600px"></canvas>
+    </div>
+    <div class="col-sm-6">
+        <canvas id="linemyChart3" style="width:100%;max-width:600px"></canvas>
+    </div>
+
+</div>
+
+<script>
+    const xValues = ["Italy", "France", "Spain", "USA", "Argentina"];
+    const yValues = [55, 49, 44, 24, 15];
+    const barColors = [
+        "#b91d47",
+        "#00aba9",
+        "#2b5797",
+        "#e8c3b9",
+        "#1e7145"
+    ];
+
+    new Chart("piemyChart", {
+        type: "pie",
+        data: {
+            labels: xValues,
+            datasets: [{
+                backgroundColor: barColors,
+                data: yValues
+            }]
+        },
+        options: {
+            plugins: {
+                datalabels: {
+                    display: false // Hide the data labels
+                },
+                title: {
+                    display: false,
+                    text: "World Wide Wine Production 2018"
+                },
+                legend: {
+                    display: false // Hide the legend
+                }
+            }
+        }
+    });
+</script>
+<script>
+    //const xValues = ["Italy", "France", "Spain", "USA", "Argentina"];
+    //const yValues = [55, 49, 44, 24, 15];
+    //const barColors = ["red", "green", "blue", "orange", "brown"];
+
+    new Chart("barmyChart", {
+        type: "bar",
+        data: {
+            labels: xValues,
+            datasets: [{
+                backgroundColor: barColors,
+                data: yValues
+            }]
+        },
+        options: {
+            legend: { display: false },
+            title: {
+                display: true,
+                text: "World Wine Production 2018"
+            }
+        }
+    });
+</script>
+<script>
+    //const xValues = ["Italy", "France", "Spain", "USA", "Argentina"];
+    //const yValues = [55, 49, 44, 24, 15];
+    //const barColors = [
+    //    "#b91d47",
+    //    "#00aba9",
+    //    "#2b5797",
+    //    "#e8c3b9",
+    //    "#1e7145"
+    //];
+
+    new Chart("doughnutmyChart", {
+        type: "doughnut",
+        data: {
+            labels: xValues,
+            datasets: [{
+                backgroundColor: barColors,
+                data: yValues
+            }]
+        },
+        options: {
+            title: {
+                display: true,
+                text: "World Wide Wine Production 2018"
+            }
+        }
+    });
+</script>
+<script>
+    const xyValuess = [
+        { x: 50, y: 7 },
+        { x: 60, y: 8 },
+        { x: 70, y: 8 },
+        { x: 80, y: 9 },
+        { x: 90, y: 9 },
+        { x: 100, y: 9 },
+        { x: 110, y: 10 },
+        { x: 120, y: 11 },
+        { x: 130, y: 14 },
+        { x: 140, y: 14 },
+        { x: 150, y: 15 }
+    ];
+
+    new Chart("scattermyChart", {
+        type: "scatter",
+        data: {
+            datasets: [{
+                pointRadius: 4,
+                pointBackgroundColor: "rgb(0,0,255)",
+                data: xyValuess
+            }]
+        },
+        options: {
+            legend: { display: false },
+            scales: {
+                xAxes: [{ ticks: { min: 40, max: 160 } }],
+                yAxes: [{ ticks: { min: 6, max: 16 } }],
+            }
+        }
+    });
+</script>
+<script>
+    const xValues1 = [50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150];
+    const yValues1 = [7, 8, 8, 9, 9, 9, 10, 11, 14, 14, 15];
+
+    new Chart("linemyChart1", {
+        type: "line",
+        data: {
+            labels: xValues1,
+            datasets: [{
+                fill: false,
+                lineTension: 0,
+                backgroundColor: "rgba(0,0,255,1.0)",
+                borderColor: "rgba(0,0,255,0.1)",
+                data: yValues1
+            }]
+        },
+        options: {
+            legend: { display: false },
+            scales: {
+                yAxes: [{ ticks: { min: 6, max: 16 } }],
+            }
+        }
+    });
+</script>
+<script>
+    const xValues2 = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
+
+    new Chart("linemyChart2", {
+        type: "line",
+        data: {
+            labels: xValues2,
+            datasets: [{
+                data: [860, 1140, 1060, 1060, 1070, 1110, 1330, 2210, 7830, 2478],
+                borderColor: "red",
+                fill: false
+            }, {
+                data: [1600, 1700, 1700, 1900, 2000, 2700, 4000, 5000, 6000, 7000],
+                borderColor: "green",
+                fill: false
+            }, {
+                data: [300, 700, 2000, 5000, 6000, 4000, 2000, 1000, 200, 100],
+                borderColor: "blue",
+                fill: false
+            }]
+        },
+        options: {
+            legend: { display: false }
+        }
+    });
+</script>
+<script>
+    const xValues3 = [];
+    const yValues3 = [];
+    generateData("x * 2 + 7", 0, 10, 0.5);
+
+    new Chart("linemyChart3", {
+        type: "line",
+        data: {
+            labels: xValues3,
+            datasets: [{
+                fill: false,
+                pointRadius: 1,
+                borderColor: "rgba(255,0,0,0.5)",
+                data: yValues3
+            }]
+        },
+        options: {
+            legend: { display: false },
+            title: {
+                display: true,
+                text: "y = x * 2 + 7",
+                fontSize: 16
+            }
+        }
+    });
+    function generateData(value, i1, i2, step = 1) {
+        for (let x = i1; x <= i2; x += step) {
+            xValues3.push(x);
+            yValues3.push(eval(value));
+        }
+    }
+</script>
+<script>
+    const xValuesl = [];
+    const yValuesl = [];
+    generateData("Math.sin(x)", 0, 10, 0.5);
+
+    new Chart("linemyChart", {
+        type: "line",
+        data: {
+            labels: xValuesl,
+            datasets: [{
+                fill: false,
+                pointRadius: 2,
+                borderColor: "rgba(0,0,255,0.5)",
+                data: yValuesl
+            }]
+        },
+        options: {
+            legend: { display: false },
+            title: {
+                display: true,
+                text: "y = sin(x)",
+                fontSize: 16
+            }
+        }
+    });
+    function generateData(value, i1, i2, step = 1) {
+        for (let x = i1; x <= i2; x += step) {
+            yValuesl.push(eval(value));
+            xValuesl.push(x);
+        }
+    }
+</script>
